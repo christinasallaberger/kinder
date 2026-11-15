@@ -139,7 +139,10 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
     <div class="row">
       <label class="filebtn">Excel öffnen<input type="file" id="fileIn" accept=".xlsx" hidden></label>
       <button class="ghost" id="saveBtn">Excel speichern</button>
+      <button id="linkBtn" hidden>Mit Excel-Datei verbinden</button>
+      <button id="reconnectBtn" hidden></button>
     </div>
+    <p class="status" id="linkHint"></p>
     <p class="status" id="fileStatus"></p>
     <details class="list"><summary>Wortlisten ansehen</summary><div id="lists"></div></details>
   </section>
@@ -523,8 +526,10 @@ function addWords(){
   st.textContent=`Als Ansage Nr. ${data[c].length} zur ${c}. Klasse hinzugefügt. Schreib in der Satzsammlung Sätze dazu und speichere dann die Excel-Datei.`;
   document.getElementById('newWords').value='';renderLists();
 }
-function saveData(){store.set(LS_DATA,data);store.set('ansagen_dirty',dirty);updateFileStatus()}
+function saveData(){store.set(LS_DATA,data);store.set('ansagen_dirty',dirty);updateFileStatus();if(dirty&&fileHandle)scheduleWrite()}
 function updateFileStatus(){
+  if(fileHandle&&!dirty){const s=document.getElementById('fileStatus');s.className='status';s.textContent=lastWrite?`Automatisch gespeichert in „${fileHandle.name}“ um ${lastWrite}.`:`Verbunden mit „${fileHandle.name}“ – Änderungen werden sofort gespeichert.`;return}
+  if(fileHandle&&dirty){const s=document.getElementById('fileStatus');s.className='status';s.textContent='Wird gespeichert …';return}
   const s=document.getElementById('fileStatus');
   if(dirty){s.textContent='Neue Wörter sind noch nicht in der Excel-Datei. Tippe auf „Excel speichern“.';s.className='status warn'}
   else{s.textContent=`${data[1].length+data[2].length+data[3].length} Ansagen geladen (1. Klasse: ${data[1].length}, 2. Klasse: ${data[2].length}, 3. Klasse: ${data[3].length}).`;s.className='status'}
@@ -541,11 +546,11 @@ function renderLists(){
 }
 
 /* ---------- Excel ---------- */
-function readExcel(file){
-  const r=new FileReader();
-  r.onload=e=>{
+function readExcel(file){file.arrayBuffer().then(b=>loadBuffer(b,file.name))}
+function loadBuffer(buf,fname){
+  {
     try{
-      const wb=XLSX.read(e.target.result,{type:'array'});const nd={1:[],2:[],3:[],saetze:[]};let found=0;
+      const wb=XLSX.read(buf,{type:'array'});const nd={1:[],2:[],3:[],saetze:[]};let found=0;
       const ss=wb.SheetNames.find(n=>/^s(ä|ae)tze/i.test(n.trim()));
       if(ss)XLSX.utils.sheet_to_json(wb.Sheets[ss],{header:1,defval:''}).forEach(row=>{if(typeof row[0]==='number'&&String(row[1]).trim())nd.saetze.push(String(row[1]).trim())});
       wb.SheetNames.forEach(n=>{const m=n.match(/([123])\.\s*Klasse/);if(!m)return;found++;
@@ -558,13 +563,11 @@ function readExcel(file){
       if(es){const dn={};XLSX.utils.sheet_to_json(es,{header:1,defval:''}).slice(1).forEach(r=>{const t=Date.parse(String(r[1]).replace(' ','T'));if(r[0]&&!isNaN(t))(dn[r[0]]=dn[r[0]]||[]).push(t)});kids.done=dn}
       saveKids();renderKids();
       nd.addedAt=data.addedAt;nd.saetze=kuerzen(nd.saetze);data=nd;dirty=false;saveData();renderLists();renderSaetze();renderProgress();
-      document.getElementById('fileStatus').textContent+=' Aus „'+file.name+'“ geöffnet.';
+      document.getElementById('fileStatus').textContent+=' Aus „'+fname+'“ geöffnet.';
     }catch(err){const s=document.getElementById('fileStatus');s.textContent='Die Datei konnte nicht gelesen werden: '+err.message;s.className='status warn'}
-  };
-  r.readAsArrayBuffer(file);
+  }
 }
-function saveExcel(){
-  if(typeof XLSX==='undefined'){alert('Excel speichern braucht eine Internetverbindung (SheetJS wird geladen).');return}
+function buildWorkbook(){
   const wb=XLSX.utils.book_new();
   ['1','2','3'].forEach(c=>{
     const rows=[[`Ansagen Volksschule ${c}. Klasse`],[],['Nr.','Ansage'],...data[c].map((l,i)=>[i+1,l])];
@@ -578,6 +581,12 @@ function saveExcel(){
   const wp=XLSX.utils.aoa_to_sheet(pr);wp['!cols']=[{wch:14},{wch:28},{wch:10},{wch:14},{wch:18},{wch:28}];XLSX.utils.book_append_sheet(wb,wp,'Fortschritt');
   const er=[['Kind','Datum']];Object.entries(kids.done).forEach(([k,l])=>l.forEach(d=>er.push([k,new Date(d).toISOString().slice(0,16).replace('T',' ')])));
   const we=XLSX.utils.aoa_to_sheet(er);we['!cols']=[{wch:14},{wch:18}];XLSX.utils.book_append_sheet(wb,we,'Erledigte Ansagen');
+  return wb;
+}
+function saveExcel(){
+  if(typeof XLSX==='undefined'){alert('Excel speichern braucht eine Internetverbindung (SheetJS wird geladen).');return}
+  if(fileHandle){writeLinked();return}
+  const wb=buildWorkbook();
   const finish=()=>{dirty=false;saveData()};
   if(dl){
     const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
@@ -586,6 +595,47 @@ function saveExcel(){
       s.textContent=e&&e.code==='declined'?'Speichern abgebrochen – die neuen Wörter sind noch nicht in der Excel-Datei.':'Speichern ist hier gerade nicht möglich ('+(e&&e.code||'Fehler')+').';
     });
   }else{XLSX.writeFile(wb,'Ansagen.xlsx');finish()}
+}
+/* ---------- Excel-Datei verknüpfen: automatisch speichern (Chrome/Edge am Computer) ---------- */
+let fileHandle=null,lastWrite='',writeTimer=null;
+const canLink=('showOpenFilePicker' in window)&&window.self===window.top;
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('ansagen',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbSet(k,v){const db=await idb();return new Promise(r=>{const tx=db.transaction('h','readwrite');tx.objectStore('h').put(v,k);tx.oncomplete=r;tx.onerror=r})}
+async function idbGet(k){const db=await idb();return new Promise(r=>{const q=db.transaction('h').objectStore('h').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)})}
+function scheduleWrite(){clearTimeout(writeTimer);writeTimer=setTimeout(writeLinked,700)}
+async function writeLinked(){
+  if(!fileHandle||typeof XLSX==='undefined')return;
+  try{
+    const buf=XLSX.write(buildWorkbook(),{type:'array',bookType:'xlsx'});
+    const w=await fileHandle.createWritable();await w.write(buf);await w.close();
+    lastWrite=new Date().toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});dirty=false;store.set('ansagen_dirty',false);updateFileStatus();
+  }catch(e){
+    const s=document.getElementById('fileStatus');s.className='status warn';
+    s.textContent=e&&e.name==='NotAllowedError'?'Die Seite darf gerade nicht in die Datei schreiben. Tippe auf „Mit Excel-Datei verbinden“.':'Speichern hat nicht geklappt – ist die Datei gerade in Excel geöffnet? Schließ sie, dann tippe auf „Excel speichern“.';
+  }
+}
+async function useHandle(h,ask){
+  let perm=await h.queryPermission({mode:'readwrite'});
+  if(perm!=='granted'&&ask)perm=await h.requestPermission({mode:'readwrite'});
+  if(perm!=='granted')return false;
+  fileHandle=h;document.getElementById('linkBtn').textContent='Andere Excel-Datei verbinden';document.getElementById('reconnectBtn').hidden=true;
+  if(dirty){await writeLinked()}
+  else{const f=await h.getFile();if(f.size>0)loadBuffer(await f.arrayBuffer(),f.name);else await writeLinked()}
+  updateFileStatus();return true;
+}
+async function linkFile(){
+  try{
+    const [h]=await window.showOpenFilePicker({types:[{description:'Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]});
+    if(dirty&&!confirm('Im Browser gibt es neue Wörter, die noch nicht in einer Excel-Datei stehen.\n\nOK: diese Wörter in die gewählte Datei schreiben\nAbbrechen: die Wörter aus der Datei laden'))dirty=false;
+    await idbSet('file',h);await useHandle(h,true);
+  }catch(e){if(e&&e.name!=='AbortError'){const s=document.getElementById('fileStatus');s.className='status warn';s.textContent='Die Datei konnte nicht verbunden werden.'}}
+}
+async function initLink(){
+  if(!canLink){document.getElementById('linkHint').textContent='Automatisch in dieselbe Excel-Datei speichern geht in Chrome oder Edge am Computer, wenn du die Seite über GitHub Pages oder als Datei öffnest – hier nicht.';return}
+  document.getElementById('linkBtn').hidden=false;
+  document.getElementById('linkHint').textContent='Tipp: Wähl die Ansagen.xlsx in deinem OneDrive-Ordner – dann ist sie auch auf allen anderen Geräten aktuell.';
+  const h=await idbGet('file').catch(()=>null);if(!h)return;
+  if(!(await useHandle(h,false))){const b=document.getElementById('reconnectBtn');b.hidden=false;b.textContent='Mit „'+h.name+'“ weiterarbeiten';b.onclick=()=>useHandle(h,true)}
 }
 let dl=null;
 if(window.claude&&claude.use){claude.use('downloads').then(d=>dl=d).catch(()=>{})}
@@ -612,11 +662,12 @@ document.getElementById('addSatzBtn').onclick=addSaetze;
 document.getElementById('printBtn').onclick=()=>window.print();
 document.getElementById('addBtn').onclick=addWords;
 document.getElementById('saveBtn').onclick=saveExcel;
+document.getElementById('linkBtn').onclick=linkFile;
 document.getElementById('fileIn').onchange=e=>e.target.files[0]&&readExcel(e.target.files[0]);
 if(!data.saetze)data.saetze=DEFAULT_DATA.saetze.slice();
 data.saetze=kuerzen(data.saetze);store.set(LS_DATA,data);
 if(!['7-10','9-13','12-16'].includes(settings.len)){settings.len='9-13';store.set(LS_SET,settings)}
-bindSettings();renderLists();rebuild();renderSaetze();renderKids();renderProgress();
+bindSettings();renderLists();rebuild();renderSaetze();renderKids();renderProgress();initLink();
 
 </script>
 </body>
