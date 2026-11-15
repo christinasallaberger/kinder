@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ansagen-Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#EEF2F7; --paper:#FFFFFF; --ink:#1F3A93; --text:#22283A; --muted:#5B6270;
+  --line:#C9D6EA; --margin:#D64545; --hl:#FFE58A; --btn:#1F3A93; --btn-text:#FFFFFF;
+  --soft:#E3EAF5; --ok:#2E7D4F;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121826; --paper:#1A2233; --ink:#9DB8FF; --text:#E6EAF2; --muted:#A3ABBA;
+    --line:#2C3850; --margin:#E06B6B; --hl:#5A4A12; --btn:#9DB8FF; --btn-text:#121826;
+    --soft:#232D42; --ok:#6CC28F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121826; --paper:#1A2233; --ink:#9DB8FF; --text:#E6EAF2; --muted:#A3ABBA;
+  --line:#2C3850; --margin:#E06B6B; --hl:#5A4A12; --btn:#9DB8FF; --btn-text:#121826;
+  --soft:#232D42; --ok:#6CC28F; color-scheme: dark;
+}
+*{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Andika,"Comic Sans MS",Verdana,sans-serif;font-size:17px;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:2rem;margin:0 0 4px;color:var(--ink)}
+.sub{color:var(--muted);margin:0 0 24px}
+section{background:var(--paper);border-radius:14px;padding:18px 18px 20px;margin-bottom:18px;border:1px solid var(--line)}
+h2{font-size:1.2rem;margin:0 0 12px;color:var(--ink)}
+button,.filebtn{font:inherit;font-weight:700;background:var(--btn);color:var(--btn-text);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;display:inline-block}
+button.ghost{background:var(--soft);color:var(--ink)}
+button:focus-visible,.filebtn:focus-within,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--margin);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{color:var(--muted);font-size:.92rem;margin-top:10px}
+.status.warn{color:var(--margin);font-weight:700}
+label{font-size:.95rem}
+select,input[type=number],textarea{font:inherit;color:var(--text);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+textarea{width:100%;min-height:80px;margin:8px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.weight{display:flex;flex-direction:column;gap:4px}
+.weight input[type=range]{width:100%;accent-color:var(--ink)}
+.big{font-size:1.15rem;padding:14px 22px}
+/* Heft */
+#heft{position:relative;background:var(--paper);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 47px,var(--line) 47px,var(--line) 48px);border-radius:14px;border:1px solid var(--line);padding:8px 12px 8px 64px;min-height:200px}
+#heft::before{content:"";position:absolute;top:0;bottom:0;left:48px;width:2px;background:var(--margin);opacity:.7}
+#heft .empty{color:var(--muted);line-height:48px}
+.item{display:flex;align-items:center;gap:8px;min-height:48px}
+.num{position:absolute;left:12px;width:28px;text-align:right;color:var(--muted);font-size:.9rem}
+.txt{flex:1;font-size:1.3rem;color:var(--ink);outline:none;border-radius:6px;padding:0 4px}
+.txt:focus{background:var(--hl)}
+.item.satz .txt{font-size:1.2rem}
+.item.playing .txt{background:var(--hl)}
+.ib{background:transparent;color:var(--muted);padding:6px 8px;font-size:1.1rem;border-radius:8px}
+.ib:hover{background:var(--soft)}
+.fremd{text-decoration:underline dotted var(--margin);text-decoration-thickness:2px;text-underline-offset:4px}
+.item.wait .txt{color:var(--muted);font-style:italic}
+.item.satz .txt{line-height:1.45;padding:6px 4px}
+.tag{font-size:.75rem;color:var(--muted);min-width:44px}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--ink);font-weight:700}
+.list ol{padding-left:28px;margin:6px 0}
+.list li{margin:4px 0}
+.list li button{padding:2px 8px;font-size:.8rem;margin-left:6px}
+@media print{
+  .fremd{text-decoration:none}
+  body{background:#fff}
+  section:not(#ansageSec),.no-print,.ib{display:none!important}
+  #heft{border:0}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ansagen-Generator</h1>
+  <p class="sub">Neue Ansagen aus den Wörtern der Volksschule, mit Wörtern der 3. Klasse im Vordergrund.</p>
+
+  <section id="ansageSec">
+    <h2 class="no-print">Ansage</h2>
+    <div class="row no-print" style="margin-bottom:14px">
+      <button class="big" id="genBtn">Neue Ansage erstellen</button>
+      <button class="ghost" id="printBtn">Drucken</button>
+    </div>
+    <div id="heft"><div class="empty">Tippe auf „Neue Ansage erstellen“.</div></div>
+    <p class="status no-print">Jeden Text kannst du antippen und ändern. ↻ ersetzt eine Zeile. <span class="fremd">Punktiert</span> = Wort steht in keiner Liste.</p>
+  </section>
+
+  <section>
+    <h2>Neue Wörter der Woche</h2>
+    <div class="row">
+      <label for="newCls">Klasse</label>
+      <select id="newCls"><option value="3">3. Klasse</option><option value="2">2. Klasse</option><option value="1">1. Klasse</option></select>
+    </div>
+    <textarea id="newWords" placeholder="z. B.: der Hund – die Hunde, laufen – er läuft, schnell"></textarea>
+    <div class="row"><button id="addBtn">Wörter hinzufügen</button>
+      <label class="filebtn ghost" id="photoBtn" hidden style="background:var(--soft);color:var(--ink)">📷 Wörter fotografieren<input type="file" id="photoIn" accept="image/*" capture="environment" hidden></label></div>
+    <p class="status">Nomen mit Artikel und Mehrzahl, Verben mit einer Personalform, durch Beistriche getrennt – so wie in den bisherigen Listen.</p>
+    <p class="status" id="addStatus"></p>
+  </section>
+
+  <section>
+    <h2>Satzsammlung (<span id="satzCount"></span> Sätze)</h2>
+    <p class="status" style="margin-top:0">Die Sätze der Ansage kommen aus dieser Sammlung. Sätze mit Wörtern der 3. Klasse werden am öftesten gewählt.</p>
+    <p class="status warn" id="coverage"></p>
+    <textarea id="newSaetze" placeholder="Eigene Sätze mit den neuen Wörtern – ein Satz pro Zeile"></textarea>
+    <div class="row">
+      <button id="addSatzBtn">Sätze hinzufügen</button>
+      <select id="satzCls" aria-label="Klasse der neuen Wörter"><option value="3">neueste Wörter 3. Klasse</option><option value="2">neueste Wörter 2. Klasse</option><option value="1">neueste Wörter 1. Klasse</option></select>
+      <button class="ghost" id="aiBtn" hidden>Sätze von Claude schreiben lassen</button>
+    </div>
+    <p class="status" id="satzStatus"></p>
+    <details class="list"><summary>Satzsammlung ansehen</summary><div id="satzListe"></div></details>
+  </section>
+
+  <section>
+    <h2>Excel-Datei</h2>
+    <div class="row">
+      <label class="filebtn">Excel öffnen<input type="file" id="fileIn" accept=".xlsx" hidden></label>
+      <button class="ghost" id="saveBtn">Excel speichern</button>
+    </div>
+    <p class="status" id="fileStatus"></p>
+    <details class="list"><summary>Wortlisten ansehen</summary><div id="lists"></div></details>
+  </section>
+
+  <section>
+    <h2>Einstellungen</h2>
+    <div class="grid">
+      <div class="weight"><label for="w3">3. Klasse: <b id="w3v"></b></label><input type="range" id="w3" min="0" max="100"></div>
+      <div class="weight"><label for="w2">2. Klasse: <b id="w2v"></b></label><input type="range" id="w2" min="0" max="100"></div>
+      <div class="weight"><label for="w1">1. Klasse: <b id="w1v"></b></label><input type="range" id="w1" min="0" max="100"></div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <label>Einzelne Wörter am Anfang<br><input type="number" id="nWords" min="0" max="20"></label>
+      <label>Sätze<br><input type="number" id="nSent" min="0" max="20"></label>
+      <label>Satzlänge<br><select id="len">
+        <option value="7-10">kurz (7–10 Wörter)</option>
+        <option value="9-13">mittel (9–13 Wörter)</option>
+        <option value="12-16">lang (12–16 Wörter)</option></select></label>
+      <label>Danach<br><select id="mode">
+        <option value="alt">Satz und Wort abwechselnd</option>
+        <option value="block">nur noch Sätze</option></select></label>
+    </div>
+    <p style="margin-top:14px"><label><input type="checkbox" id="boost"> Neueste Wörter jeder Klasse öfter üben</label></p>
+  </section>
+</main>
+
+<script>
+const DEFAULT_DATA = {"1": ["Im, Mama, am, Lilli, Oma", "So, malen, Name, Mimi, in", "Esel, Sonne, lesen, essen, ein", "Melone, ist, nass, alles, es", "Tomate, Nase, lernen, mit, so", "Nest, lernen, Tor, lila, wir", "Rose, Dach, lachen, der, das", "Der Schal, der Tisch, raten, die, da", "Die Feder, der Fisch, schlafen, frisch, oft", "das Rad, die Tafel, machen, alt, leicht", "Die Schule, die Nacht, rufen – er ruft, holen – er holt, rund", "der Baum, die Blume, bauen – er baut, basteln – sie bastelt, fest", "Das Buch, der Hase, schauen – es schaut, brauchen – er braucht, schwer", "Die Woche, der Montag, sagen – er sagt, schneiden – sie schneidet, gut", "Der Monat, die Tasche, lachen – er lacht, hören – sie hört, schön", "Der Garten, das Gras, singen – er singt, denken – sie denkt, kalt", "Die Milch, der Papa, kaufen – er kauft, haben – sie hat, wo", "Das Kind, die Maus baden – er badet, fragen – sie fragt, klug", "der Arm, die Kiste, kleben – er klebt, weinen – sie weint, gesund", "Das Fest, das Haus, merken – er merkt, geben – er gibt, gelb", "Das Land, die Gabel, kochen- er kocht, duschen- er duscht, sauber", "Die Ferien, das Wort, finden – er findet, naschen – er nascht, warm"], "2": ["der Abend, die Jause, rechnen – er rechnet, schreiben – sie schreibt, bunt", "die Pause, der Freund, zeichnen – er zeichnet, teilen – er teilt, freundlich", "das Haustier, die Leine, streicheln – er streichelt, bringen – sie bringt, weich", "Der Apfel, der Boden, kommen – er kommt, sparen – sie spart, dunkel", "Der Regen, der Mantel, fallen – er fällt, fliegen – sie fliegt, vorne", "Die Mutter, der Vater, wollen – sie will, rollen – er rollt, stolz", "Der Stift, die Stunde, stehen – er steht, sich freuen – sie freut sich, neu", "Der Vogel, der November, tragen-sie trägt, hüpfen-er hüpft, lieb", "Die Biene, die Wiese, können – er kann, wollen – sie will, toll", "Das Taxi, die Hexe, können- er kann, rennen – sie rennt, groß", "Der Ball, das Wasser, stellen-sie stellt, treffen – er trifft, immer", "Das Zimmer, das Bett, fressen – sie frisst, lassen – er lässt, alle", "Der Wochentag – Wochentage; der Dienstag; wandern – er wandert , suchen – sie sucht, fleißig, höflich", "Der Mittwoch, der Donnerstag, der Freitag – verstehen-er versteht, tragen-sie trägt, schief, vorsichtig", "Das Wochenende-die Wochenenden, der Samstag, der Sonntag — üben-sie übt, teilen- er teilt, spät, neugierig", "Die Füllfeder-die Füllfedern, der Schnee, der Winter-die Winter — sitzen, er sitzt, sollen-sie soll, lang, süß", "Der Fasching, das Spiel-die Spiele, das Lied-die Lieder, sich verkleiden-er verkleidet sich, jubeln-sie jubelt, bunt, spannend", "Der Brief-die Briefe, das Heft-die Hefte, die Hausübung-die Hausübungen, fangen- er fängt, fehlen-sie fehlt, jung-ordentlich", "Der Besuch-die Besuche, der EURO-die Euros, die Musik, zahlen- er zahlt, tanzen - sie tanzt, schmutzig, nah", "Der Korb – die Körbe, das Ostern, das Geschenk – die Geschenke, verstecken – er versteckt, liegen – sie liegt, toll, braun", "Das Frühstück – die Frühstücke, der Durst, das Gemüse, gießen, er gießt, legen – er legt, selten, trocken", "Die Schüssel – die Schüsseln, die Küche – die Küchen, der Topf – die Töpfe, brennen – es brennt, greifen – sie greift, giftig, klar", "Das Spiel- die Spiele, die Pfeife – die Pfeifen, der Sieg – die Siege, passieren – es ist passiert, schließen – er schließt, munter, nass, schlau", "Der Bach- die Bäche, die Wolke – die Wolken, die Natur, fließen -es fließt, meinen – sie meint, gierig, fit, wild", "Der See- die Seen, das Haar – die Haare, das Boot- die Boote, segeln- er segelt, wachsen – sie wächst, praktisch, winzig, dick", "Das Jahr – die Jahre, der Kopf- die Köpfe, das Ding- der Dinge, schimpfen- er schimpft, klopfen – sie klopft, tapfer, stumpf, eng"], "3": ["die Schüssel – die Schüsseln, die Karte die Karten, warten – ich warte, füttern – sie füttert, besuchen – er besucht, selten, sicher, geduldig", "Der Himmel – die Himmel, die Flügel– die Flügel, das Gewitter – die Gewitter, bewegen – er bewegt, erleben – wir erleben, finster, munter, düster", "Die Spritze – die Spritzen, der Strauch – die Sträucher, der Stein – die Steine, springen – sie springt, sprechen – er spricht, streiten – wir streiten, anstrengend, spannend", "Der Vulkan- die Vulkane, der Vampir- die Vampire, die Vase- die Vasen, der Verkehr- die Verkehre, versuchen- sie versucht, verlieren- sie verliert, violett, bevor, vorsichtig"], "saetze": ["Am finsteren Abend warten die munteren Kinder geduldig vor dem Haus.", "Vorsichtig füttert die junge Mutter den winzigen, lieben Vogel.", "Beim Gewitter bewegen sich dunkle, dicke Wolken über den finsteren Himmel.", "Der tapfere Vater besucht am Sonntag seinen alten Freund am See.", "Im spannenden Buch besucht ein freundlicher Vampir einen wilden Vulkan.", "Bevor die Spritze kommt, wartet das tapfere Kind geduldig.", "Die wilden Kinder springen über die runden Steine im kalten Bach.", "Hinter dem dunklen Strauch versteckt sich ein winziger, brauner Hase.", "Bei Regen rollt das gelbe Taxi vorsichtig durch den anstrengenden Verkehr.", "Die violette Vase fällt vom Tisch, weil das neugierige Haustier springt.", "Ich warte geduldig auf die bunten Karten von meinem lieben Freund.", "Wir streiten selten, aber heute sprechen wir lange über das spannende Spiel.", "Er spricht freundlich und höflich mit der alten Oma.", "Der junge Vampir versucht vorsichtig, den schweren, braunen Korb zu tragen.", "Sie verliert beim spannenden Spiel, aber sie ist freundlich und lacht.", "In der finsteren Nacht ist der Himmel über dem wilden Vulkan düster.", "Die munteren Vögel bewegen ihre winzigen Flügel und fliegen über den Bach.", "Wir erleben ein anstrengendes, aber spannendes Wochenende in der wilden Natur.", "Die liebe Oma besucht uns selten und bringt dann ein tolles Geschenk.", "Am Mittwoch füttert sie das gierige Haustier mit frischem Gemüse.", "Mit einer bunten Schüssel wartet die freundliche Mutter in der warmen Küche.", "Die Hausübung ist anstrengend, aber das fleißige Kind schreibt ordentlich.", "Vor dem düsteren Gewitter holt der Vater die nassen Boote vom See.", "Der schlaue Vampir springt vorsichtig über die nassen Steine im Bach.", "Beim Fasching verkleiden sich die Kinder als bunte Vampire und wilde Hexen.", "Ich stelle den schweren, dicken Topf vorsichtig auf den runden Tisch.", "Am spannenden Abend spricht der freundliche Vater mit uns über Vulkane.", "Im kalten Winter erleben wir finstere Tage mit weichem, frischem Schnee.", "Wir streiten selten, denn mein Freund ist freundlich, höflich und lieb.", "Auf dem dicken Strauch singt der muntere Vogel ein schönes Lied.", "Sie verliert ihre violette Füllfeder, doch ihr neugieriger Freund findet sie.", "Am Montag ist der Verkehr anstrengend, weil bei Regen viele Taxis stehen.", "Ein düsterer Strauch und ein großer, dunkler Stein liegen im Garten.", "Die geduldige Oma besucht mit uns am Samstag den klaren, kalten See.", "Sicher springt die muntere Maus über die schmutzige Schüssel in der Küche.", "Am späten Abend rechnet das fleißige Kind die schwere Hausübung ordentlich.", "In der Pause teilt mein lieber Freund seine süße Jause mit mir.", "Er streichelt das weiche, junge Haustier an der langen Leine.", "Ein runder, süßer Apfel fällt vom alten Baum auf den nassen Boden.", "Bei Regen trägt die Mutter einen langen, dunklen Mantel.", "Im November fliegt der junge Vogel munter über die bunte Wiese.", "Die fleißige Biene fliegt über die bunte, warme Wiese.", "Im großen Zimmer steht ein neues, weiches Bett für das liebe Kind.", "Am Dienstag wandern wir mit höflichen Freunden durch die schöne Natur.", "Wir üben am Wochenende ein neues, langes Lied für das Fest.", "Das schlaue Kind fängt den schmutzigen Ball auf dem nassen Boden.", "Zu Ostern versteckt der Vater tolle Geschenke im großen, bunten Garten.", "Zum Frühstück gibt es warme Milch und einen süßen, runden Apfel.", "Die fleißige Hexe sucht im schmutzigen Zimmer ihre alte, schiefe Pfeife.", "Am Freitag schreibt sie einen langen, freundlichen Brief an die Oma.", "Im kalten Winter liegt weicher, frischer Schnee auf dem alten Dach.", "Auf dem klaren, kalten See segelt ein winziges Boot.", "Sie klopft höflich an die Tür und kommt in das ordentliche Zimmer.", "Der Vater schimpft selten, aber heute ist das Zimmer schmutzig.", "Nach dem spannenden Spiel jubeln alle Kinder über den tollen Sieg.", "Lilli und Mimi malen eine gelbe Sonne und eine schöne, lila Rose.", "Der alte Esel steht im warmen Gras und frisst eine süße Melone.", "Im großen Garten baut der Papa ein festes, rundes Nest.", "Am Abend liest Oma den lieben Kindern aus einem alten Buch vor.", "Die kluge Maus findet in der schweren Kiste eine frische Tomate.", "In den warmen Ferien naschen wir oft süße, frische Melonen.", "Das gesunde Kind schaut, wie kalter Schnee auf das alte Dach fällt.", "Mama kocht in der sauberen Küche ein gutes, warmes Essen."]};
+const KUERZER={"Am finsteren Abend warten die munteren Kinder geduldig vor dem großen Haus, bevor das Gewitter kommt.": "Am finsteren Abend warten die munteren Kinder geduldig vor dem Haus.", "Vorsichtig füttert die junge Mutter den winzigen, lieben Vogel aus einer bunten Schüssel.": "Vorsichtig füttert die junge Mutter den winzigen, lieben Vogel.", "Beim düsteren Gewitter bewegen sich die dunklen, dicken Wolken über den finsteren Himmel.": "Beim Gewitter bewegen sich dunkle, dicke Wolken über den finsteren Himmel.", "Der tapfere Vater besucht am Sonntag seinen alten Freund, der am klaren See ein schönes Haus hat.": "Der tapfere Vater besucht am Sonntag seinen alten Freund am See.", "Im spannenden Buch erleben wir, wie ein freundlicher Vampir einen wilden Vulkan besucht.": "Im spannenden Buch besucht ein freundlicher Vampir einen wilden Vulkan.", "Bevor die Spritze kommt, wartet das tapfere Kind geduldig neben der lieben Mutter.": "Bevor die Spritze kommt, wartet das tapfere Kind geduldig.", "Die wilden Kinder springen über die runden Steine im nassen, kalten Bach.": "Die wilden Kinder springen über die runden Steine im kalten Bach.", "Hinter dem großen, dunklen Strauch versteckt sich ein winziger, brauner Hase.": "Hinter dem dunklen Strauch versteckt sich ein winziger, brauner Hase.", "Bei Regen rollt das gelbe Taxi im anstrengenden Verkehr sehr vorsichtig über den nassen Boden.": "Bei Regen rollt das gelbe Taxi vorsichtig durch den anstrengenden Verkehr.", "Die violette Vase mit den schönen Blumen fällt vom runden Tisch, weil das neugierige Haustier springt.": "Die violette Vase fällt vom Tisch, weil das neugierige Haustier springt.", "Ich warte geduldig auf die bunten Karten, die mein lieber Freund aus den Ferien schreibt.": "Ich warte geduldig auf die bunten Karten von meinem lieben Freund.", "Wir streiten selten, aber heute sprechen wir lange über das spannende, tolle Spiel.": "Wir streiten selten, aber heute sprechen wir lange über das spannende Spiel.", "Er spricht sehr freundlich und höflich mit der alten Oma, die am Abend ihre Tasche sucht.": "Er spricht freundlich und höflich mit der alten Oma.", "Der junge Vampir versucht vorsichtig, den schweren, braunen Korb über den Boden zu tragen.": "Der junge Vampir versucht vorsichtig, den schweren, braunen Korb zu tragen.", "Sie verliert beim spannenden Spiel im Garten, aber sie ist freundlich und lacht.": "Sie verliert beim spannenden Spiel, aber sie ist freundlich und lacht.", "In der finsteren Nacht ist der Himmel düster, nur am wilden Vulkan brennt es noch lange.": "In der finsteren Nacht ist der Himmel über dem wilden Vulkan düster.", "Die Vögel bewegen ihre winzigen Flügel so munter, dass sie leicht über den klaren Bach fliegen.": "Die munteren Vögel bewegen ihre winzigen Flügel und fliegen über den Bach.", "Wir erleben ein anstrengendes, aber spannendes Wochenende, denn wir wandern mit dem Vater lange durch die wilde Natur.": "Wir erleben ein anstrengendes, aber spannendes Wochenende in der wilden Natur.", "Selten besucht uns die liebe Oma, doch dann bringt sie immer ein großes, süßes Geschenk mit.": "Die liebe Oma besucht uns selten und bringt dann ein tolles Geschenk.", "Am Mittwoch füttert sie das gierige Haustier vorsichtig mit frischem, gesundem Gemüse.": "Am Mittwoch füttert sie das gierige Haustier mit frischem Gemüse.", "Mit einer bunten Schüssel und süßen Äpfeln wartet die freundliche Mutter in der warmen Küche.": "Mit einer bunten Schüssel wartet die freundliche Mutter in der warmen Küche.", "Die Hausübung ist anstrengend und lang, aber das fleißige Kind schreibt ordentlich und sauber.": "Die Hausübung ist anstrengend, aber das fleißige Kind schreibt ordentlich.", "Bevor das düstere Gewitter kommt, bringt der Vater die nassen Boote vom See in den Garten.": "Vor dem düsteren Gewitter holt der Vater die nassen Boote vom See.", "Der schlaue Vampir springt vorsichtig über die runden, nassen Steine im wilden Bach.": "Der schlaue Vampir springt vorsichtig über die nassen Steine im Bach.", "Beim Fasching verkleiden sich die Kinder als bunte Vampire und wilde Hexen und tanzen zur tollen Musik.": "Beim Fasching verkleiden sich die Kinder als bunte Vampire und wilde Hexen.", "Ich versuche, den schweren, dicken Topf vorsichtig auf den runden Tisch in der Küche zu stellen.": "Ich stelle den schweren, dicken Topf vorsichtig auf den runden Tisch.", "Am spannenden Abend spricht der freundliche Vater mit uns über den alten Vulkan in einem warmen Land.": "Am spannenden Abend spricht der freundliche Vater mit uns über Vulkane.", "Im Winter erleben wir oft kalte, finstere Wochentage, an denen weicher, frischer Schnee fällt.": "Im kalten Winter erleben wir finstere Tage mit weichem, frischem Schnee.", "Wir streiten selten lange, denn mein Freund ist freundlich, höflich und immer sehr lieb.": "Wir streiten selten, denn mein Freund ist freundlich, höflich und lieb.", "Der muntere Vogel sitzt auf dem dicken Strauch und singt ein schönes, langes Lied.": "Auf dem dicken Strauch singt der muntere Vogel ein schönes Lied.", "Sie verliert ihre violette Füllfeder in der Pause, doch ihr neugieriger Freund findet sie unter dem Tisch.": "Sie verliert ihre violette Füllfeder, doch ihr neugieriger Freund findet sie.", "Am Montag ist der Verkehr anstrengend, weil bei Regen viele gelbe Taxis lange stehen.": "Am Montag ist der Verkehr anstrengend, weil bei Regen viele Taxis stehen.", "Ein düsterer Strauch und ein großer, dunkler Stein liegen vor dem alten Haus im Garten.": "Ein düsterer Strauch und ein großer, dunkler Stein liegen im Garten.", "Die geduldige Oma besucht am Samstag mit uns den klaren, kalten See und die wilde Natur.": "Die geduldige Oma besucht mit uns am Samstag den klaren, kalten See.", "Sicher springt die muntere Maus über die schmutzige Schüssel in der dunklen Küche.": "Sicher springt die muntere Maus über die schmutzige Schüssel in der Küche.", "Am späten Abend rechnet das fleißige Kind die schwere Hausübung ordentlich in sein neues Heft.": "Am späten Abend rechnet das fleißige Kind die schwere Hausübung ordentlich.", "In der Pause teilt mein lieber Freund seine süße Jause mit mir und allen Kindern.": "In der Pause teilt mein lieber Freund seine süße Jause mit mir.", "Er streichelt das weiche, junge Haustier, bevor er es an der langen Leine in den Garten bringt.": "Er streichelt das weiche, junge Haustier an der langen Leine.", "Ein runder, süßer Apfel fällt vom alten Baum auf den nassen, dunklen Boden.": "Ein runder, süßer Apfel fällt vom alten Baum auf den nassen Boden.", "Bei Regen trägt die Mutter einen langen, dunklen Mantel und eine große, bunte Tasche.": "Bei Regen trägt die Mutter einen langen, dunklen Mantel.", "Der stolze Vater schaut, wie der junge Vogel im November munter über die Wiese fliegt.": "Im November fliegt der junge Vogel munter über die bunte Wiese.", "Die fleißige Biene fliegt von Blume zu Blume über die bunte, warme Wiese.": "Die fleißige Biene fliegt über die bunte, warme Wiese.", "Im großen Zimmer steht ein neues, weiches Bett, in dem das liebe Kind lange schläft.": "Im großen Zimmer steht ein neues, weiches Bett für das liebe Kind.", "Am Dienstag wandern wir mit unseren höflichen Freunden durch die schöne, wilde Natur.": "Am Dienstag wandern wir mit höflichen Freunden durch die schöne Natur.", "Wir üben am Wochenende ein neues, langes Lied für das spannende Fest in der Schule.": "Wir üben am Wochenende ein neues, langes Lied für das Fest.", "Der schmutzige Ball rollt über den nassen Boden, und das schlaue Kind fängt ihn vorsichtig.": "Das schlaue Kind fängt den schmutzigen Ball auf dem nassen Boden.", "Zu Ostern versteckt der Vater bunte Körbe und tolle Geschenke im großen Garten.": "Zu Ostern versteckt der Vater tolle Geschenke im großen, bunten Garten.", "Zum Frühstück gibt es warme Milch, frisches Gemüse und einen süßen, runden Apfel.": "Zum Frühstück gibt es warme Milch und einen süßen, runden Apfel.", "Die fleißige Hexe sucht im dunklen, schmutzigen Zimmer ihre alte, schiefe Pfeife.": "Die fleißige Hexe sucht im schmutzigen Zimmer ihre alte, schiefe Pfeife.", "Am Freitag schreibt sie einen langen, freundlichen Brief an die liebe Oma.": "Am Freitag schreibt sie einen langen, freundlichen Brief an die Oma.", "Im kalten Winter liegt weicher, frischer Schnee auf dem alten Dach und im großen Garten.": "Im kalten Winter liegt weicher, frischer Schnee auf dem alten Dach.", "Der wilde Bach fließt durch die schöne Natur, und auf dem klaren See segelt ein winziges Boot.": "Auf dem klaren, kalten See segelt ein winziges Boot.", "Sie klopft höflich an die Tür, bevor sie in das ordentliche Zimmer kommt.": "Sie klopft höflich an die Tür und kommt in das ordentliche Zimmer.", "Der Vater schimpft selten, aber heute ist das Zimmer schmutzig und das Bett ist nass.": "Der Vater schimpft selten, aber heute ist das Zimmer schmutzig.", "Nach dem spannenden Spiel jubeln alle Kinder, denn der Sieg ist ein tolles Geschenk.": "Nach dem spannenden Spiel jubeln alle Kinder über den tollen Sieg.", "Lilli und Mimi malen am Montag eine gelbe Sonne und eine schöne, lila Rose.": "Lilli und Mimi malen eine gelbe Sonne und eine schöne, lila Rose.", "Der alte Esel steht im warmen Gras und frisst eine süße, frische Melone.": "Der alte Esel steht im warmen Gras und frisst eine süße Melone.", "Im großen Garten baut der Papa mit uns ein festes, rundes Nest für die Vögel.": "Im großen Garten baut der Papa ein festes, rundes Nest.", "Oma liest am Abend aus einem alten Buch, und die Kinder hören gut zu.": "Am Abend liest Oma den lieben Kindern aus einem alten Buch vor.", "Die kluge Maus findet in der schweren Kiste eine frische Tomate und eine süße Melone.": "Die kluge Maus findet in der schweren Kiste eine frische Tomate.", "In den warmen Ferien naschen wir oft süße, frische Melonen im schönen Garten.": "In den warmen Ferien naschen wir oft süße, frische Melonen.", "Das gesunde Kind schaut vom warmen Bett, wie der kalte Schnee auf das alte Dach fällt.": "Das gesunde Kind schaut, wie kalter Schnee auf das alte Dach fällt.", "Mama kocht in der sauberen Küche ein gutes, warmes Essen für alle Kinder.": "Mama kocht in der sauberen Küche ein gutes, warmes Essen."};
+function kuerzen(arr){return arr.map(s=>KUERZER[s]||s)}
+const LS_DATA='ansagen_daten_v1', LS_SET='ansagen_einst_v1', LS_HIST='ansagen_verlauf_v1';
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let data=store.get(LS_DATA,null)||JSON.parse(JSON.stringify(DEFAULT_DATA));
+let dirty=store.get('ansagen_dirty',false);
+let settings=Object.assign({w3:60,w2:30,w1:10,nWords:6,nSent:6,mode:'alt',boost:true,len:'9-13'},store.get(LS_SET,{}));
+let history=store.get(LS_HIST,[]); // Liste von Wort-IDs je Ansage (letzte 3)
+
+/* ---------- Wörter erkennen ---------- */
+const PRON=/^(ich|du|er|sie|es|wir|ihr)\s+/i;
+const ART=/^(der|die|das)\s+/i;
+const FUNC=new Set('im am in ein es mit wir der das die da so ist alles alle immer vorne bevor wo oft und nah'.split(' '));
+const NAMES=new Set(['Mama','Papa','Oma','Opa','Lilli','Mimi']);
+const KNOWN={Esel:'der',Sonne:'die',Melone:'die',Tomate:'die',Nase:'die',Nest:'das',Tor:'das',Rose:'die',Dach:'das',Name:'der'};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+function parseLine(line,cls,row){
+  const s=line.replace(/—/g,',').replace(/\s*[–-]\s*/g,' – ').replace(/\s+/g,' ');
+  const toks=s.split(/[,;]/).map(t=>t.trim()).filter(Boolean);
+  const hasPair=toks.some(t=>t.includes(' – '))||toks.some(t=>PRON.test(t));
+  const out=[];
+  const add=o=>{o.cls=cls;o.row=row;o.id=cls+'|'+(o.noun||o.inf||o.form||o.word);out.push(o)};
+  const noun=(str,pl)=>{
+    const w=str.split(' ');const art=w[0].toLowerCase();
+    const o={type:'N',art,noun:w.slice(1).join(' ')};
+    if(pl){const p=pl.split(' ');if(ART.test(pl)){o.plural=p.slice(1).join(' ')}else if(p.length===1&&/^[A-ZÄÖÜ]/.test(pl)){o.plural=pl}}
+    return o;
+  };
+  const verb=(inf,form)=>{
+    const o={type:'V',inf:inf.trim()};
+    if(form){o.form=form.trim();const m=o.form.match(/^(er|sie|es)\s+(\S+)$/i);if(m)o.v3=m[2];o.pron=o.form.split(' ')[0].toLowerCase()}
+    o.reflexive=/^sich\s/.test(o.inf);
+    return o;
+  };
+  for(const t of toks){
+    const parts=t.split(' – ');
+    if(parts.length>=2){
+      const L=parts[0],R=parts[1];
+      if(ART.test(L)&&/^(der|die|das)\s+\S+\s+(der|die|das)\s+\S+$/i.test(L)&&parts.length===2){const w=L.split(' ');add(noun(w.slice(0,2).join(' '),w.slice(2).join(' ')));parts.slice(1).forEach(p=>p&&add(ART.test(p)?noun(p):single(p,hasPair)))}
+      else if(ART.test(L)){
+        const w=L.split(' ');
+        if(w.length>2&&PRON.test(R)){add(noun(w.slice(0,2).join(' ')));add(verb(w.slice(2).join(' '),R))}
+        else add(noun(L,R));
+      }else if(PRON.test(R)){add(verb(L,R))}
+      else{parts.forEach(p=>p&&add(single(p,hasPair)))}
+    }else if(ART.test(t)){const w=t.split(' ');if(w.length===4&&ART.test(w[2]+' '))add(noun(w.slice(0,2).join(' '),w.slice(2).join(' ')));else add(noun(t))}
+    else if(PRON.test(t)){
+      const prev=out[out.length-1];
+      if(prev&&prev.type==='V'&&!prev.form){Object.assign(prev,verb(prev.inf,t))}
+      else if(prev&&prev.type==='A'&&/(en|eln|ern)$/.test(prev.word)){const w=prev.word;delete prev.word;Object.assign(prev,verb(w,t));prev.id=prev.cls+'|'+w}
+      else add({type:'W',word:t});
+    }else add(single(t,hasPair));
+  }
+  return out;
+}
+function single(t,hasPair){
+  if(t.includes(' '))return {type:'W',word:t};
+  const low=t.toLowerCase();
+  if(FUNC.has(low))return {type:'W',word:low};
+  if(/^[A-ZÄÖÜ]/.test(t)){
+    if(NAMES.has(t))return {type:'P',word:t};
+    if(KNOWN[t])return {type:'N',art:KNOWN[t],noun:t};
+    return {type:'W',word:t};
+  }
+  if(!hasPair&&/(en|eln|ern)$/.test(t))return {type:'V',inf:t};
+  return {type:'A',word:t};
+}
+let items=[];
+function rebuild(){
+  items=[];
+  for(const c of ['1','2','3'])(data[c]||[]).forEach((line,i)=>items.push(...parseLine(line,c,i)));
+}
+
+/* ---------- Zufall mit Gewichten ---------- */
+let used=new Set();
+function weight(it,counts){
+  let w=(settings['w'+it.cls]||0)/(counts[it.cls]||1);
+  if(settings.boost&&it.row===(data[it.cls].length-1))w*=3;
+  if(history.some(h=>h.includes(it.id)))w*=0.25;
+  if(used.has(it.id))w*=0.02;
+  return w;
+}
+function pick(filter){
+  const pool=items.filter(filter);let tot=0;const counts={};pool.forEach(it=>counts[it.cls]=(counts[it.cls]||0)+1);
+  const ws=pool.map(it=>{const w=weight(it,counts);tot+=w;return w});
+  if(!pool.length)return null;
+  if(tot<=0)return pool[Math.floor(Math.random()*pool.length)];
+  let r=Math.random()*tot;for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0)return pool[i]}
+  return pool[pool.length-1];
+}
+const take=it=>{if(it)used.add(it.id);return it};
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const nomNoun=n=>cap(n.art)+' '+n.noun;
+const accArt={der:'den',die:'die',das:'das'};
+
+/* ---------- Einzelwörter ---------- */
+function wordText(it){
+  if(it.type==='N')return (it.plural&&Math.random()<0.3)?'die '+it.plural:it.art+' '+it.noun;
+  if(it.type==='V')return (it.form&&Math.random()<0.5)?it.form:it.inf;
+  return it.word;
+}
+function makeWord(){const it=take(pick(i=>['N','V','A','P'].includes(i.type)));return it?{kind:'wort',text:wordText(it),ids:[it.id]}:null}
+
+/* ---------- Sätze aus der Satzsammlung ---------- */
+// Für jedes Lernwort die Wortformen, an denen es im Satz erkannt wird
+function formsOf(it){
+  const f=[];
+  if(it.type==='N'){f.push(it.noun);if(it.plural)f.push(it.plural)}
+  else if(it.type==='V'){f.push(it.inf.replace(/^sich\s+/,''));if(it.form)f.push(it.form.split(' ')[1]||'')}
+  else f.push(it.word);
+  return f.filter(x=>x&&x.length>=3).map(x=>x.toLowerCase());
+}
+function tokens(s){return (s.toLowerCase().match(/[a-zäöüß]+/g)||[])}
+function matchForm(tok,form){
+  if(tok===form)return true;
+  if(form.length<4||tok.length<4)return false;
+  const k=form.length>=6?form.length-2:form.length-1;
+  return tok.startsWith(form.slice(0,k));
+}
+function sentenceItems(s){
+  const toks=tokens(s);
+  return items.filter(it=>['N','V','A'].includes(it.type)&&formsOf(it).some(f=>toks.some(t=>matchForm(t,f))));
+}
+let satzHist=store.get('ansagen_satzverlauf_v1',[]);
+function sentenceWeight(s,usedS){
+  if(usedS.has(s))return 0;
+  const its=sentenceItems(s);
+  const counts={1:0,2:0,3:0};items.forEach(i=>counts[i.cls]++);
+  let sc=0;
+  its.forEach(it=>{let w=(settings['w'+it.cls]||0)/(counts[it.cls]||1);if(settings.boost&&it.row===data[it.cls].length-1)w*=3;sc+=w});
+  sc=Math.pow(sc,1.2);
+  const n=s.split(/\s+/).length,[mn,mx]=settings.len.split('-').map(Number);
+  if(n<mn-1||n>mx+1)sc*=0.4;
+  if(satzHist.some(h=>h.includes(s)))sc*=0.05;
+  return sc;
+}
+function makeSentence(usedS){
+  const pool=data.saetze||[];if(!pool.length)return null;
+  const ws=pool.map(s=>sentenceWeight(s,usedS));let tot=ws.reduce((a,b)=>a+b,0);
+  let s;
+  if(tot<=0){const free=pool.filter(x=>!usedS.has(x));if(!free.length)return null;s=rnd(free)}
+  else{let r=Math.random()*tot;s=pool[pool.length-1];for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0){s=pool[i];break}}}
+  usedS.add(s);
+  const ids=sentenceItems(s).map(i=>i.id);ids.forEach(id=>used.add(id));
+  return {kind:'satz',text:s,ids};
+}
+
+/* ---------- Neue Sätze mit Claude (nur auf claude.ai) ---------- */
+let sampleFn=null;
+if(window.claude&&claude.use){claude.use('sample').then(s=>{sampleFn=s;updateAiUi()}).catch(()=>{})}
+function updateAiUi(){
+  document.getElementById('aiBtn').hidden=!sampleFn;
+  if(sampleFn&&sampleFn.limits)sampleFn.limits().then(l=>{if(l&&l.images){document.getElementById('photoIn').accept=l.images.mediaTypes.join(',');document.getElementById('photoBtn').hidden=false}}).catch(()=>{});
+}
+async function readPhoto(file){
+  const st=document.getElementById('addStatus');const ta=document.getElementById('newWords');
+  st.className='status';st.textContent='Claude liest die Wörter vom Foto … das kann bis zu einer Minute dauern.';
+  const prompt=`Auf dem Foto steht eine Liste von Lernwörtern einer österreichischen Volksschulklasse, gedruckt oder handgeschrieben.
+Schreib alle Lernwörter ab, genau so wie sie auf dem Foto stehen, und bring sie in dieses Format, durch Beistriche getrennt:
+- Nomen mit Artikel und, falls angegeben, Mehrzahl: der Hund – die Hunde
+- Verben als Grundform und, falls angegeben, Personalform: laufen – er läuft
+- alle anderen Wörter allein: schnell
+Erfinde keine Mehrzahl- oder Personalformen, die nicht auf dem Foto stehen. Übernimm keine Überschriften, Datumsangaben oder Nummern.
+Antworte nur mit JSON: {"woerter": "der Hund – die Hunde, laufen – er läuft, schnell", "unsicher": "Wörter, die schwer lesbar waren, sonst leer"}`;
+  try{
+    const r=await sampleFn.json(prompt,{images:file,modelTier:'default',cache:false});
+    const w=(r&&r.woerter||'').trim();
+    if(!w){st.textContent='Auf dem Foto wurden keine Wörter gefunden. Versuch es mit einem schärferen Foto.';return}
+    ta.value=ta.value.trim()?ta.value.trim().replace(/,?$/,', ')+w:w;
+    st.textContent='Bitte kontrollieren und dann auf „Wörter hinzufügen“ tippen.'+(r.unsicher?' Schwer lesbar: '+r.unsicher:'');
+  }catch(e){
+    st.className='status warn';
+    st.textContent=e&&e.code==='not_granted'?'Claude darf auf dieser Seite keine Fotos lesen.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte gleich noch einmal.':'Das Foto konnte nicht gelesen werden – bitte noch einmal versuchen.';
+  }
+}
+async function aiWrite(){
+  const c=document.getElementById('satzCls').value;const st=document.getElementById('satzStatus');
+  const line=data[c][data[c].length-1];if(!line){st.textContent='In dieser Klasse gibt es noch keine Wörter.';return}
+  const [mn,mx]=settings.len.split('-');const btn=document.getElementById('aiBtn');
+  const prompt=`Du schreibst Sätze für Ansagen (Diktate) in einer österreichischen Volksschule, 3. Klasse.
+
+NEUE LERNWÖRTER (jedes davon soll mindestens zweimal vorkommen):
+${line}
+
+WEITERE LERNWÖRTER, die du verwenden sollst:
+${['3','2','1'].map(k=>k+'. Klasse: '+data[k].join(' / ')).join('\n')}
+
+Schreibe 8 Sätze. Regeln:
+- Jeder Satz ergibt Sinn und beschreibt etwas, das Kinder sich gut vorstellen können. Keine schrägen oder unlogischen Wortkombinationen.
+- ${mn} bis ${mx} Wörter, mehrere Satzglieder (Subjekt, Prädikat, Objekt, Angaben zu Zeit, Ort, Art und Weise).
+- Mindestens drei Eigenschaftswörter pro Satz, möglichst aus den Lernwörtern.
+- Fast nur Lernwörter. Zusätzlich erlaubt: Artikel, Pronomen, Präpositionen, Bindewörter, sein, haben, werden, Zahlwörter, sehr, heute, gestern, morgen. Höchstens ein anderes Wort pro Satz.
+- Österreichisches Deutsch, fehlerfreie Rechtschreibung und Beistriche, abwechslungsreiche Satzanfänge.
+
+Antworte nur mit JSON: {"saetze": ["...", "..."]}`;
+  btn.disabled=true;st.textContent='Claude schreibt Sätze …';
+  try{
+    const r=await sampleFn.json(prompt,{modelTier:'default',cache:false});
+    const arr=((r&&r.saetze)||[]).map(s=>String(s).trim()).filter(s=>s&&!data.saetze.includes(s));
+    data.saetze.push(...arr);dirty=true;saveData();renderSaetze();
+    st.textContent=arr.length+' neue Sätze in die Satzsammlung übernommen. Unpassende kannst du unten löschen.';
+  }catch(e){st.textContent=e&&e.code==='not_granted'?'Claude darf auf dieser Seite nicht schreiben.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte gleich noch einmal.':'Das hat nicht geklappt – bitte noch einmal versuchen.'}
+  btn.disabled=false;
+}
+function addSaetze(){
+  const ta=document.getElementById('newSaetze');const st=document.getElementById('satzStatus');
+  const arr=ta.value.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>/[.!?]$/.test(s)?s:s+'.').filter(s=>!data.saetze.includes(s));
+  if(!arr.length){st.textContent='Schreib zuerst einen Satz pro Zeile.';return}
+  data.saetze.push(...arr);dirty=true;saveData();ta.value='';renderSaetze();
+  st.textContent=arr.length===1?'1 Satz hinzugefügt.':arr.length+' Sätze hinzugefügt.';
+}
+function coverageHint(){
+  rebuild();const el=document.getElementById('coverage');const miss=[];
+  ['3','2'].forEach(c=>{const row=data[c].length-1;if(row<0)return;
+    const its=items.filter(i=>i.cls===c&&i.row===row&&['N','V','A'].includes(i.type));
+    const covered=new Set();data.saetze.forEach(s=>sentenceItems(s).forEach(i=>covered.add(i.id)));
+    const m=its.filter(i=>!covered.has(i.id)).map(label);if(m.length)miss.push(c+'. Klasse: '+m.join(', '))});
+  el.textContent=miss.length?'Für diese neuesten Wörter gibt es noch keinen Satz: '+miss.join(' · '):'';
+}
+function label(it){if(it.type==='N')return it.art+' '+it.noun;if(it.type==='V')return it.inf;return it.word}
+function renderSaetze(){
+  const box=document.getElementById('satzListe');box.innerHTML='';const ol=document.createElement('ol');
+  data.saetze.forEach((s,i)=>{const li=document.createElement('li');li.textContent=s+' ';const b=document.createElement('button');b.className='ghost';b.textContent='Löschen';
+    b.onclick=()=>{if(confirm('Diesen Satz löschen?\n\n'+s)){data.saetze.splice(i,1);dirty=true;saveData();renderSaetze()}};li.appendChild(b);ol.appendChild(li)});
+  box.appendChild(ol);document.getElementById('satzCount').textContent=data.saetze.length;coverageHint();
+}
+
+/* ---------- Markieren, was in keiner Liste steht ---------- */
+const EXTRA=new Set(('der die das den dem des ein eine einen einem einer eines kein keine ich du er sie es wir ihr mich dich sich uns euch mir dir ihm ihn ihnen mein meine dein deine sein seine ihre unser unsere '+
+ 'in im an am auf aus bei mit nach von vom zu zum zur über unter vor hinter neben zwischen durch für gegen ohne um bis seit '+
+ 'und oder aber weil dass denn wenn als ob doch sondern ist sind war waren bin bist seid hat haben hatte hatten habe hast werden wird wurde wurden gewesen sein '+
+ 'sehr heute gestern morgen nicht auch noch schon dann da so ganz viel viele alle zwei drei vier fünf eins einmal').split(' '));
+function vocabStems(){
+  const s=new Set();
+  ['1','2','3'].forEach(c=>data[c].forEach(l=>l.toLowerCase().replace(/[–—,;\-]/g,' ').split(/\s+/).forEach(w=>{w=w.replace(/[^a-zäöüß]/g,'');if(w.length>=2)s.add(w)})));
+  return [...s];
+}
+function knownWord(tok,stems){
+  const w=tok.toLowerCase();if(!w||EXTRA.has(w))return true;
+  return stems.some(v=>{if(v===w)return true;if(v.length<4)return false;const k=Math.max(4,v.length-2);return w.startsWith(v.slice(0,k))||v.startsWith(w.slice(0,Math.max(4,w.length-1)))});
+}
+function markText(el,text,stems){
+  el.textContent='';
+  text.split(/([A-Za-zÄÖÜäöüß]+)/).forEach((p,i)=>{
+    if(i%2&&!knownWord(p,stems)){const s=document.createElement('span');s.className='fremd';s.textContent=p;el.appendChild(s)}
+    else el.appendChild(document.createTextNode(p));
+  });
+}
+
+/* ---------- Ansage zusammenstellen ---------- */
+let ansage=[];
+function generate(){
+  rebuild();used=new Set();ansage=[];const usedS=new Set();
+  const nW=+settings.nWords,nS=+settings.nSent;
+  const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(usedS);s&&sents.push(s)}
+  for(let i=0;i<nW;i++){const w=makeWord();w&&ansage.push(w)}
+  if(settings.mode==='alt'){sents.forEach((s,i)=>{ansage.push(s);if(i<sents.length-1){const w=makeWord();w&&ansage.push(w)}})}
+  else ansage.push(...sents);
+  history.push([...used]);history=history.slice(-3);store.set(LS_HIST,history);
+  satzHist.push(sents.map(s=>s.text));satzHist=satzHist.slice(-3);store.set('ansagen_satzverlauf_v1',satzHist);
+  render();
+}
+function replaceLine(idx){
+  rebuild();used=new Set(ansage.flatMap(a=>a.ids));
+  const usedS=new Set(ansage.filter(a=>a.kind==='satz').map(a=>a.text));
+  const n=ansage[idx].kind==='satz'?makeSentence(usedS):makeWord();
+  if(n){ansage[idx]=n;render()}
+}
+function render(){
+  const h=document.getElementById('heft');h.innerHTML='';
+  if(!ansage.length){h.innerHTML='<div class="empty">Keine Wörter gefunden – prüfe die Einstellungen.</div>';return}
+  const stems=vocabStems();
+  ansage.forEach((a,i)=>{
+    const d=document.createElement('div');d.className='item '+a.kind;
+    d.innerHTML=`<span class="num">${i+1}</span><span class="txt" contenteditable="true" spellcheck="false"></span><span class="tag no-print">${a.kind==='satz'?'Satz':'Wort'}</span><button class="ib" title="Ersetzen" aria-label="Ersetzen">↻</button>`;
+    const t=d.querySelector('.txt');markText(t,a.text,stems);
+    t.oninput=()=>a.text=t.textContent;
+    d.querySelector('.ib').onclick=()=>replaceLine(i);
+    h.appendChild(d);
+  });
+}
+
+/* ---------- Neue Wörter ---------- */
+function addWords(){
+  const txt=document.getElementById('newWords').value.replace(/\n+/g,', ').trim().replace(/,\s*$/,'');
+  const st=document.getElementById('addStatus');
+  if(!txt){st.textContent='Trag zuerst die neuen Wörter ein.';return}
+  const c=document.getElementById('newCls').value;
+  data[c].push(txt);dirty=true;saveData();renderSaetze();
+  st.textContent=`Als Ansage Nr. ${data[c].length} zur ${c}. Klasse hinzugefügt. Schreib in der Satzsammlung Sätze dazu und speichere dann die Excel-Datei.`;
+  document.getElementById('newWords').value='';renderLists();
+}
+function saveData(){store.set(LS_DATA,data);store.set('ansagen_dirty',dirty);updateFileStatus()}
+function updateFileStatus(){
+  const s=document.getElementById('fileStatus');
+  if(dirty){s.textContent='Neue Wörter sind noch nicht in der Excel-Datei. Tippe auf „Excel speichern“.';s.className='status warn'}
+  else{s.textContent=`${data[1].length+data[2].length+data[3].length} Ansagen geladen (1. Klasse: ${data[1].length}, 2. Klasse: ${data[2].length}, 3. Klasse: ${data[3].length}).`;s.className='status'}
+}
+function renderLists(){
+  const box=document.getElementById('lists');box.innerHTML='';
+  ['3','2','1'].forEach(c=>{
+    const h=document.createElement('h3');h.textContent=c+'. Klasse';h.style.cssText='font-size:1rem;margin:14px 0 4px;color:var(--ink)';box.appendChild(h);
+    const ol=document.createElement('ol');
+    data[c].forEach((line,i)=>{const li=document.createElement('li');li.textContent=line+' ';const b=document.createElement('button');b.className='ghost';b.textContent='Löschen';b.onclick=()=>{if(confirm('Diese Zeile löschen?\n\n'+line)){data[c].splice(i,1);dirty=true;saveData();renderLists()}};li.appendChild(b);ol.appendChild(li)});
+    box.appendChild(ol);
+  });
+  updateFileStatus();
+}
+
+/* ---------- Excel ---------- */
+function readExcel(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});const nd={1:[],2:[],3:[],saetze:[]};let found=0;
+      const ss=wb.SheetNames.find(n=>/^s(ä|ae)tze/i.test(n.trim()));
+      if(ss)XLSX.utils.sheet_to_json(wb.Sheets[ss],{header:1,defval:''}).forEach(row=>{if(typeof row[0]==='number'&&String(row[1]).trim())nd.saetze.push(String(row[1]).trim())});
+      wb.SheetNames.forEach(n=>{const m=n.match(/([123])\.\s*Klasse/);if(!m)return;found++;
+        XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''}).forEach(row=>{if(typeof row[0]==='number'&&String(row[1]).trim())nd[m[1]].push(String(row[1]).replace(/\s+/g,' ').trim())})});
+      if(!found)throw new Error('Keine Blätter „1. Klasse“, „2. Klasse“, „3. Klasse“ gefunden.');
+      if(!ss)nd.saetze=data.saetze;
+      nd.saetze=kuerzen(nd.saetze);data=nd;dirty=false;saveData();renderLists();renderSaetze();
+      document.getElementById('fileStatus').textContent+=' Aus „'+file.name+'“ geöffnet.';
+    }catch(err){const s=document.getElementById('fileStatus');s.textContent='Die Datei konnte nicht gelesen werden: '+err.message;s.className='status warn'}
+  };
+  r.readAsArrayBuffer(file);
+}
+function saveExcel(){
+  if(typeof XLSX==='undefined'){alert('Excel speichern braucht eine Internetverbindung (SheetJS wird geladen).');return}
+  const wb=XLSX.utils.book_new();
+  ['1','2','3'].forEach(c=>{
+    const rows=[[`Ansagen Volksschule ${c}. Klasse`],[],['Nr.','Ansage'],...data[c].map((l,i)=>[i+1,l])];
+    const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:6},{wch:95}];
+    XLSX.utils.book_append_sheet(wb,ws,c+'. Klasse');
+  });
+  const ws=XLSX.utils.aoa_to_sheet([['Satzsammlung für die Ansagen'],[],['Nr.','Satz'],...data.saetze.map((s,i)=>[i+1,s])]);
+  ws['!cols']=[{wch:6},{wch:110}];XLSX.utils.book_append_sheet(wb,ws,'Sätze');
+  const finish=()=>{dirty=false;saveData()};
+  if(dl){
+    const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+    dl.save({filename:'Ansagen.xlsx',data:new Blob([buf])}).then(finish).catch(e=>{
+      const s=document.getElementById('fileStatus');s.className='status warn';
+      s.textContent=e&&e.code==='declined'?'Speichern abgebrochen – die neuen Wörter sind noch nicht in der Excel-Datei.':'Speichern ist hier gerade nicht möglich ('+(e&&e.code||'Fehler')+').';
+    });
+  }else{XLSX.writeFile(wb,'Ansagen.xlsx');finish()}
+}
+let dl=null;
+if(window.claude&&claude.use){claude.use('downloads').then(d=>dl=d).catch(()=>{})}
+
+/* ---------- Einstellungen ---------- */
+function bindSettings(){
+  ['w3','w2','w1','nWords','nSent','mode','len'].forEach(k=>{
+    const el=document.getElementById(k);el.value=settings[k];
+    const upd=()=>{settings[k]=el.type==='range'||el.type==='number'?+el.value:el.value;store.set(LS_SET,settings);showW()};
+    el.addEventListener('input',upd);el.addEventListener('change',upd);
+  });
+  const b=document.getElementById('boost');b.checked=settings.boost;b.onchange=()=>{settings.boost=b.checked;store.set(LS_SET,settings)};
+  showW();
+}
+function showW(){const s=settings.w1+settings.w2+settings.w3||1;[1,2,3].forEach(c=>document.getElementById('w'+c+'v').textContent=Math.round(settings['w'+c]/s*100)+' %')}
+
+document.getElementById('genBtn').onclick=generate;
+document.getElementById('aiBtn').onclick=aiWrite;
+document.getElementById('photoIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f&&sampleFn)readPhoto(f)};
+document.getElementById('addSatzBtn').onclick=addSaetze;
+document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('addBtn').onclick=addWords;
+document.getElementById('saveBtn').onclick=saveExcel;
+document.getElementById('fileIn').onchange=e=>e.target.files[0]&&readExcel(e.target.files[0]);
+if(!data.saetze)data.saetze=DEFAULT_DATA.saetze.slice();
+data.saetze=kuerzen(data.saetze);store.set(LS_DATA,data);
+if(!['7-10','9-13','12-16'].includes(settings.len)){settings.len='9-13';store.set(LS_SET,settings)}
+bindSettings();renderLists();rebuild();renderSaetze();
+
+</script>
+</body>
+</html>
