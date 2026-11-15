@@ -75,6 +75,14 @@ input[type=search],input[type=text]{font:inherit;color:var(--text);background:va
 .pklist h4{margin:10px 0 2px;font-size:.9rem;color:var(--muted)}
 .pklist button.chip{border:0;cursor:pointer;font:inherit;font-size:.95rem}
 .pklist button.chip.zero{border:1.5px dashed var(--margin)}
+.tab{background:var(--soft);color:var(--ink);padding:7px 12px;font-size:.95rem}
+.tab.on{background:var(--btn);color:var(--btn-text)}
+.wday{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 14px 6px;margin-bottom:12px;cursor:pointer;break-inside:avoid}
+.wday h3{margin:0 0 4px;font-size:1.05rem;color:var(--ink)}
+.wday ol{margin:0 0 6px;padding-left:26px}
+.wday li{margin:2px 0;color:var(--ink)}
+.wday li.ok{color:var(--ok)}
+.wday li.ok::marker{content:"✓ "}
 .tag{font-size:.75rem;color:var(--muted);min-width:44px}
 details{margin-top:10px}
 summary{cursor:pointer;color:var(--ink);font-weight:700}
@@ -82,6 +90,7 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
 .list li{margin:4px 0}
 .list li button{padding:2px 8px;font-size:.8rem;margin-left:6px}
 @media print{
+  .wday{border:0;padding:0 0 10px}
   .fremd{text-decoration:none}
   body{background:#fff}
   section:not(#ansageSec),.no-print,.ib{display:none!important}
@@ -98,10 +107,14 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
   <section id="ansageSec">
     <h2 class="no-print">Ansage</h2>
     <div class="row no-print" style="margin-bottom:14px">
-      <button class="big" id="genBtn">Neue Ansage erstellen</button>
+      <button class="big" id="weekBtn">Wochenplan erstellen</button>
+      <label>mit <input type="number" id="weekN" min="1" max="7" style="width:3.5em"> Ansagen</label>
+      <button class="ghost" id="genBtn">Neue Ansage erstellen</button>
       <button class="ghost" id="printBtn">Drucken</button>
       <label>für <select id="kidSel"></select></label>
     </div>
+    <div id="tabs" class="row no-print" hidden style="margin-bottom:12px"></div>
+    <div id="weekBox" hidden></div>
     <div id="heft"><div class="empty">Tippe auf „Neue Ansage erstellen“.</div></div>
     <div class="row no-print" style="margin-top:14px"><button id="doneBtn" hidden></button><button class="ghost" id="allBtn" hidden>Alle abhaken</button><span class="status" id="doneStatus" style="margin:0"></span></div>
     <p class="status no-print">Jeden Text kannst du antippen und ändern. Hak jede Zeile ab, die geübt wurde. ✎ lässt dich ein Wort selbst wählen, ↻ ersetzt zufällig. <span class="fremd">Punktiert</span> = Wort steht in keiner Liste.</p>
@@ -285,7 +298,8 @@ function need(it){
 function priority(it){
   let p=(settings['w'+it.cls]||0)/100/classCount[it.cls]*50*need(it);
   if(settings.boost&&isNewest(it))p=Math.max(p,1)*4;
-  if(history.some(h=>h.includes(it.id)))p*=0.6;    // gerade erst erstellt, aber noch nicht als geübt markiert
+  if(history.some(h=>h.includes(it.id)))p*=0.6;
+  if(planUsedIds.has(it.id)&&!isNewest(it))p*=0.15;    // gerade erst erstellt, aber noch nicht als geübt markiert
   return p;
 }
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
@@ -340,7 +354,8 @@ function sentenceScore(s,cov,usedS){
   sc=sc/(1+0.8*rep);                                // Wörter, die in dieser Ansage schon vorkamen, machen den Satz unattraktiv
   const n=s.split(/\s+/).length,[mn,mx]=settings.len.split('-').map(Number);
   if(n<mn-1||n>mx+1)sc*=0.4;
-  if(satzHist.some(h=>h.includes(s)))sc*=sentenceItems(s).some(isNewest)?0.6:0.2;  // Sätze mit neuen Wörtern dürfen öfter wiederkommen
+  if(planUsedS.has(s))sc*=sentenceItems(s).some(isNewest)?0.3:0.03;
+  else if(satzHist.some(h=>h.includes(s)))sc*=sentenceItems(s).some(isNewest)?0.6:0.2;  // Sätze mit neuen Wörtern dürfen öfter wiederkommen
   return sc;
 }
 function makeSentence(cov,usedS){
@@ -470,8 +485,8 @@ function markText(el,text,stems){
 
 /* ---------- Ansage zusammenstellen ---------- */
 let ansage=[],ansageDone=false;
-function generate(){
-  rebuild();ansage=[];ansageDone=false;const cov=new Set(),usedS=new Set();
+function buildAnsage(){
+  rebuild();const ansage=[];const cov=new Set(),usedS=new Set();
   const nW=+settings.nWords,nS=+settings.nSent;
   const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(cov,usedS);s&&sents.push(s)}
   // Einzelwörter: zuerst ALLE neuesten Wörter, die in den Sätzen noch nicht vorkommen
@@ -486,10 +501,52 @@ function generate(){
   else ansage.push(...sents);
   history.push([...cov]);history=history.slice(-3);store.set(LS_HIST,history);
   satzHist.push(sents.map(s=>s.text));satzHist=satzHist.slice(-4);store.set('ansagen_satzverlauf_v1',satzHist);
-  render();updateDoneBtn();
+  return ansage;
+}
+
+/* ---------- Wochenplan ---------- */
+const LS_PLAN='ansagen_plan_v1';
+let plans=store.get(LS_PLAN,{}),curDay=0,weekView=false,planUsedIds=new Set(),planUsedS=new Set();
+const plan=()=>plans[kids.current];
+function savePlan(){const p=plan();if(p&&p.days[curDay]){p.days[curDay].lines=ansage;p.days[curDay].done=ansageDone;p.cur=curDay}store.set(LS_PLAN,plans)}
+function loadDay(i){const p=plan();if(!p||!p.days.length){ansage=[];ansageDone=false;curDay=0;return}curDay=Math.max(0,Math.min(i,p.days.length-1));ansage=p.days[curDay].lines;ansageDone=p.days[curDay].done}
+// Was an anderen Tagen der Woche schon vorkommt, wird seltener gewählt (neue Wörter ausgenommen)
+function setPlanUsed(except){planUsedIds=new Set();planUsedS=new Set();const p=plan();if(!p)return;p.days.forEach((d,i)=>{if(i===except)return;d.lines.forEach(a=>{a.ids.forEach(id=>planUsedIds.add(id));if(a.kind==='satz')planUsedS.add(a.text)})})}
+function generate(){
+  if(!plan())plans[kids.current]={created:Date.now(),days:[{lines:[],done:false}]};
+  if(ansage.some(a=>a.recorded)&&!confirm('Für diese Ansage ist schon etwas als geübt gespeichert. Trotzdem eine neue erstellen?'))return;
+  setPlanUsed(curDay);const lines=buildAnsage();
+  plan().days[curDay]={lines,done:false};loadDay(curDay);weekView=false;render();updateDoneBtn();
+}
+function makeWeek(){
+  const n=Math.max(1,Math.min(7,+document.getElementById('weekN').value||5));settings.weekN=n;store.set(LS_SET,settings);
+  const p=plan();if(p&&p.days.some(d=>d.lines.some(a=>a.recorded))&&!confirm('Einen neuen Wochenplan erstellen? Der bisherige wird ersetzt – was schon als geübt gespeichert ist, bleibt im Fortschritt.'))return;
+  plans[kids.current]={created:Date.now(),days:[]};
+  for(let i=0;i<n;i++){setPlanUsed(-1);plan().days.push({lines:buildAnsage(),done:false})}
+  planUsedIds=new Set();planUsedS=new Set();
+  loadDay(0);weekView=false;render();updateDoneBtn();
+}
+function showDay(i){savePlan();loadDay(i);weekView=false;render();updateDoneBtn()}
+function renderTabs(){
+  const box=document.getElementById('tabs');box.innerHTML='';const p=plan();
+  if(!p||p.days.length<2){box.hidden=true;return}box.hidden=false;
+  p.days.forEach((d,i)=>{const b=document.createElement('button');const rec=d.lines.filter(a=>a.recorded).length;
+    b.className='tab'+(i===curDay&&!weekView?' on':'');b.textContent='Ansage '+(i+1)+(rec===d.lines.length&&rec?' ✓':rec?' ◐':'');b.onclick=()=>showDay(i);box.appendChild(b)});
+  const w=document.createElement('button');w.className='tab'+(weekView?' on':'');w.textContent='Ganze Woche';w.onclick=()=>{savePlan();weekView=true;render();updateDoneBtn()};box.appendChild(w);
+}
+function renderWeek(){
+  const h=document.getElementById('heft');h.hidden=true;const wb=document.getElementById('weekBox');wb.hidden=false;wb.innerHTML='';
+  plan().days.forEach((d,i)=>{
+    const s=document.createElement('div');s.className='wday';
+    const rec=d.lines.filter(a=>a.recorded).length;
+    s.innerHTML=`<h3>Ansage ${i+1}${rec?` <span class="status" style="font-weight:400">· ${rec} von ${d.lines.length} geübt</span>`:''}</h3>`;
+    const ol=document.createElement('ol');
+    d.lines.forEach(a=>{const li=document.createElement('li');li.textContent=a.text;if(a.recorded)li.className='ok';if(a.kind==='satz')li.classList.add('satz');ol.appendChild(li)});
+    s.appendChild(ol);s.onclick=()=>showDay(i);wb.appendChild(s);
+  });
 }
 function replaceLine(idx){
-  rebuild();const cov=new Set(ansage.flatMap((a,i)=>i===idx?[]:a.ids));ansage[idx].ids.forEach(id=>cov.add(id));
+  setPlanUsed(curDay);rebuild();const cov=new Set(ansage.flatMap((a,i)=>i===idx?[]:a.ids));ansage[idx].ids.forEach(id=>cov.add(id));
   const usedS=new Set(ansage.filter(a=>a.kind==='satz').map(a=>a.text));
   const n=ansage[idx].kind==='satz'?makeSentence(cov,usedS):makeWord(cov,false);
   if(n){ansage[idx]=n;render();updateDoneBtn()}
@@ -506,6 +563,7 @@ function markDone(){
 }
 function weekCount(){const d=new Date();const mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7)).getTime();return (kids.done[kids.current]||[]).filter(t=>t>=mon).length}
 function updateDoneBtn(){
+  if(weekView){document.getElementById('doneBtn').hidden=document.getElementById('allBtn').hidden=true;document.getElementById('doneStatus').textContent='';return}
   const b=document.getElementById('doneBtn'),s=document.getElementById('doneStatus'),all=document.getElementById('allBtn');
   const pending=ansage.filter(a=>a.checked&&!a.recorded).length,rec=ansage.filter(a=>a.recorded).length;
   b.hidden=all.hidden=!ansage.length;b.disabled=!pending;
@@ -539,8 +597,11 @@ function renderProgress(){
 }
 
 function render(){
-  const h=document.getElementById('heft');h.innerHTML='';
-  if(!ansage.length){h.innerHTML='<div class="empty">Keine Wörter gefunden – prüfe die Einstellungen.</div>';return}
+  savePlan();renderTabs();
+  if(weekView&&plan()){renderWeek();return}
+  document.getElementById('weekBox').hidden=true;
+  const h=document.getElementById('heft');h.hidden=false;h.innerHTML='';
+  if(!ansage.length){h.innerHTML='<div class="empty">Tippe auf „Wochenplan erstellen“ oder „Neue Ansage erstellen“.</div>';return}
   const stems=vocabStems();
   ansage.forEach((a,i)=>{
     const d=document.createElement('div');d.className='item '+a.kind+(a.checked?' ok':'');
@@ -593,6 +654,7 @@ async function choose(e){
   const usedS=new Set(ansage.filter((x,j)=>j!==pkIdx&&x.kind==='satz').map(x=>x.text));
   const cov=new Set(ansage.flatMap((x,j)=>j===pkIdx?[]:x.ids));
   const cands=data.saetze.filter(s=>!usedS.has(s)&&sentenceItems(s).some(i=>i.id===e.it.id));
+  setPlanUsed(curDay);
   if(cands.length){
     const s=weightedTop(cands,x=>sentenceScore(x,cov,usedS)+0.01,3)||cands[0];
     ansage[pkIdx]={kind:'satz',text:s,ids:sentenceItems(s).map(i=>i.id)};closePicker();render();updateDoneBtn();return;
@@ -754,14 +816,16 @@ function bindSettings(){
 function showW(){const s=settings.w1+settings.w2+settings.w3||1;[1,2,3].forEach(c=>document.getElementById('w'+c+'v').textContent=Math.round(settings['w'+c]/s*100)+' %')}
 
 document.getElementById('genBtn').onclick=generate;
+document.getElementById('weekBtn').onclick=makeWeek;
+document.getElementById('weekN').value=settings.weekN||5;
 document.getElementById('doneBtn').onclick=markDone;
 document.getElementById('allBtn').onclick=()=>{ansage.forEach(a=>{if(!a.recorded)a.checked=true});render();updateDoneBtn()};
 document.getElementById('pkSearch').oninput=renderPicker;
 document.getElementById('pkClose').onclick=closePicker;
 document.getElementById('pkOwnBtn').onclick=chooseOwn;
 document.getElementById('pkOwn').onkeydown=e=>{if(e.key==='Enter')chooseOwn()};
-document.getElementById('kidSel').onchange=e=>{kids.current=e.target.value;saveKids();ansageDone=false;ansage.forEach(a=>{a.recorded=false;a.checked=false});render();updateDoneBtn();renderProgress()};
-document.getElementById('kidAdd').onclick=()=>{const n=(prompt('Name des Kindes:')||'').trim();if(!n)return;if(!kids.list.includes(n))kids.list.push(n);kids.current=n;saveKids();renderKids();updateDoneBtn();renderProgress()};
+document.getElementById('kidSel').onchange=e=>{savePlan();kids.current=e.target.value;saveKids();loadDay(plan()?plan().cur||0:0);weekView=false;render();updateDoneBtn();renderProgress()};
+document.getElementById('kidAdd').onclick=()=>{const n=(prompt('Name des Kindes:')||'').trim();if(!n)return;if(!kids.list.includes(n))kids.list.push(n);savePlan();kids.current=n;loadDay(plan()?plan().cur||0:0);render();saveKids();renderKids();updateDoneBtn();renderProgress()};
 document.getElementById('aiBtn').onclick=aiWrite;
 document.getElementById('copyBtn').onclick=copyPrompt;
 document.getElementById('photoIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f&&sampleFn)readPhoto(f)};
@@ -775,6 +839,7 @@ if(!data.saetze)data.saetze=DEFAULT_DATA.saetze.slice();
 data.saetze=kuerzen(data.saetze);store.set(LS_DATA,data);
 if(!['7-10','9-13','12-16'].includes(settings.len)){settings.len='9-13';store.set(LS_SET,settings)}
 bindSettings();renderLists();rebuild();renderSaetze();renderKids();renderProgress();initLink();
+loadDay(plan()?plan().cur||0:0);render();updateDoneBtn();
 
 </script>
 </body>
