@@ -64,6 +64,8 @@ textarea{width:100%;min-height:80px;margin:8px 0}
 .fremd{text-decoration:underline dotted var(--margin);text-decoration-thickness:2px;text-underline-offset:4px}
 .item.wait .txt{color:var(--muted);font-style:italic}
 .item.satz .txt{line-height:1.45;padding:6px 4px}
+.chip{display:inline-block;padding:3px 10px;margin:3px;border-radius:999px;background:var(--soft);color:var(--ink);font-size:.9rem}
+.chip.zero{background:transparent;border:1.5px dashed var(--margin);color:var(--text)}
 .tag{font-size:.75rem;color:var(--muted);min-width:44px}
 details{margin-top:10px}
 summary{cursor:pointer;color:var(--ink);font-weight:700}
@@ -89,9 +91,20 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
     <div class="row no-print" style="margin-bottom:14px">
       <button class="big" id="genBtn">Neue Ansage erstellen</button>
       <button class="ghost" id="printBtn">Drucken</button>
+      <label>für <select id="kidSel"></select></label>
     </div>
     <div id="heft"><div class="empty">Tippe auf „Neue Ansage erstellen“.</div></div>
+    <div class="row no-print" style="margin-top:14px"><button id="doneBtn" hidden></button><span class="status" id="doneStatus" style="margin:0"></span></div>
     <p class="status no-print">Jeden Text kannst du antippen und ändern. ↻ ersetzt eine Zeile. <span class="fremd">Punktiert</span> = Wort steht in keiner Liste.</p>
+  </section>
+
+  <section>
+    <h2 id="progTitle">Fortschritt</h2>
+    <p class="status" id="kidSummary" style="margin-top:0"></p>
+    <p style="margin:12px 0 4px"><b>Neueste Wörter</b> – kommen in jeder Ansage vor, bis sie gut sitzen:</p>
+    <div id="newestBox"></div>
+    <details class="list"><summary>Noch nie geübte Wörter</summary><div id="neverBox"></div></details>
+    <div class="row" style="margin-top:14px"><button class="ghost" id="kidAdd">Weiteres Kind anlegen</button></div>
   </section>
 
   <section>
@@ -149,7 +162,7 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
         <option value="alt">Satz und Wort abwechselnd</option>
         <option value="block">nur noch Sätze</option></select></label>
     </div>
-    <p style="margin-top:14px"><label><input type="checkbox" id="boost"> Neueste Wörter jeder Klasse öfter üben</label></p>
+    <p style="margin-top:14px"><label><input type="checkbox" id="boost"> Neueste Wörter (letzte Zeile der 3. Klasse und neu eingegebene) in jeder Ansage üben</label></p>
   </section>
 </main>
 
@@ -215,7 +228,7 @@ function parseLine(line,cls,row){
 function single(t,hasPair){
   if(t.includes(' '))return {type:'W',word:t};
   const low=t.toLowerCase();
-  if(FUNC.has(low))return {type:'W',word:low};
+  if(FUNC.has(low)&&(!hasPair||low.length<3))return {type:'W',word:low};
   if(/^[A-ZÄÖÜ]/.test(t)){
     if(NAMES.has(t))return {type:'P',word:t};
     if(KNOWN[t])return {type:'N',art:KNOWN[t],noun:t};
@@ -226,31 +239,42 @@ function single(t,hasPair){
 }
 let items=[];
 function rebuild(){
-  items=[];
+  items=[];sentCache=new Map();
   for(const c of ['1','2','3'])(data[c]||[]).forEach((line,i)=>items.push(...parseLine(line,c,i)));
+  classCount={1:0,2:0,3:0};items.forEach(i=>classCount[i.cls]++);['1','2','3'].forEach(c=>classCount[c]=classCount[c]||1);
 }
 
-/* ---------- Zufall mit Gewichten ---------- */
-let used=new Set();
-function weight(it,counts){
-  let w=(settings['w'+it.cls]||0)/(counts[it.cls]||1);
-  if(settings.boost&&it.row===(data[it.cls].length-1))w*=3;
-  if(history.some(h=>h.includes(it.id)))w*=0.25;
-  if(used.has(it.id))w*=0.02;
-  return w;
+/* ---------- Kinder und Übungsfortschritt ---------- */
+const LS_KIDS='ansagen_kinder_v1', DAY=86400000;
+let kids=store.get(LS_KIDS,{list:['Franziska'],current:'Franziska',stats:{},done:{}});
+function kidStats(){return kids.stats[kids.current]||(kids.stats[kids.current]={})}
+function saveKids(){store.set(LS_KIDS,kids)}
+let classCount={1:1,2:1,3:1};
+function isNewest(it){
+  if(it.cls==='3'&&it.row===data['3'].length-1)return true;
+  const t=(data.addedAt||{})[it.cls+'|'+it.row];return !!t&&Date.now()-t<14*DAY;
 }
-function pick(filter){
-  const pool=items.filter(filter);let tot=0;const counts={};pool.forEach(it=>counts[it.cls]=(counts[it.cls]||0)+1);
-  const ws=pool.map(it=>{const w=weight(it,counts);tot+=w;return w});
-  if(!pool.length)return null;
-  if(tot<=0)return pool[Math.floor(Math.random()*pool.length)];
-  let r=Math.random()*tot;for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0)return pool[i]}
-  return pool[pool.length-1];
+// Wie dringend muss das Wort wieder geübt werden?
+function need(it){
+  const s=kidStats()[it.id];
+  if(!s)return 3;                                   // noch nie geübt
+  const days=(Date.now()-s.last)/DAY;
+  return (0.4+Math.min(days,28)/7)/(1+0.25*s.n);    // lange nicht geübt → wichtiger, oft geübt → weniger wichtig
 }
-const take=it=>{if(it)used.add(it.id);return it};
+function priority(it){
+  let p=(settings['w'+it.cls]||0)/100/classCount[it.cls]*50*need(it);
+  if(settings.boost&&isNewest(it))p=Math.max(p,1)*4;
+  if(history.some(h=>h.includes(it.id)))p*=0.6;    // gerade erst erstellt, aber noch nicht als geübt markiert
+  return p;
+}
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
-const nomNoun=n=>cap(n.art)+' '+n.noun;
-const accArt={der:'den',die:'die',das:'das'};
+function weightedTop(list,scoreFn,top){
+  const sc=list.map(x=>[x,scoreFn(x)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,top);
+  if(!sc.length)return null;
+  let tot=sc.reduce((a,x)=>a+x[1],0),r=Math.random()*tot;
+  for(const [x,s] of sc){r-=s;if(r<=0)return x}
+  return sc[0][0];
+}
 
 /* ---------- Einzelwörter ---------- */
 function wordText(it){
@@ -258,10 +282,15 @@ function wordText(it){
   if(it.type==='V')return (it.form&&Math.random()<0.5)?it.form:it.inf;
   return it.word;
 }
-function makeWord(){const it=take(pick(i=>['N','V','A','P'].includes(i.type)));return it?{kind:'wort',text:wordText(it),ids:[it.id]}:null}
+function makeWord(cov,onlyNewest){
+  const pool=items.filter(i=>['N','V','A','P'].includes(i.type)&&!cov.has(i.id)&&(!onlyNewest||isNewest(i)));
+  const it=weightedTop(pool,priority,onlyNewest?50:12);if(!it)return null;
+  cov.add(it.id);return {kind:'wort',text:wordText(it),ids:[it.id]};
+}
 
 /* ---------- Sätze aus der Satzsammlung ---------- */
-// Für jedes Lernwort die Wortformen, an denen es im Satz erkannt wird
+const UML=s=>s.replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');
+function stemW(w){w=UML(w.toLowerCase());for(const e of ['ern','en','em','er','es','st','e','n','s','t']){if(w.endsWith(e)&&w.length-e.length>=3)return w.slice(0,-e.length)}return w}
 function formsOf(it){
   const f=[];
   if(it.type==='N'){f.push(it.noun);if(it.plural)f.push(it.plural)}
@@ -271,38 +300,34 @@ function formsOf(it){
 }
 function tokens(s){return (s.toLowerCase().match(/[a-zäöüß]+/g)||[])}
 function matchForm(tok,form){
-  if(tok===form)return true;
-  if(form.length<4||tok.length<4)return false;
-  const k=form.length>=6?form.length-2:form.length-1;
-  return tok.startsWith(form.slice(0,k));
+  if(tok===form||stemW(tok)===stemW(form))return true;
+  if(form.length<7||tok.length<form.length-1)return false;
+  return tok.startsWith(form.slice(0,form.length-2));
 }
+let sentCache=new Map();
 function sentenceItems(s){
+  if(sentCache.has(s))return sentCache.get(s);
   const toks=tokens(s);
-  return items.filter(it=>['N','V','A'].includes(it.type)&&formsOf(it).some(f=>toks.some(t=>matchForm(t,f))));
+  const r=items.filter(it=>['N','V','A'].includes(it.type)&&formsOf(it).some(f=>toks.some(t=>matchForm(t,f))));
+  sentCache.set(s,r);return r;
 }
 let satzHist=store.get('ansagen_satzverlauf_v1',[]);
-function sentenceWeight(s,usedS){
+function sentenceScore(s,cov,usedS){
   if(usedS.has(s))return 0;
-  const its=sentenceItems(s);
-  const counts={1:0,2:0,3:0};items.forEach(i=>counts[i.cls]++);
-  let sc=0;
-  its.forEach(it=>{let w=(settings['w'+it.cls]||0)/(counts[it.cls]||1);if(settings.boost&&it.row===data[it.cls].length-1)w*=3;sc+=w});
-  sc=Math.pow(sc,1.2);
+  let sc=0,rep=0;
+  sentenceItems(s).forEach(it=>{if(cov.has(it.id))rep++;else sc+=priority(it)});
+  sc=sc/(1+0.8*rep);                                // Wörter, die in dieser Ansage schon vorkamen, machen den Satz unattraktiv
   const n=s.split(/\s+/).length,[mn,mx]=settings.len.split('-').map(Number);
   if(n<mn-1||n>mx+1)sc*=0.4;
-  if(satzHist.some(h=>h.includes(s)))sc*=0.05;
+  if(satzHist.some(h=>h.includes(s)))sc*=0.2;
   return sc;
 }
-function makeSentence(usedS){
-  const pool=data.saetze||[];if(!pool.length)return null;
-  const ws=pool.map(s=>sentenceWeight(s,usedS));let tot=ws.reduce((a,b)=>a+b,0);
-  let s;
-  if(tot<=0){const free=pool.filter(x=>!usedS.has(x));if(!free.length)return null;s=rnd(free)}
-  else{let r=Math.random()*tot;s=pool[pool.length-1];for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0){s=pool[i];break}}}
-  usedS.add(s);
-  const ids=sentenceItems(s).map(i=>i.id);ids.forEach(id=>used.add(id));
-  return {kind:'satz',text:s,ids};
+function makeSentence(cov,usedS){
+  const s=weightedTop(data.saetze||[],x=>sentenceScore(x,cov,usedS),5);
+  if(!s){const free=(data.saetze||[]).filter(x=>!usedS.has(x));if(!free.length)return null;return addSentence(rnd(free),cov,usedS)}
+  return addSentence(s,cov,usedS);
 }
+function addSentence(s,cov,usedS){usedS.add(s);const ids=sentenceItems(s).map(i=>i.id);ids.forEach(id=>cov.add(id));return {kind:'satz',text:s,ids}}
 
 /* ---------- Neue Sätze mit Claude (nur auf claude.ai) ---------- */
 let sampleFn=null;
@@ -390,13 +415,14 @@ const EXTRA=new Set(('der die das den dem des ein eine einen einem einer eines k
  'und oder aber weil dass denn wenn als ob doch sondern ist sind war waren bin bist seid hat haben hatte hatten habe hast werden wird wurde wurden gewesen sein '+
  'sehr heute gestern morgen nicht auch noch schon dann da so ganz viel viele alle zwei drei vier fünf eins einmal').split(' '));
 function vocabStems(){
-  const s=new Set();
-  ['1','2','3'].forEach(c=>data[c].forEach(l=>l.toLowerCase().replace(/[–—,;\-]/g,' ').split(/\s+/).forEach(w=>{w=w.replace(/[^a-zäöüß]/g,'');if(w.length>=2)s.add(w)})));
-  return [...s];
+  const set=new Set(),arr=[];
+  ['1','2','3'].forEach(c=>data[c].forEach(l=>l.toLowerCase().replace(/[–—,;\-]/g,' ').split(/\s+/).forEach(w=>{w=w.replace(/[^a-zäöüß]/g,'');if(w.length>=2){arr.push(w);set.add(UML(w));set.add(stemW(w))}})));
+  return {set,arr};
 }
 function knownWord(tok,stems){
   const w=tok.toLowerCase();if(!w||EXTRA.has(w))return true;
-  return stems.some(v=>{if(v===w)return true;if(v.length<4)return false;const k=Math.max(4,v.length-2);return w.startsWith(v.slice(0,k))||v.startsWith(w.slice(0,Math.max(4,w.length-1)))});
+  if(stems.set.has(UML(w))||stems.set.has(stemW(w)))return true;
+  return stems.arr.some(v=>{if(v.length<4)return false;const k=Math.max(4,v.length-2);return w.startsWith(v.slice(0,k))||v.startsWith(w.slice(0,Math.max(4,w.length-1)))});
 }
 function markText(el,text,stems){
   el.textContent='';
@@ -407,24 +433,71 @@ function markText(el,text,stems){
 }
 
 /* ---------- Ansage zusammenstellen ---------- */
-let ansage=[];
+let ansage=[],ansageDone=false;
 function generate(){
-  rebuild();used=new Set();ansage=[];const usedS=new Set();
+  rebuild();ansage=[];ansageDone=false;const cov=new Set(),usedS=new Set();
   const nW=+settings.nWords,nS=+settings.nSent;
-  const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(usedS);s&&sents.push(s)}
-  for(let i=0;i<nW;i++){const w=makeWord();w&&ansage.push(w)}
-  if(settings.mode==='alt'){sents.forEach((s,i)=>{ansage.push(s);if(i<sents.length-1){const w=makeWord();w&&ansage.push(w)}})}
+  const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(cov,usedS);s&&sents.push(s)}
+  // Einzelwörter: zuerst neueste Wörter, die in den Sätzen noch fehlen
+  const words=[];const nNew=settings.boost?Math.ceil(nW/2):0;
+  for(let i=0;i<nNew;i++){const w=makeWord(cov,true);w&&words.push(w)}
+  const extra=settings.mode==='alt'?Math.max(0,sents.length-1):0;
+  while(words.length<nW+extra){const w=makeWord(cov,false);if(!w)break;words.push(w)}
+  ansage.push(...words.slice(0,nW).sort(()=>Math.random()-0.5));
+  const rest=words.slice(nW);
+  if(settings.mode==='alt'){sents.forEach((s,i)=>{ansage.push(s);if(rest[i])ansage.push(rest[i])})}
   else ansage.push(...sents);
-  history.push([...used]);history=history.slice(-3);store.set(LS_HIST,history);
-  satzHist.push(sents.map(s=>s.text));satzHist=satzHist.slice(-3);store.set('ansagen_satzverlauf_v1',satzHist);
-  render();
+  history.push([...cov]);history=history.slice(-3);store.set(LS_HIST,history);
+  satzHist.push(sents.map(s=>s.text));satzHist=satzHist.slice(-4);store.set('ansagen_satzverlauf_v1',satzHist);
+  render();updateDoneBtn();
 }
 function replaceLine(idx){
-  rebuild();used=new Set(ansage.flatMap(a=>a.ids));
+  rebuild();const cov=new Set(ansage.flatMap((a,i)=>i===idx?[]:a.ids));ansage[idx].ids.forEach(id=>cov.add(id));
   const usedS=new Set(ansage.filter(a=>a.kind==='satz').map(a=>a.text));
-  const n=ansage[idx].kind==='satz'?makeSentence(usedS):makeWord();
+  const n=ansage[idx].kind==='satz'?makeSentence(cov,usedS):makeWord(cov,false);
   if(n){ansage[idx]=n;render()}
 }
+function markDone(){
+  if(!ansage.length||ansageDone)return;
+  rebuild();const st=kidStats(),now=Date.now(),ids=new Set();
+  ansage.forEach(a=>{(a.kind==='satz'?sentenceItems(a.text).map(i=>i.id):a.ids).forEach(id=>ids.add(id))});
+  ids.forEach(id=>{const s=st[id]||{n:0};s.n++;s.last=now;st[id]=s});
+  (kids.done[kids.current]=kids.done[kids.current]||[]).push(now);
+  history=[];store.set(LS_HIST,history);
+  ansageDone=true;saveKids();dirty=true;saveData();updateDoneBtn();renderProgress();
+}
+function weekCount(){const d=new Date();const mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7)).getTime();return (kids.done[kids.current]||[]).filter(t=>t>=mon).length}
+function updateDoneBtn(){
+  const b=document.getElementById('doneBtn'),s=document.getElementById('doneStatus');
+  b.hidden=!ansage.length;b.disabled=ansageDone;b.textContent=ansageDone?'✓ Geübt':'✓ '+kids.current+' hat diese Ansage geübt';
+  s.textContent=ansageDone?`Gespeichert. Diese Woche ${weekCount()===1?'1 Ansage':weekCount()+' Ansagen'} mit ${kids.current}.`:'';
+}
+
+/* ---------- Fortschritt anzeigen ---------- */
+function renderKids(){
+  const sel=document.getElementById('kidSel');sel.innerHTML='';
+  kids.list.forEach(n=>{const o=document.createElement('option');o.value=o.textContent=n;sel.appendChild(o)});
+  sel.value=kids.current;
+}
+function chip(it){
+  const s=kidStats()[it.id];const c=document.createElement('span');c.className='chip'+(s?'':' zero');
+  c.textContent=label(it)+' · '+(s?s.n+'×':'noch nie');return c;
+}
+function renderProgress(){
+  rebuild();const st=kidStats();
+  document.getElementById('progTitle').textContent='Fortschritt von '+kids.current;
+  const nb=document.getElementById('newestBox');nb.innerHTML='';
+  const nw=items.filter(i=>['N','V','A','P'].includes(i.type)&&isNewest(i));
+  nw.sort((a,b)=>((st[a.id]||{n:0}).n)-((st[b.id]||{n:0}).n)).forEach(i=>nb.appendChild(chip(i)));
+  const learn=items.filter(i=>['N','V','A'].includes(i.type));
+  const sum=c=>{const l=learn.filter(i=>i.cls===c);return `${c}. Klasse: ${l.filter(i=>st[i.id]).length} von ${l.length}`};
+  document.getElementById('kidSummary').textContent=`Diese Woche ${weekCount()===1?'1 Ansage':weekCount()+' Ansagen'} geübt. Schon geübte Wörter – ${['3','2','1'].map(sum).join(' · ')}.`;
+  const nv=document.getElementById('neverBox');nv.innerHTML='';
+  ['3','2','1'].forEach(c=>{const l=learn.filter(i=>i.cls===c&&!st[i.id]);if(!l.length)return;
+    const h=document.createElement('h3');h.textContent=c+'. Klasse ('+l.length+')';h.style.cssText='font-size:1rem;margin:12px 0 4px;color:var(--ink)';nv.appendChild(h);
+    const d=document.createElement('div');l.forEach(i=>d.appendChild(chip(i)));nv.appendChild(d)});
+}
+
 function render(){
   const h=document.getElementById('heft');h.innerHTML='';
   if(!ansage.length){h.innerHTML='<div class="empty">Keine Wörter gefunden – prüfe die Einstellungen.</div>';return}
@@ -445,7 +518,8 @@ function addWords(){
   const st=document.getElementById('addStatus');
   if(!txt){st.textContent='Trag zuerst die neuen Wörter ein.';return}
   const c=document.getElementById('newCls').value;
-  data[c].push(txt);dirty=true;saveData();renderSaetze();
+  data[c].push(txt);data.addedAt=data.addedAt||{};data.addedAt[c+'|'+(data[c].length-1)]=Date.now();
+  dirty=true;saveData();renderSaetze();renderProgress();
   st.textContent=`Als Ansage Nr. ${data[c].length} zur ${c}. Klasse hinzugefügt. Schreib in der Satzsammlung Sätze dazu und speichere dann die Excel-Datei.`;
   document.getElementById('newWords').value='';renderLists();
 }
@@ -478,7 +552,12 @@ function readExcel(file){
         XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''}).forEach(row=>{if(typeof row[0]==='number'&&String(row[1]).trim())nd[m[1]].push(String(row[1]).replace(/\s+/g,' ').trim())})});
       if(!found)throw new Error('Keine Blätter „1. Klasse“, „2. Klasse“, „3. Klasse“ gefunden.');
       if(!ss)nd.saetze=data.saetze;
-      nd.saetze=kuerzen(nd.saetze);data=nd;dirty=false;saveData();renderLists();renderSaetze();
+      const fs=wb.Sheets['Fortschritt'],es=wb.Sheets['Erledigte Ansagen'];
+      if(fs){const st={};XLSX.utils.sheet_to_json(fs,{header:1,defval:''}).slice(1).forEach(r=>{if(!r[0]||!r[5])return;const t=Date.parse(String(r[4]).replace(' ','T'));(st[r[0]]=st[r[0]]||{})[r[5]]={n:+r[3]||1,last:isNaN(t)?Date.now():t}});
+        kids.stats=st;Object.keys(st).forEach(k=>{if(!kids.list.includes(k))kids.list.push(k)})}
+      if(es){const dn={};XLSX.utils.sheet_to_json(es,{header:1,defval:''}).slice(1).forEach(r=>{const t=Date.parse(String(r[1]).replace(' ','T'));if(r[0]&&!isNaN(t))(dn[r[0]]=dn[r[0]]||[]).push(t)});kids.done=dn}
+      saveKids();renderKids();
+      nd.addedAt=data.addedAt;nd.saetze=kuerzen(nd.saetze);data=nd;dirty=false;saveData();renderLists();renderSaetze();renderProgress();
       document.getElementById('fileStatus').textContent+=' Aus „'+file.name+'“ geöffnet.';
     }catch(err){const s=document.getElementById('fileStatus');s.textContent='Die Datei konnte nicht gelesen werden: '+err.message;s.className='status warn'}
   };
@@ -494,6 +573,11 @@ function saveExcel(){
   });
   const ws=XLSX.utils.aoa_to_sheet([['Satzsammlung für die Ansagen'],[],['Nr.','Satz'],...data.saetze.map((s,i)=>[i+1,s])]);
   ws['!cols']=[{wch:6},{wch:110}];XLSX.utils.book_append_sheet(wb,ws,'Sätze');
+  rebuild();const byId=new Map(items.map(i=>[i.id,i]));const pr=[['Kind','Wort','Klasse','Anzahl geübt','Zuletzt geübt','ID']];
+  Object.entries(kids.stats).forEach(([k,st])=>Object.entries(st).forEach(([id,s])=>{const it=byId.get(id);pr.push([k,it?label(it):id,id.split('|')[0]+'. Klasse',s.n,new Date(s.last).toISOString().slice(0,16).replace('T',' '),id])}));
+  const wp=XLSX.utils.aoa_to_sheet(pr);wp['!cols']=[{wch:14},{wch:28},{wch:10},{wch:14},{wch:18},{wch:28}];XLSX.utils.book_append_sheet(wb,wp,'Fortschritt');
+  const er=[['Kind','Datum']];Object.entries(kids.done).forEach(([k,l])=>l.forEach(d=>er.push([k,new Date(d).toISOString().slice(0,16).replace('T',' ')])));
+  const we=XLSX.utils.aoa_to_sheet(er);we['!cols']=[{wch:14},{wch:18}];XLSX.utils.book_append_sheet(wb,we,'Erledigte Ansagen');
   const finish=()=>{dirty=false;saveData()};
   if(dl){
     const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
@@ -519,6 +603,9 @@ function bindSettings(){
 function showW(){const s=settings.w1+settings.w2+settings.w3||1;[1,2,3].forEach(c=>document.getElementById('w'+c+'v').textContent=Math.round(settings['w'+c]/s*100)+' %')}
 
 document.getElementById('genBtn').onclick=generate;
+document.getElementById('doneBtn').onclick=markDone;
+document.getElementById('kidSel').onchange=e=>{kids.current=e.target.value;saveKids();ansageDone=false;updateDoneBtn();renderProgress()};
+document.getElementById('kidAdd').onclick=()=>{const n=(prompt('Name des Kindes:')||'').trim();if(!n)return;if(!kids.list.includes(n))kids.list.push(n);kids.current=n;saveKids();renderKids();updateDoneBtn();renderProgress()};
 document.getElementById('aiBtn').onclick=aiWrite;
 document.getElementById('photoIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f&&sampleFn)readPhoto(f)};
 document.getElementById('addSatzBtn').onclick=addSaetze;
@@ -529,7 +616,7 @@ document.getElementById('fileIn').onchange=e=>e.target.files[0]&&readExcel(e.tar
 if(!data.saetze)data.saetze=DEFAULT_DATA.saetze.slice();
 data.saetze=kuerzen(data.saetze);store.set(LS_DATA,data);
 if(!['7-10','9-13','12-16'].includes(settings.len)){settings.len='9-13';store.set(LS_SET,settings)}
-bindSettings();renderLists();rebuild();renderSaetze();
+bindSettings();renderLists();rebuild();renderSaetze();renderKids();renderProgress();
 
 </script>
 </body>
