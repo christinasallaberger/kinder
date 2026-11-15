@@ -127,8 +127,8 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
     <textarea id="newSaetze" placeholder="Eigene Sätze mit den neuen Wörtern – ein Satz pro Zeile"></textarea>
     <div class="row">
       <button id="addSatzBtn">Sätze hinzufügen</button>
-      <select id="satzCls" aria-label="Klasse der neuen Wörter"><option value="3">neueste Wörter 3. Klasse</option><option value="2">neueste Wörter 2. Klasse</option><option value="1">neueste Wörter 1. Klasse</option></select>
-      <button class="ghost" id="aiBtn" hidden>Sätze von Claude schreiben lassen</button>
+      <button class="ghost" id="aiBtn" hidden>Sätze mit den neuen Wörtern schreiben lassen</button>
+      <button class="ghost" id="copyBtn">Auftrag für Claude kopieren</button>
     </div>
     <p class="status" id="satzStatus"></p>
     <details class="list"><summary>Satzsammlung ansehen</summary><div id="satzListe"></div></details>
@@ -318,11 +318,11 @@ let satzHist=store.get('ansagen_satzverlauf_v1',[]);
 function sentenceScore(s,cov,usedS){
   if(usedS.has(s))return 0;
   let sc=0,rep=0;
-  sentenceItems(s).forEach(it=>{if(cov.has(it.id))rep++;else sc+=priority(it)});
+  sentenceItems(s).forEach(it=>{if(!cov.has(it.id))sc+=priority(it);else if(isNewest(it))sc+=priority(it)*0.5;else rep++});  // neue Wörter dürfen sich wiederholen
   sc=sc/(1+0.8*rep);                                // Wörter, die in dieser Ansage schon vorkamen, machen den Satz unattraktiv
   const n=s.split(/\s+/).length,[mn,mx]=settings.len.split('-').map(Number);
   if(n<mn-1||n>mx+1)sc*=0.4;
-  if(satzHist.some(h=>h.includes(s)))sc*=0.2;
+  if(satzHist.some(h=>h.includes(s)))sc*=sentenceItems(s).some(isNewest)?0.6:0.2;  // Sätze mit neuen Wörtern dürfen öfter wiederkommen
   return sc;
 }
 function makeSentence(cov,usedS){
@@ -336,7 +336,7 @@ function addSentence(s,cov,usedS){usedS.add(s);const ids=sentenceItems(s).map(i=
 let sampleFn=null;
 if(window.claude&&claude.use){claude.use('sample').then(s=>{sampleFn=s;updateAiUi()}).catch(()=>{})}
 function updateAiUi(){
-  document.getElementById('aiBtn').hidden=!sampleFn;
+  document.getElementById('aiBtn').hidden=!sampleFn;document.getElementById('copyBtn').hidden=!!sampleFn;
   if(sampleFn&&sampleFn.limits)sampleFn.limits().then(l=>{if(l&&l.images){document.getElementById('photoIn').accept=l.images.mediaTypes.join(',');document.getElementById('photoBtn').hidden=false}}).catch(()=>{});
 }
 async function readPhoto(file){
@@ -360,49 +360,64 @@ Antworte nur mit JSON: {"woerter": "der Hund – die Hunde, laufen – er läuft
     st.textContent=e&&e.code==='not_granted'?'Claude darf auf dieser Seite keine Fotos lesen.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte gleich noch einmal.':'Das Foto konnte nicht gelesen werden – bitte noch einmal versuchen.';
   }
 }
-async function aiWrite(){
-  const c=document.getElementById('satzCls').value;const st=document.getElementById('satzStatus');
-  const line=data[c][data[c].length-1];if(!line){st.textContent='In dieser Klasse gibt es noch keine Wörter.';return}
-  const [mn,mx]=settings.len.split('-');const btn=document.getElementById('aiBtn');
-  const prompt=`Du schreibst Sätze für Ansagen (Diktate) in einer österreichischen Volksschule, 3. Klasse.
+// neueste Wörter, für die es noch keine zwei Sätze gibt
+function missingNewest(){
+  rebuild();const cnt={};data.saetze.forEach(s=>sentenceItems(s).forEach(i=>cnt[i.id]=(cnt[i.id]||0)+1));
+  return items.filter(i=>['N','V','A'].includes(i.type)&&isNewest(i)&&(cnt[i.id]||0)<2);
+}
+function satzPrompt(words,asJson){
+  const [mn,mx]=settings.len.split('-');const n=Math.min(14,Math.max(6,Math.ceil(words.length*2/3)+2));
+  return `Du schreibst Sätze für Ansagen (Diktate) in einer österreichischen Volksschule, 3. Klasse.
 
-NEUE LERNWÖRTER (jedes davon soll mindestens zweimal vorkommen):
-${line}
+NEUE LERNWÖRTER – jedes davon muss in mindestens zwei verschiedenen Sätzen vorkommen (Nomen auch in der Mehrzahl, Verben in passender Personalform, Eigenschaftswörter gebeugt):
+${words.map(label).join(', ')}
 
-WEITERE LERNWÖRTER, die du verwenden sollst:
+WEITERE LERNWÖRTER, die du in den Sätzen verwenden sollst:
 ${['3','2','1'].map(k=>k+'. Klasse: '+data[k].join(' / ')).join('\n')}
 
-Schreibe 8 Sätze. Regeln:
+Schreibe ${n} Sätze. Regeln:
 - Jeder Satz ergibt Sinn und beschreibt etwas, das Kinder sich gut vorstellen können. Keine schrägen oder unlogischen Wortkombinationen.
 - ${mn} bis ${mx} Wörter, mehrere Satzglieder (Subjekt, Prädikat, Objekt, Angaben zu Zeit, Ort, Art und Weise).
-- Mindestens drei Eigenschaftswörter pro Satz, möglichst aus den Lernwörtern.
+- Jeder Satz enthält mindestens zwei der neuen Lernwörter und mindestens zwei Eigenschaftswörter.
 - Fast nur Lernwörter. Zusätzlich erlaubt: Artikel, Pronomen, Präpositionen, Bindewörter, sein, haben, werden, Zahlwörter, sehr, heute, gestern, morgen. Höchstens ein anderes Wort pro Satz.
 - Österreichisches Deutsch, fehlerfreie Rechtschreibung und Beistriche, abwechslungsreiche Satzanfänge.
 
-Antworte nur mit JSON: {"saetze": ["...", "..."]}`;
-  btn.disabled=true;st.textContent='Claude schreibt Sätze …';
+`+(asJson?'Antworte nur mit JSON: {"saetze": ["...", "..."]}':'Antworte nur mit den Sätzen, ein Satz pro Zeile, ohne Nummerierung und ohne weiteren Text.');
+}
+async function aiWrite(){
+  const st=document.getElementById('satzStatus');const btn=document.getElementById('aiBtn');
+  if(!sampleFn)return;
+  let words=missingNewest();if(!words.length){rebuild();words=items.filter(i=>['N','V','A'].includes(i.type)&&isNewest(i))}
+  if(!words.length){st.textContent='Es gibt gerade keine neuen Wörter.';return}
+  btn.disabled=true;st.className='status';st.textContent='Claude schreibt Sätze mit den neuen Wörtern …';
   try{
-    const r=await sampleFn.json(prompt,{modelTier:'default',cache:false});
+    const r=await sampleFn.json(satzPrompt(words,true),{modelTier:'default',cache:false});
     const arr=((r&&r.saetze)||[]).map(s=>String(s).trim()).filter(s=>s&&!data.saetze.includes(s));
     data.saetze.push(...arr);dirty=true;saveData();renderSaetze();
-    st.textContent=arr.length+' neue Sätze in die Satzsammlung übernommen. Unpassende kannst du unten löschen.';
-  }catch(e){st.textContent=e&&e.code==='not_granted'?'Claude darf auf dieser Seite nicht schreiben.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte gleich noch einmal.':'Das hat nicht geklappt – bitte noch einmal versuchen.'}
+    const m=missingNewest();
+    st.textContent=arr.length+' neue Sätze übernommen.'+(m.length?' Noch zu wenige Sätze für: '+m.map(label).join(', ')+' – tippe noch einmal auf den Knopf.':' Alle neuen Wörter kommen jetzt in Sätzen vor.')+' Unpassende Sätze kannst du unten löschen.';
+  }catch(e){st.className='status warn';st.textContent=e&&e.code==='not_granted'?'Claude darf auf dieser Seite nicht schreiben.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte gleich noch einmal.':'Das hat nicht geklappt – bitte noch einmal versuchen.'}
   btn.disabled=false;
+}
+async function copyPrompt(){
+  const st=document.getElementById('satzStatus');let words=missingNewest();
+  if(!words.length){rebuild();words=items.filter(i=>['N','V','A'].includes(i.type)&&isNewest(i))}
+  if(!words.length){st.textContent='Es gibt gerade keine neuen Wörter.';return}
+  const txt=satzPrompt(words,false);
+  try{await navigator.clipboard.writeText(txt);st.textContent='Auftrag kopiert. Füg ihn in einen Chat mit Claude ein und kopier die Sätze, die zurückkommen, in das Feld oben. Dann tippe auf „Sätze hinzufügen“.'}
+  catch(e){document.getElementById('newSaetze').value=txt;st.textContent='Kopieren ging nicht – der Auftrag steht jetzt im Feld oben. Markier ihn, kopier ihn in einen Chat mit Claude und ersetz ihn dann durch die Sätze.'}
 }
 function addSaetze(){
   const ta=document.getElementById('newSaetze');const st=document.getElementById('satzStatus');
-  const arr=ta.value.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(s=>/[.!?]$/.test(s)?s:s+'.').filter(s=>!data.saetze.includes(s));
+  const arr=ta.value.split(/\n+/).map(s=>s.trim().replace(/^(\d+[.)]|[-–•*])\s*/,'').replace(/^["„“]|["“”]$/g,'').trim()).filter(s=>s&&s.split(/\s+/).length>=3).map(s=>/[.!?]$/.test(s)?s:s+'.').filter(s=>!data.saetze.includes(s));
   if(!arr.length){st.textContent='Schreib zuerst einen Satz pro Zeile.';return}
   data.saetze.push(...arr);dirty=true;saveData();ta.value='';renderSaetze();
   st.textContent=arr.length===1?'1 Satz hinzugefügt.':arr.length+' Sätze hinzugefügt.';
 }
 function coverageHint(){
-  rebuild();const el=document.getElementById('coverage');const miss=[];
-  ['3','2'].forEach(c=>{const row=data[c].length-1;if(row<0)return;
-    const its=items.filter(i=>i.cls===c&&i.row===row&&['N','V','A'].includes(i.type));
-    const covered=new Set();data.saetze.forEach(s=>sentenceItems(s).forEach(i=>covered.add(i.id)));
-    const m=its.filter(i=>!covered.has(i.id)).map(label);if(m.length)miss.push(c+'. Klasse: '+m.join(', '))});
-  el.textContent=miss.length?'Für diese neuesten Wörter gibt es noch keinen Satz: '+miss.join(' · '):'';
+  const el=document.getElementById('coverage');const m=missingNewest();
+  el.textContent=m.length?'Für diese neuen Wörter gibt es noch zu wenige Sätze: '+m.map(label).join(', '):'';
+  document.getElementById('aiBtn').classList.toggle('ghost',!m.length);document.getElementById('copyBtn').classList.toggle('ghost',!m.length);
 }
 function label(it){if(it.type==='N')return it.art+' '+it.noun;if(it.type==='V')return it.inf;return it.word}
 function renderSaetze(){
@@ -441,7 +456,6 @@ function generate(){
   rebuild();ansage=[];ansageDone=false;const cov=new Set(),usedS=new Set();
   const nW=+settings.nWords,nS=+settings.nSent;
   const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(cov,usedS);s&&sents.push(s)}
-  // Einzelwörter: zuerst neueste Wörter, die in den Sätzen noch fehlen
   // Einzelwörter: zuerst ALLE neuesten Wörter, die in den Sätzen noch nicht vorkommen
   const words=[];
   if(settings.boost){let w;while((w=makeWord(cov,true)))words.push(w)}
@@ -527,6 +541,7 @@ function addWords(){
   dirty=true;saveData();renderSaetze();renderProgress();
   st.textContent=`Als Ansage Nr. ${data[c].length} zur ${c}. Klasse hinzugefügt. Schreib in der Satzsammlung Sätze dazu und speichere dann die Excel-Datei.`;
   document.getElementById('newWords').value='';renderLists();
+  if(sampleFn){st.textContent=`Zur ${c}. Klasse hinzugefügt. Claude schreibt jetzt passende Sätze dazu …`;aiWrite()}
 }
 function saveData(){store.set(LS_DATA,data);store.set('ansagen_dirty',dirty);updateFileStatus();if(dirty&&fileHandle)scheduleWrite()}
 function updateFileStatus(){
@@ -660,6 +675,7 @@ document.getElementById('doneBtn').onclick=markDone;
 document.getElementById('kidSel').onchange=e=>{kids.current=e.target.value;saveKids();ansageDone=false;updateDoneBtn();renderProgress()};
 document.getElementById('kidAdd').onclick=()=>{const n=(prompt('Name des Kindes:')||'').trim();if(!n)return;if(!kids.list.includes(n))kids.list.push(n);kids.current=n;saveKids();renderKids();updateDoneBtn();renderProgress()};
 document.getElementById('aiBtn').onclick=aiWrite;
+document.getElementById('copyBtn').onclick=copyPrompt;
 document.getElementById('photoIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f&&sampleFn)readPhoto(f)};
 document.getElementById('addSatzBtn').onclick=addSaetze;
 document.getElementById('printBtn').onclick=()=>window.print();
