@@ -6,7 +6,7 @@
 <title>Zeitungsbericht-Trainer</title>
 <meta name="uebersicht-kapitel" content="Deutsch: Schreiben">
 <meta name="uebersicht-thema" content="Zeitungsbericht (Deutschstunde 3, S. 29–34)">
-<meta name="uebersicht-info" content="Regel-Check, indirekte Rede üben, je Runde 2 Berichte (1 mit freier Hand, 1 mit vielen Angaben, je 120–150 Wörter), Summary und Headline zum Schluss, Sofort-Kontrolle mit Fehlern und Wortwiederholungen">
+<meta name="uebersicht-info" content="Direkte und indirekte Rede üben, Regel-Check, je Runde 2 Berichte (1 mit freier Hand, 1 mit vielen Angaben, je 120–150 Wörter), Summary und Headline zum Schluss, Sofort-Kontrolle mit Fehlern und Wortwiederholungen">
 <meta name="uebersicht-gruppe" content="3. Klasse">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -166,9 +166,9 @@ const TASKS=[
 const T=id=>TASKS.find(x=>x.id===id);
 
 /* ===================== SCHRITTE & FORMULIERUNGEN ===================== */
-const ZEUGEN_ST=['Laut ',' sei ',' habe ',' seien ',' hätten ','Wie ',' berichtete, ',' gab an, '];
+const ZEUGEN_ST=[' sagte: „','“, sagte ','“, berichtete ','Laut ',' sei ',' habe ',' seien ',' hätten ','Wie ',' berichtete, ',' gab an, '];
 const STEPS=[
-{k:'hauptteil',kind:'haupt',label:'Hauptteil: Was? Wo? Wann? Wer? Wie?',de:'Beginne mit der Ortsmarke (Ort + Punkt). Erzähl dann der Reihe nach, was passiert ist und wer geholfen hat. Absätze machst du mit ↵.',rule:'Präteritum, sachlich, keine wörtliche Rede – Aussagen indirekt mit sei / habe einbauen.',ph:'Ort. Am … war …',st:t=>[t.ort+'. ','Am ',', dem ',' gegen ',' Uhr war ',' unterwegs, als ','Zur selben Zeit ','Vermutlich ','Dabei übersah ','In weiterer Folge ','Kurz darauf ','Augenzeugen verständigten sofort die Einsatzkräfte. ','Daraufhin ','Wenig später ',...((t.wit||t.type==='angaben')?ZEUGEN_ST:[])]},
+{k:'hauptteil',kind:'haupt',label:'Hauptteil: Was? Wo? Wann? Wer? Wie?',de:'Beginne mit der Ortsmarke (Ort + Punkt). Erzähl dann der Reihe nach, was passiert ist und wer geholfen hat. Absätze machst du mit ↵.',rule:'Präteritum, sachlich. Aussagen direkt („…“, sagte er.) oder indirekt (er sagte, er habe …) einbauen.',ph:'Ort. Am … war …',st:t=>[t.ort+'. ','Am ',', dem ',' gegen ',' Uhr war ',' unterwegs, als ','Zur selben Zeit ','Vermutlich ','Dabei übersah ','In weiterer Folge ','Kurz darauf ','Augenzeugen verständigten sofort die Einsatzkräfte. ','Daraufhin ','Wenig später ',...((t.wit||t.type==='angaben')?ZEUGEN_ST:[])]},
 {k:'schluss',kind:'body',label:'Schluss: Welche Folgen?',de:'Welche Folgen hatte der Vorfall? Verletzungen, Schaden, Sperre, Ermittlungen, Warnung der Polizei.',rule:'Hier darf der aktuelle Stand im Präsens stehen: „Die Polizei ermittelt.“',ph:'… erlitt …',st:t=>[' erlitt ','leichte Verletzungen. ','Verletzt wurde niemand. ','Am Fahrzeug entstand Sachschaden. ','Die Straße war ',' gesperrt. ','Die Polizei ermittelt nun ','Die Polizei warnt davor, ','Mittlerweile ']},
 {k:'summary',kind:'summary',label:'Summary (1–2 Sätze)',de:'Jetzt, wo der Artikel fertig ist: Fasse ihn in 1–2 Sätzen zusammen. Das Summary steht später fett über dem Hauptteil.',rule:'Nur das Wichtigste: Wer? Was? Wo? Wann? Keine Einzelheiten.',ph:'Bei einem … wurde am … in …',st:t=>['Bei einem ',' wurde am ',' in ',' kam es am ',' zu einem ',' leicht verletzt.',' schwer verletzt.','Verletzt wurde niemand.']},
 {k:'headline',kind:'headline',label:'Headline im Telegrammstil',de:'Zum Schluss die Schlagzeile: knapp wie ein Telegramm – ohne Artikel am Anfang und ohne „ist“ oder „wurde“.',rule:'Richtig: „Motorradfahrer tödlich verunglückt“ – nicht: „Ein Motorradfahrer ist tödlich verunglückt“.',ph:'z. B. Radfahrerin bei Sturz verletzt',st:t=>['Großeinsatz in ',' verletzt',' gerettet',' geborgen',' tödlich verunglückt','Feuerwehr rettet ',' sorgt für Stau']}
@@ -176,14 +176,14 @@ const STEPS=[
 const PHRASES=[
 ['Hauptteil beginnen',['[Ort]. Am Montag, dem …, war … gegen … Uhr unterwegs, als …','[Ort]. Gegen … Uhr bemerkte …']],
 ['Hergang erzählen',['Zur selben Zeit …','Vermutlich aufgrund …','Aus bisher ungeklärter Ursache …','Dabei übersah …','In weiterer Folge …','Augenzeugen verständigten sofort die Einsatzkräfte.','Die Feuerwehr rückte mit … Fahrzeugen aus.','… wurde mit dem Rettungswagen ins Krankenhaus gebracht.']],
-['Aussagen indirekt einbauen',['Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.','Wie die Tierärztin berichtete, habe sie die Pferde betäubt.','Die Lenkerin gab an, sie habe stark bremsen müssen.','Der Bauer erklärte, die Pferde hätten die Koppel durchbrochen.']],
+['Aussagen einbauen – direkt oder indirekt',['Polizist Josef H. sagte: „Wir haben die Autobahn sofort gesperrt.“','„Plötzlich sprangen zwei Pferde über die Leitschiene“, berichtete die Lenkerin.','Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.','Wie die Tierärztin berichtete, habe sie die Pferde betäubt.','Die Lenkerin gab an, sie habe stark bremsen müssen.','Der Bauer erklärte, die Pferde hätten die Koppel durchbrochen.']],
 ['Schluss: Folgen',['… erlitt leichte / schwere Verletzungen.','Verletzt wurde niemand.','Am Fahrzeug entstand Sachschaden.','Die Straße war bis … gesperrt.','Die Polizei ermittelt nun die Unfallursache.']],
 ['Summary (zum Schluss schreiben)',['Bei einem … wurde am … in … ein … verletzt.','In … kam es am … zu einem …']],
 ['Statt „dann“',['anschließend','daraufhin','kurz darauf','wenig später','in weiterer Folge','zur selben Zeit','schließlich']],
 ['Statt immer denselben Namen',['Maria K. → die Lenkerin → die 26-Jährige','Josef H. → der Polizist → der Beamte']],
 ['Headline im Telegrammstil',['Motorradfahrer tödlich verunglückt','Pferde legen Autobahn lahm','Radfahrerin bei Sturz verletzt']]
 ];
-const RULES=['<b>Länge:</b> 120 bis 150 Wörter.','<b>Hauptteil</b> mit Ortsmarke: Was? Wo? Wann? Wer? Wie?','<b>Schluss</b>: Welche Folgen?','<b>Summary</b> (1–2 Sätze) und <b>Headline</b> erst zum Schluss schreiben.','<b>Headline im Telegrammstil</b>: <i>Motorradfahrer tödlich verunglückt</i> – ohne Artikel, ohne „ist“.','<b>Präteritum</b>, <b>sachlich</b>, keine Meinung und keine Gefühle.','<b>Keine wörtliche Rede</b> – Aussagen indirekt mit <i>sei / habe</i>.','<b>Namen abkürzen</b> + Alter: <i>Maria K. (26)</i>.'];
+const RULES=['<b>Länge:</b> 120 bis 150 Wörter.','<b>Hauptteil</b> mit Ortsmarke: Was? Wo? Wann? Wer? Wie?','<b>Schluss</b>: Welche Folgen?','<b>Summary</b> (1–2 Sätze) und <b>Headline</b> erst zum Schluss schreiben.','<b>Headline im Telegrammstil</b>: <i>Motorradfahrer tödlich verunglückt</i> – ohne Artikel, ohne „ist“.','<b>Präteritum</b>, <b>sachlich</b>, keine Meinung und keine Gefühle.','<b>Aussagen einbauen:</b> direkt mit richtiger Zeichensetzung (<i>Der Polizist sagte: „…“</i>) oder indirekt mit <i>sei / habe</i>.','<b>Namen abkürzen</b> + Alter: <i>Maria K. (26)</i>.'];
 
 /* ===================== REGEL-QUIZ ===================== */
 const QUIZ=[
@@ -196,9 +196,9 @@ const QUIZ=[
 {q:'In welcher Zeitform schreibt man einen Zeitungsbericht?',a:['Präsens','Präteritum','Perfekt','Futur'],c:1,w:'Präteritum: ereignete sich, fuhr, stürzte. Nur der aktuelle Stand darf im Präsens stehen: „Die Polizei ermittelt.“'},
 {q:'„Wir haben die Autobahn sofort gesperrt“, sagte der Polizist. – Welche indirekte Rede ist richtig?',a:['Der Polizist sagte, sie hätten die Autobahn sofort gesperrt.','Der Polizist sagte, wir haben die Autobahn sofort gesperrt.','Der Polizist sagte: „Wir haben gesperrt.“','Der Polizist sagt, sie sperren die Autobahn.'],c:0,w:'wir → sie, und „haben“ wird zu „hätten“ (weil „sie haben“ gleich klingt wie die normale Form).'},
 {q:'„Mir ist nichts passiert“, sagte die Lenkerin. – Wie lautet die indirekte Rede?',a:['Die Lenkerin sagte, ihr sei nichts passiert.','Die Lenkerin sagte, mir ist nichts passiert.','Die Lenkerin sagte, ihr ist nichts passiert worden.','Die Lenkerin sagt: Ihr sei nichts.'],c:0,w:'mir → ihr, ist → sei. Keine Anführungszeichen.'},
-{q:'Darf dein Bericht wörtliche Rede enthalten?',a:['Ja, mit vielen Anführungszeichen','Nein – Aussagen baust du als indirekte Rede ein','Nur in der Headline','Nur am Schluss'],c:1,w:'Direkte Rede wird indirekt eingebaut: „Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.“'},
+{q:'Darf dein Bericht wörtliche (direkte) Rede enthalten?',a:['Ja – richtig gesetzt; oder du gibst die Aussage indirekt wieder','Nein, niemals','Nur in der Headline','Ja, aber ohne Anführungszeichen'],c:0,w:'Beides geht: direkt – Der Polizist sagte: „Wir haben die Autobahn gesperrt.“ – oder indirekt – Laut Polizist sei die Autobahn gesperrt worden.'},
 {q:'Was gehört NICHT in einen Zeitungsbericht?',a:['Ort und Zeit','Die Folgen','Gefühle und Wertungen wie „Gott sei Dank“ oder „voll schlimm“','Die Namen der Beteiligten'],c:2,w:'Ein Bericht ist objektiv. Wertungen und Umgangssprache aus Zeugenaussagen lässt du weg.'},
-{q:'Ein Zeuge sagt: „Die Bankräuber sind futsch.“ Wie schreibst du das im Bericht?',a:['Die Bankräuber sind futsch.','Die Täter konnten flüchten.','Die Räuber waren voll schnell weg.','„Futsch“, sagte der Zeuge.'],c:1,w:'Umgangssprache wird in Standardsprache umgeformt: Die Täter konnten flüchten / sind flüchtig.'},
+{q:'Ein Zeuge sagt: „Die Bankräuber sind futsch.“ Wie schreibst du das im Bericht?',a:['Die Bankräuber sind futsch.','Die Täter konnten flüchten.','Die Räuber waren voll schnell weg.','Die Räuber sind abgehaut.'],c:1,w:'Umgangssprache wird in Standardsprache umgeformt: Die Täter konnten flüchten / sind flüchtig.'},
 {q:'Wie werden Personen genannt?',a:['Mit vollem Namen und Adresse','Vorname, abgekürzter Nachname und Alter: Maria K. (26)','Nur mit Spitznamen','Gar nicht'],c:1,w:'So schützt die Zeitung die Beteiligten. Später abwechseln: die 26-Jährige, die Lenkerin.'},
 {q:'Was ist eine Ortsmarke?',a:['Der Ort am Anfang des Hauptteils mit Punkt: „Gallneukirchen.“','Eine Briefmarke','Der Ort in der Headline','Der Wohnort des Autors'],c:0,w:'Der Hauptteil beginnt mit dem Ort und einem Punkt: „Wels. Am Samstag …“'},
 {q:'Welcher Satz ist sachlich?',a:['Der arme Bub hatte schreckliche Schmerzen.','Der 13-Jährige wurde leicht verletzt.','Zum Glück ist nichts Schlimmes passiert!','Der Lenker war total unvorsichtig.'],c:1,w:'„arm, schrecklich, zum Glück, total“ sind Wertungen oder Umgangssprache. Sachlich: nur die Fakten.'},
@@ -223,6 +223,29 @@ const IRQ=[
 {who:'Autolenkerin Lisa P. (26)',d:'Mir ist zum Glück nichts passiert.',m:'Autolenkerin Lisa P. sagte, ihr sei nichts passiert.',a:['ihr sei nichts passiert','ihr sei zum glück nichts passiert','dass ihr nichts passiert sei','dass ihr zum glück nichts passiert sei'],tip:'mir → ihr; ist → sei. „Zum Glück“ ist eine Wertung – im Bericht weglassen.'},
 {who:'Tierarzt Martin L. (57)',d:'Ich habe die Pferde mit einem Gewehr betäubt.',m:'Tierarzt Martin L. berichtete, er habe die Pferde mit einem Gewehr betäubt.',a:['er habe die pferde mit einem gewehr betäubt','dass er die pferde mit einem gewehr betäubt habe','er habe die pferde mit einem betäubungsgewehr betäubt'],tip:'ich → er; habe bleibt habe.'},
 {who:'Bäuerin Rosa G. (63)',d:'Die Schafe sind durch ein Loch im Zaun entkommen.',m:'Bäuerin Rosa G. erklärte, die Schafe seien durch ein Loch im Zaun entkommen.',a:['die schafe seien durch ein loch im zaun entkommen','dass die schafe durch ein loch im zaun entkommen seien'],tip:'sind → seien.'}
+];
+
+const DRMC=[
+{q:'Welche direkte Rede ist richtig gesetzt? (Begleitsatz vorne)',a:['Der Polizist sagte: „Wir sperren die Straße.“','Der Polizist sagte „Wir sperren die Straße.“','Der Polizist sagte, „wir sperren die Straße.“','Der Polizist sagte: „Wir sperren die Straße“.'],c:0,w:'Begleitsatz vorne → Doppelpunkt, die Rede beginnt groß, der Punkt steht vor dem Schlusszeichen.'},
+{q:'Welche direkte Rede ist richtig gesetzt? (Begleitsatz hinten)',a:['„Mir ist nichts passiert“, sagte die Lenkerin.','„Mir ist nichts passiert.“, sagte die Lenkerin.','„Mir ist nichts passiert“ sagte die Lenkerin.','„Mir ist nichts passiert“, Sagte die Lenkerin.'],c:0,w:'Begleitsatz hinten → kein Punkt in der Rede, Komma nach dem Schlusszeichen, der Begleitsatz geht klein weiter.'},
+{q:'Welche Frage ist richtig gesetzt?',a:['„Hat jemand etwas gesehen?“, fragte die Polizistin.','„Hat jemand etwas gesehen“?, fragte die Polizistin.','„Hat jemand etwas gesehen?“ fragte die Polizistin.','„Hat jemand etwas gesehen.“, fragte die Polizistin.'],c:0,w:'Frage- und Ausrufezeichen bleiben in der Rede – das Komma nach dem Schlusszeichen setzt du trotzdem.'},
+{q:'Welcher Ausruf ist richtig gesetzt?',a:['Der Feuerwehrmann rief: „Alle sofort raus!“','Der Feuerwehrmann rief: „alle sofort raus!“','Der Feuerwehrmann rief: „Alle sofort raus“!','Der Feuerwehrmann rief „Alle sofort raus!“'],c:0,w:'Doppelpunkt, Großbuchstabe am Anfang der Rede, Ausrufezeichen vor dem Schlusszeichen.'},
+{q:'Welcher Satz mit eingeschobenem Begleitsatz ist richtig?',a:['„Wir haben“, sagte der Kommandant, „den Brand gelöscht.“','„Wir haben,“ sagte der Kommandant „den Brand gelöscht.“','„Wir haben“, sagte der Kommandant, „Den Brand gelöscht.“','„Wir haben“ sagte der Kommandant „den Brand gelöscht“.'],c:0,w:'Eingeschobener Begleitsatz: Komma davor und danach, die Rede geht klein weiter, Punkt vor dem letzten Schlusszeichen.'},
+{q:'Welcher Satz enthält direkte Rede?',a:['Die Zeugin sagte: „Ich habe alles gesehen.“','Die Zeugin sagte, sie habe alles gesehen.','Laut der Zeugin habe sie alles gesehen.','Die Zeugin hat alles gesehen.'],c:0,w:'Direkte Rede = wörtlich, mit Anführungszeichen. Indirekte Rede = Konjunktiv (habe, sei), ohne Anführungszeichen.'},
+{q:'Welcher Satz ist indirekte Rede?',a:['Der Bauer erklärte, die Pferde seien ausgebrochen.','Der Bauer erklärte: „Die Pferde sind ausgebrochen.“','Die Pferde sind ausgebrochen.','„Die Pferde sind ausgebrochen“, erklärte der Bauer.'],c:0,w:'Indirekte Rede erkennst du am Konjunktiv (seien) und daran, dass keine Anführungszeichen stehen.'},
+{q:'Wo stehen die Anführungszeichen im Deutschen?',a:['Unten am Anfang („) und oben am Ende (“)','Oben am Anfang (“) und unten am Ende („)','Nur am Ende','Nur am Anfang'],c:0,w:'„So sieht es richtig aus.“ – unten anfangen, oben aufhören.'},
+{q:'Welche direkte Rede ist richtig?',a:['„Die Tiere sind unverletzt“, berichtete die Tierärztin.','„Die Tiere sind unverletzt“. berichtete die Tierärztin.','„Die Tiere sind unverletzt“, berichtete die Tierärztin','Die Tierärztin berichtete: die Tiere sind unverletzt.'],c:0,w:'Komma nach dem Schlusszeichen, Punkt am Ende des ganzen Satzes – und Anführungszeichen nicht vergessen.'}
+];
+const DRQ=[
+{ind:'Der Polizist sagte, sie hätten die Straße sofort gesperrt.',pron:['wir'],hint:'Der Polizist sagte: „…“',m:'Der Polizist sagte: „Wir haben die Straße sofort gesperrt.“',a:['wir haben die straße sofort gesperrt','wir sperrten die straße sofort'],tip:'sie → wir; hätten → haben.'},
+{ind:'Die Zeugin erklärte, sie habe den Knall deutlich gehört.',pron:['ich'],hint:'„…“, erklärte die Zeugin.',m:'„Ich habe den Knall deutlich gehört“, erklärte die Zeugin.',a:['ich habe den knall deutlich gehört','ich hörte den knall deutlich'],tip:'sie → ich; habe → habe (Wirklichkeitsform). Kein Punkt in der Rede, Komma nach dem Schlusszeichen.'},
+{ind:'Laut dem Notarzt sei der Bub nur leicht verletzt.',hint:'Der Notarzt sagte: „…“',m:'Der Notarzt sagte: „Der Bub ist nur leicht verletzt.“',a:['der bub ist nur leicht verletzt','der junge ist nur leicht verletzt','er ist nur leicht verletzt'],tip:'sei → ist.'},
+{ind:'Die Lenkerin gab an, ihr sei nichts passiert.',pron:['mir'],hint:'„…“, gab die Lenkerin an.',m:'„Mir ist nichts passiert“, gab die Lenkerin an.',a:['mir ist nichts passiert'],tip:'ihr → mir; sei → ist.'},
+{ind:'Der Bauer berichtete, die Pferde hätten die Koppel durchbrochen.',hint:'Der Bauer berichtete: „…“',m:'Der Bauer berichtete: „Die Pferde haben die Koppel durchbrochen.“',a:['die pferde haben die koppel durchbrochen','die pferde durchbrachen die koppel'],tip:'hätten → haben.'},
+{ind:'Der Kommandant betonte, der Einsatz sei sehr schwierig gewesen.',hint:'„…“, betonte der Kommandant.',m:'„Der Einsatz war sehr schwierig“, betonte der Kommandant.',a:['der einsatz war sehr schwierig','der einsatz ist sehr schwierig gewesen'],tip:'sei … gewesen → war.'},
+{ind:'Der Wanderer erzählte, er habe den Weg im Nebel verloren.',pron:['ich'],hint:'Der Wanderer erzählte: „…“',m:'Der Wanderer erzählte: „Ich habe den Weg im Nebel verloren.“',a:['ich habe den weg im nebel verloren','ich habe im nebel den weg verloren','ich verlor den weg im nebel','ich verlor im nebel den weg'],tip:'er → ich; habe → habe.'},
+{ind:'Die Polizistin fragte, ob jemand etwas gesehen habe.',hint:'„…?“, fragte die Polizistin.',q:true,m:'„Hat jemand etwas gesehen?“, fragte die Polizistin.',a:['hat jemand etwas gesehen','hat irgendjemand etwas gesehen'],tip:'Aus „ob …“ wird eine Frage. Das Fragezeichen steht in der Rede, danach kommt das Komma.'},
+{ind:'Der Feuerwehrmann rief, alle sollten sofort das Haus verlassen.',hint:'Der Feuerwehrmann rief: „…!“',m:'Der Feuerwehrmann rief: „Verlasst sofort das Haus!“',a:['verlasst sofort das haus','alle sofort raus','alle sofort aus dem haus','alle müssen sofort das haus verlassen','verlassen sie sofort das haus','alle verlassen sofort das haus'],tip:'Aus „sollten“ wird eine Aufforderung mit Ausrufezeichen in der Rede.'}
 ];
 
 /* ===================== PRÜFREGELN ===================== */
@@ -250,13 +273,23 @@ function splitSentences(text){const out=[];const t=String(text||'').replace(/\s+
  if(t.slice(start).trim())out.push(t.slice(start).trim());return out.filter(Boolean);}
 function hasW(s,list,fl=''){return list.filter(p=>wre(p,fl).test(s));}
 function styleChecks(s,add,q,isHead){
- const quoted=/[„“”"«»]/.test(s);
- if(quoted){const inner=(s.match(/[„"«»“]([^„“”"«»]+)[“”"«»]/)||[])[1]||'';if(/:\s*[„"«»]/.test(s)||wc(inner)>=4)add('bad','Wörtliche Rede','Keine wörtliche Rede im Bericht. Schreib indirekt, z. B. <i>Der Kommandant sagte, die Jugendliche <b>sei</b> in Panik gewesen.</i>',q);else add('warn','Wörtliche Rede','Anführungszeichen? Für Aussagen im Bericht lieber die indirekte Rede verwenden.',q);}
- else{const ich=hasW(s,ICH,'i');if(ich.length)add('bad','Berichtsstil',`Ein Bericht ist <b>nicht in der Ich-Form</b> („${esc(ich[0])}“). Schreib über die Personen: <i>Die 14-Jährige …</i>`,q);}
+ const ich=hasW(s,ICH,'i');if(ich.length)add('bad','Berichtsstil',`Ein Bericht ist <b>nicht in der Ich-Form</b> („${esc(ich[0])}“). Ich-Form ist nur in der direkten Rede erlaubt (in Anführungszeichen).`,q);
  const wt=hasW(s,WERT);if(wt.length)add('warn','Sachlichkeit',`<b>${wt.map(esc).join(', ')}</b> ist eine Wertung oder ein Gefühl. Ein Bericht bleibt sachlich – nur die Fakten.`,q);
  const um=hasW(s,UMG);if(um.length)add('warn','Ausdruck',`<b>${um.map(esc).join(', ')}</b> ist Umgangssprache. Im Bericht: Standardsprache.`,q);
  if(!isHead&&/!\s*["”“]?$/.test(s))add('warn','Sachlichkeit','Kein Ausrufezeichen im Bericht – sachlich bleiben.',q);
  if(!isHead&&/\?\s*["”“]?$/.test(s))add('warn','Sachlichkeit','Keine Fragen an die Leser – ein Bericht informiert.',q);}
+const QRE=/[„"«“][^„“”"«»]*[“”"»]/g;
+function quoteCheck(s,add,q){if(!/[„“”"«»]/.test(s))return;
+ const m=s.match(/^(.*?)[„"«]([^„“”"«»]*)[“”"»](.*)$/);if(!m){add('warn','Zeichensetzung','Bei der direkten Rede fehlt ein Anführungszeichen: <i>„…“</i> (unten am Anfang, oben am Ende).',q);return;}
+ const pre=m[1].trim(),inner=m[2].trim(),post=m[3].trim();
+ if(!pre&&!post){add('warn','Zeichensetzung','Wer sagt das? Ergänze einen Begleitsatz: <i>„…“, sagte die Zeugin.</i>',q);return;}
+ if(pre&&!/:$/.test(pre)&&!/,$/.test(pre))add('warn','Zeichensetzung','Steht der Begleitsatz vorne, kommt vor die Rede ein <b>Doppelpunkt</b>: <i>Der Polizist sagte: „…“</i>',q);
+ if(pre&&/:$/.test(pre)&&/^[a-zäöü]/.test(inner))add('warn','Großschreibung','Die direkte Rede beginnt nach dem Doppelpunkt mit einem <b>Großbuchstaben</b>.',q);
+ if(pre&&/:$/.test(pre)&&!post.replace(/^[.]/,'')&&!/[.!?]$/.test(inner))add('warn','Zeichensetzung','Der Punkt gehört <b>vor</b> das Schlusszeichen: <i>… gesperrt.“</i>',q);
+ if(post&&!/^[.!?]?$/.test(post)&&!/^,/.test(post))add('warn','Zeichensetzung','Steht der Begleitsatz hinten, kommt nach dem Schlusszeichen ein <b>Komma</b>: <i>„…“, sagte sie.</i>',q);
+ if(/^,/.test(post)&&/\.$/.test(inner))add('warn','Zeichensetzung','Wenn der Begleitsatz folgt, steht in der Rede <b>kein Punkt</b>: <i>„Mir ist nichts passiert“, sagte sie.</i>',q);
+ if(/^,\s*(Sagte|Erklärte|Berichtete|Meinte|Fragte|Rief|Betonte|Gab|Erzählte|Antwortete)(?![a-zäöüß])/.test(post))add('warn','Großschreibung','Nach <i>„…“,</i> geht der Begleitsatz klein weiter: <i>„…“, <b>s</b>agte sie.</i>',q);
+}
 function spell(s,add,q){words(s).forEach(w=>{const lw=w.toLowerCase();if(SPELL[lw])add('bad','Rechtschreibung',`Schreibweise: <b>${SPELL[lw]}</b> (nicht „${esc(w)}“).`,q);else if(NOUNS.has(lw)&&w===lw)add('bad','Großschreibung',`<b>${esc(w[0].toUpperCase()+w.slice(1))}</b> ist ein Nomen – groß schreiben.`,q);});}
 function checkText(text,kind){const out=[];const add=(lvl,cat,msg,q)=>out.push({lvl,cat,msg,q});const t=String(text||'').trim();if(!t)return out;
  if(kind==='headline'){const n=wc(t);
@@ -271,11 +304,12 @@ function checkText(text,kind){const out=[];const add=(lvl,cat,msg,q)=>out.push({
  const ss=splitSentences(t);
  if(kind==='summary'){const n=wc(t);if(ss.length>2)add('warn','Aufbau',`Das Summary hat ${ss.length} Sätze – höchstens 2.`);if(n>45)add('warn','Aufbau',`Das Summary ist mit ${n} Wörtern zu lang. Nur das Wichtigste in 1–2 Sätzen.`);if(n>=8&&ss.length<=2&&n<=45)add('ok','Aufbau','Kurz und knapp – so soll ein Summary sein.');}
  if(kind==='haupt'){const first=ss[0]||'';if(wc(first)>4||!/\.$/.test(first))add('warn','Aufbau','Beginne den Hauptteil mit der <b>Ortsmarke</b>: Ort + Punkt, z. B. <i>Wels.</i>');else add('ok','Aufbau','Ortsmarke ✓');}
- ss.forEach((s,si)=>{const q=s.length>80?s.slice(0,77)+'…':s;const low=s.toLowerCase();
+ ss.forEach((s,si)=>{const q=s.length>80?s.slice(0,77)+'…':s;let low=s.toLowerCase();const so=s;
   if(si===0&&wc(s)<=4&&/\.$/.test(s)&&!/\s(war|ist|wurde|fuhr|kam)(\s|\.)/.test(low))return;
-  if(/^[a-zäöü]/.test(s))add('bad','Großschreibung','Satzanfang groß schreiben.',q);
+  if(/^[a-zäöü]/.test(so))add('bad','Großschreibung','Satzanfang groß schreiben.',q);
+  quoteCheck(so,add,q);spell(so,add,q);s=so.replace(QRE,' ').replace(/\s+/g,' ').trim();low=s.toLowerCase();if(!/[a-zäöü]{3}/i.test(s))return;
   styleChecks(s,add,q,false);
-  if(/^und\s/i.test(s))add('warn','Satzbau','Einen Satz nicht mit <b>Und</b> beginnen.',q);
+  if(/^und\s/i.test(so))add('warn','Satzbau','Einen Satz nicht mit <b>Und</b> beginnen.',q);
   s.split(/[,;]/).forEach(cl=>{const ws=cl.replace(/[.!?“”"»«)]+$/,'').trim().split(/\s+/);const lowc=cl.toLowerCase();const last=(ws[ws.length-1]||'').toLowerCase();const prev=(ws[ws.length-2]||'').toLowerCase();let part='',aux='';
    if(/^(hat|haben|ist|sind)$/.test(last)){aux=last;part=prev;}else{const m=lowc.match(/(?<![a-zäöüß])(hat|haben|ist|sind)(?![a-zäöüß])/);if(m){aux=m[1];part=last;}}
    if(aux&&part&&!/^(gegen|genug|gern|gestern|gerade|gesperrt|geöffnet|geschlossen|besetzt|beschädigt|zerstört|verschüttet|bekannt|verletzt|unverletzt|gesichert|geplant|geeignet|gefährlich)$/.test(part)){
@@ -296,8 +330,7 @@ function checkText(text,kind){const out=[];const add=(lvl,cat,msg,q)=>out.push({
   {const m=s.match(/(?<![a-zäöüß])(gestern|heute|morgen|am)\s+(abend|nachmittag|vormittag|früh|morgen|mittag)(?![a-zäöüß])/);if(m)add('bad','Großschreibung',`Tageszeiten groß: <b>${m[1]} ${m[2][0].toUpperCase()+m[2].slice(1)}</b>.`,q);}
   {const m=s.match(/([A-ZÄÖÜ][a-zäöü]+)\s+([A-ZÄÖÜ][a-zäöü]{2,})\s*\(\d{1,2}\)/);if(m&&!/^(Feuerwehrkommandant|Kommandant|Lenkerin|Lenker|Schülerin|Schüler|Polizistin|Bürgermeister|Herr|Frau|Busfahrer|Nachbar|Passant|Spaziergänger|Besitzerin|Einsatzleiterin|Motorradlenker|Lehrerin|Lehrer)$/.test(m[1]))add('warn','Berichtsstil',`Nachnamen abkürzen: <i>${esc(m[1])} ${esc(m[2][0])}. (…)</i>`,q);}
   {const m=s.match(/(?<![a-zäöüß])(schwer|leicht)\s+verletzte[n]?\s+(wurde|wurden|waren|kamen|mussten|lagen)(?![a-zäöüß])/);if(m)add('bad','Großschreibung',`Hier ist es ein Nomen: <i>zwei ${m[1]} <b>Verletzte</b></i> (oder <i>${m[1][0].toUpperCase()+m[1].slice(1)}verletzte</i>).`,q);}
-  if(wc(s)>28)add('warn','Satzbau','Sehr langer Satz – teile ihn in zwei Sätze.',q);
-  spell(s,add,q);
+  if(wc(so)>32)add('warn','Satzbau','Sehr langer Satz – teile ihn in zwei Sätze.',q);
  });
  if(!/[.!?“”"]\s*$/.test(t))add('warn','Zeichensetzung','Am Ende fehlt ein Punkt.');
  const ber=BERICHT.filter(p=>wre(p).test(t));if(ber.length)add('ok','Berichtsprache','Gut: '+ber.slice(0,5).map(x=>'<b>'+x+'</b>').join(', '));
@@ -330,7 +363,7 @@ function aiListHTML(errs){return errs.map((e,i)=>`<div class="f bad"><b>${i+1}</
 const KEY='zb-trainer-v1';
 let S={name:'',level:1,help:true,hist:[],qw:[],cur:null};
 try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
-if(S.cur&&!S.cur.ir)S.cur=null;
+if(S.cur&&!S.cur.rd)S.cur=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 const app=$('#app');let rerender=()=>{};
 function ask(msg,yes='OK',no='Abbrechen'){return new Promise(res=>{const d=document.createElement('div');d.className='modal';d.innerHTML=`<div class="mbox" role="dialog" aria-modal="true"><p>${msg}</p><div class="row"><button class="btn" data-y>${yes}</button><button class="btn s" data-n>${no}</button></div></div>`;document.body.appendChild(d);const done=v=>{d.remove();res(v);};d.querySelector('[data-y]').onclick=()=>done(true);d.querySelector('[data-n]').onclick=()=>done(false);d.querySelector('[data-y]').focus();});}
@@ -344,7 +377,7 @@ let sampleP=null;function getSample(){if(!sampleP)sampleP=(window.claude&&window
 let aiOff=false;
 const ART='Rechtschreibung|Grammatik|Satzbau|Zeichensetzung|Großschreibung|Zeitform|Berichtsstil|Ausdruck';
 const BASE=`Du bist Deutschlehrerin an einem österreichischen Gymnasium (3. Klasse, Schüler/innen 12–13 Jahre). Österreichisches Deutsch gilt als richtig (Jänner, Spital, heuer, PKW, Rettung, Bub).
-Regeln für den Zeitungsbericht: Präteritum (nur der aktuelle Stand darf im Präsens stehen), sachlich ohne Wertungen und Gefühle, keine wörtliche Rede (Aussagen indirekt mit Konjunktiv: sei, habe), keine Ich-Form, Nachnamen abgekürzt mit Alter (Manfred S. (36)), Summary beginnt mit Ortsmarke („Wels.“), Headline ohne Punkt.`;
+Regeln für den Zeitungsbericht: Präteritum (nur der aktuelle Stand darf im Präsens stehen), sachlich ohne Wertungen und Gefühle, Aussagen dürfen als direkte Rede (richtig gesetzt: Doppelpunkt, „…“, Komma nach dem Schlusszeichen, Ich-Form und Umgangssprache nur innerhalb der Anführungszeichen) oder als indirekte Rede mit Konjunktiv (sei, habe) eingebaut werden, keine Ich-Form, Nachnamen abgekürzt mit Alter (Manfred S. (36)), Summary beginnt mit Ortsmarke („Wels.“), Headline ohne Punkt.`;
 function stepPrompt(t,label,txt){return `${BASE}
 Prüfe diesen Teil eines Zeitungsberichts (Teil: ${label}). Thema: ${t.title}.
 Text:
@@ -362,8 +395,8 @@ function header(){const c=S.cur;const lv=c?c.level:S.level;return `<div class="w
 function typeName(t){return t.type==='notizen'?'Bericht mit freier Hand':'Bericht mit vielen Angaben';}
 function materialHTML(t,open){let inner='';
  if(t.type==='notizen'&&!t.wit)inner=`<p class="note" style="margin:0 0 4px">Aus den Notizen eines Reporters:</p><p style="margin:0">${esc(t.notes)}</p><p class="note">Hier hast du „freie Hand“: Mach aus den Stichwörtern ganze Sätze und einen zusammenhängenden Bericht. Erfinde nichts Wichtiges dazu.</p>`;
- else if(t.type==='notizen')inner=`<p class="note" style="margin:0 0 4px"><b>${esc(t.src)}</b></p>${t.wit.map(w=>`<div class="wit">${esc(w.text)}</div>`).join('')}<p class="note">Achtung: Der Zeuge spricht Umgangssprache. Schreib sachlich in Standardsprache – ohne Wertungen und ohne wörtliche Rede.</p>`;
- else inner=`<p style="margin:0 0 8px">${esc(t.info)}</p><p class="note" style="margin:0"><b>Die handelnden Personen:</b></p>${t.wit.map(w=>`<div class="wit"><b>${esc(w.who)}</b>${esc(w.text)}</div>`).join('')}<p class="note">Beantworte die W-Fragen mit diesen Angaben. Die Aussagen baust du als <b>indirekte Rede</b> ein (<i>Laut Polizist Gerhard T. sei …</i>).</p>`;
+ else if(t.type==='notizen')inner=`<p class="note" style="margin:0 0 4px"><b>${esc(t.src)}</b></p>${t.wit.map(w=>`<div class="wit">${esc(w.text)}</div>`).join('')}<p class="note">Achtung: Der Zeuge spricht Umgangssprache. Schreib sachlich in Standardsprache, ohne Wertungen. Zitierst du ihn wörtlich, wähle einen passenden Satz und setze die Anführungszeichen richtig.</p>`;
+ else inner=`<p style="margin:0 0 8px">${esc(t.info)}</p><p class="note" style="margin:0"><b>Die handelnden Personen:</b></p>${t.wit.map(w=>`<div class="wit"><b>${esc(w.who)}</b>${esc(w.text)}</div>`).join('')}<p class="note">Beantworte die W-Fragen mit diesen Angaben. Die Aussagen baust du als <b>direkte Rede</b> (<i>„…“, sagte Polizist Gerhard T.</i>) oder <b>indirekte Rede</b> (<i>Laut Polizist Gerhard T. sei …</i>) ein.</p>`;
  return `<details class="card" ${open?'open':''}><summary><b>${typeName(t)}</b> <span class="note">(${esc(t.title)})</span></summary><div style="margin-top:10px">${inner}</div></details>`;}
 function phraseCard(){const on=S.cur?S.cur.help:S.help;return on?`<div class="card phr"><div class="row" style="justify-content:space-between"><h3>Wichtige Formulierungen</h3><button class="btn s sm" id="phT">Formulierungen ausblenden</button></div><p class="note" style="margin:0">Lies sie dir durch, bevor du schreibst. Wenn du sicher bist, blende sie aus – bei der Schularbeit hast du sie auch nicht.</p>${PHRASES.map(([h,l])=>`<h4>${esc(h)}</h4><ul>${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>`:`<div class="card row" style="justify-content:space-between"><span class="note">Formulierungen sind ausgeblendet.</span><button class="btn s sm" id="phT">Formulierungen einblenden</button></div>`;}
 function bindPhrase(){const b=$('#phT');if(b)b.onclick=()=>{if(S.cur){S.cur.help=!S.cur.help;S.help=S.cur.help;}else S.help=!S.help;save();rerender();};}
@@ -371,15 +404,15 @@ function merkbox(){return `<details class="card"><summary><b>Merkbox: So schreib
 <p><b>Länge:</b> 120 bis 150 Wörter.</p>
 <p><b>1. Headline</b> im Telegrammstil – ohne Artikel, ohne „ist / wurde“, ohne Punkt: <i>Motorradfahrer tödlich verunglückt</i> (nicht: <i>Ein Motorradfahrer ist tödlich verunglückt</i>).<br><b>2. Summary</b> – 1 bis 2 Sätze, fasst den Bericht zusammen.<br><b>3. Hauptteil</b> – beginnt mit der Ortsmarke (<i>Linz.</i>), beantwortet die W-Fragen: Was? Wo? Wann? Wer? Wie?<br><b>4. Schluss</b> – Welche Folgen?</p>
 <p><b>Reihenfolge beim Schreiben:</b> zuerst Hauptteil und Schluss, <b>danach</b> Summary und Headline.</p>
-<p><b>Sprache:</b> Präteritum · sachlich, ohne Meinung und Gefühle · Umgangssprache in Standardsprache umformen · keine wörtliche Rede, sondern indirekt (<i>Laut Polizist Josef H. sei …</i>) · Namen abkürzen mit Alter: <i>Eva K. (45)</i>.</p>
+<p><b>Sprache:</b> Präteritum · sachlich, ohne Meinung und Gefühle · Umgangssprache in Standardsprache umformen · Aussagen direkt (<i>Der Polizist sagte: „Wir haben gesperrt.“</i>) oder indirekt (<i>Laut Polizist Josef H. sei …</i>) · Namen abkürzen mit Alter: <i>Eva K. (45)</i>.</p>
 <p><b>Beispiel:</b></p>${clipHTML('Feuerwehr rettet Hund aus der Donau','In Linz zog die Feuerwehr am Sonntag einen Hund aus der Donau. Das Tier blieb unverletzt.',['Linz. Am 6. April sprang der Labrador Bello gegen 16 Uhr beim Spielen ins Wasser und wurde von der Strömung abgetrieben. Seine Besitzerin Eva K. (45) verständigte sofort die Einsatzkräfte. Wenig später zogen die Feuerwehrleute das erschöpfte Tier mit einem Boot ans Ufer.','Laut Feuerwehr sei der Hund unverletzt geblieben. Seine Besitzerin muss nun besser auf ihn aufpassen.'],[],[],false)}
 <p class="note" style="margin-top:10px"><b>Schreib die Merkbox mit dem Beispiel ins Heft ab.</b></p></div></details>`;}
-function keys(){return `<div class="keys" aria-label="Eingabehilfe">${['ä','ö','ü','ß','Ä','Ö','Ü',',','.','-','–','(',')',':'].map(k=>`<button class="chip" data-k="${k}">${k}</button>`).join('')}<button class="chip" data-k="\n">↵</button></div>`;}
+function keys(){return `<div class="keys" aria-label="Eingabehilfe">${['„','“','ä','ö','ü','ß','Ä','Ö','Ü',',','.','-','–','(',')',':','?','!'].map(k=>`<button class="chip" data-k="${k}">${k}</button>`).join('')}<button class="chip" data-k="\n">↵</button></div>`;}
 function insertAt(f,txt){if(f.tagName==='INPUT'&&txt==='\n')return;const s=f.selectionStart??f.value.length,e=f.selectionEnd??f.value.length;f.value=f.value.slice(0,s)+txt+f.value.slice(e);const p=s+txt.length;f.focus();f.setSelectionRange(p,p);f.dispatchEvent(new Event('input'));}
 let lastField=null;function bindKeys(){app.querySelectorAll('textarea:not([readonly]),input[type=text]').forEach(f=>f.addEventListener('focus',()=>lastField=f));app.querySelectorAll('.keys .chip').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{const f=lastField&&document.body.contains(lastField)?lastField:app.querySelector('#ta');if(f)insertAt(f,b.dataset.k);};});}
 
 /* ===================== START ===================== */
-function viewStart(){rerender=viewStart;app.innerHTML=`<h1><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Regeln lernen, indirekte Rede üben und Zeitungsberichte schreiben. Wie bei der Schularbeit gibt es in jeder Runde <b>zwei Berichte</b> mit je 120 bis 150 Wörtern: einen mit freier Hand und einen mit vielen Angaben.</p>
+function viewStart(){rerender=viewStart;app.innerHTML=`<h1><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Direkte und indirekte Rede üben, Regeln lernen und Zeitungsberichte schreiben. Wie bei der Schularbeit gibt es in jeder Runde <b>zwei Berichte</b> mit je 120 bis 150 Wörtern: einen mit freier Hand und einen mit vielen Angaben.</p>
 <div class="card"><h3>Wie heißt du?</h3><p class="note">Achtung: Der Name kann danach nicht mehr geändert werden.</p><input type="text" id="nm" autocomplete="off" placeholder="Vor- und Nachname"><div class="row" style="margin-top:10px"><button class="btn" id="go">Los geht’s</button></div></div>
 <div class="card"><h3>Schon auf einem anderen Gerät geübt?</h3><p class="note">Namen oben eintragen und den Speicher-Code einfügen.</p><input type="text" id="cd" placeholder="ZB-…" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn s" id="rs">Fortschritt laden</button><span id="msg" class="note"></span></div></div>`;
  $('#go').onclick=async()=>{const n=$('#nm').value.trim();if(n.length<2){$('#nm').focus();return;}if(!await ask(`Ist „<b>${esc(n)}</b>“ richtig? Der Name kann danach nicht mehr geändert werden.`,'Ja, stimmt','Nein, ändern'))return;S.name=n;save();viewHome();};
@@ -391,11 +424,11 @@ function doneIds(){const s=new Set();S.hist.forEach(h=>(h.r||[]).forEach(x=>s.ad
 function chart(){if(S.hist.length<2)return '';const h=S.hist.slice(-12);const Wd=320,H=120,p=24;const xs=i=>p+i*(Wd-2*p)/Math.max(1,h.length-1),ys=v=>H-p-(v/100)*(H-2*p);
  return `<svg viewBox="0 0 ${Wd} ${H}" width="100%" role="img" aria-label="Punkte der letzten Runden"><line x1="${p}" y1="${ys(75)}" x2="${Wd-p}" y2="${ys(75)}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="${Wd-p}" y="${ys(75)-4}" font-size="10" text-anchor="end" fill="var(--soft)">75 = nächste Stufe</text><polyline fill="none" stroke="var(--accent)" stroke-width="3" points="${h.map((x,i)=>xs(i)+','+ys(x.s)).join(' ')}"/>${h.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys(x.s)}" r="4" fill="var(--accent)"/><text x="${xs(i)}" y="${ys(x.s)-8}" font-size="10" text-anchor="middle" fill="var(--ink)">${x.s}</text>`).join('')}</svg>`;}
 function focusTips(){const agg={};S.hist.slice(-2).forEach(h=>(h.r||[]).forEach(r=>Object.entries(r.c||{}).forEach(([k,v])=>agg[k]=(agg[k]||0)+v)));const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,2);
- const TIP={'Zeitform':'Erzähl im <b>Präteritum</b>: fuhr, stürzte, verständigte – nicht „ist gefahren“.','Wörtliche Rede':'Aussagen <b>indirekt</b>: <i>Der Zeuge gab an, er habe … gesehen.</i>','Sachlichkeit':'Keine Wertungen: weg mit <i>leider, zum Glück, Gott sei Dank</i>.','Berichtsstil':'Keine Ich-Form, Namen abkürzen: <i>Lena F. (12)</i>.','Großschreibung':'Nomen groß: <i>die Polizei, der 36-Jährige</i>.','Rechtschreibung':'Klassiker prüfen: <i>Straße, dass, Krankenhaus, plötzlich</i>.','Zeichensetzung':'Komma vor <i>dass, weil, als, nachdem</i>.','Wiederholung':'Abwechseln: <i>anschließend, kurz darauf, die Lenkerin, die 35-Jährige</i>.','Satzbau':'Kurze, klare Sätze statt Schlangensätze.','Aufbau':'Headline im Telegrammstil, Summary höchstens 2 Sätze, Ortsmarke im Hauptteil.','Grammatik':'Endungen prüfen: <i>dem Buben, den Schüler, des Fahrzeugs</i>.','Ausdruck':'Umgangssprache in Standardsprache umformen.'};
+ const TIP={'Zeitform':'Erzähl im <b>Präteritum</b>: fuhr, stürzte, verständigte – nicht „ist gefahren“.','Wörtliche Rede':'Direkte Rede richtig setzen: <i>Der Zeuge sagte: „…“</i> / <i>„…“, sagte der Zeuge.</i>','Sachlichkeit':'Keine Wertungen: weg mit <i>leider, zum Glück, Gott sei Dank</i>.','Berichtsstil':'Keine Ich-Form, Namen abkürzen: <i>Lena F. (12)</i>.','Großschreibung':'Nomen groß: <i>die Polizei, der 36-Jährige</i>.','Rechtschreibung':'Klassiker prüfen: <i>Straße, dass, Krankenhaus, plötzlich</i>.','Zeichensetzung':'Komma vor <i>dass, weil, als, nachdem</i>.','Wiederholung':'Abwechseln: <i>anschließend, kurz darauf, die Lenkerin, die 35-Jährige</i>.','Satzbau':'Kurze, klare Sätze statt Schlangensätze.','Aufbau':'Headline im Telegrammstil, Summary höchstens 2 Sätze, Ortsmarke im Hauptteil.','Grammatik':'Endungen prüfen: <i>dem Buben, den Schüler, des Fahrzeugs</i>.','Ausdruck':'Umgangssprache in Standardsprache umformen.'};
  return top.length?`<div class="card" style="border-color:var(--warn)"><h3>Dein Fokus für diese Runde</h3>${top.map(([k,v])=>`<div class="f warn" style="margin:6px 0"><b>${esc(k)}</b> (${v}× in den letzten Runden): ${TIP[k]||''}</div>`).join('')}</div>`:'';}
 function viewHome(){rerender=viewHome;const dn=doneIds();
  const grid=type=>`<div class="tasks">${TASKS.filter(t=>t.type===type).map(t=>{const g=type[0];const on=sel[g]===t.id;return `<button class="task${on?' sel':''}" data-t="${t.id}" data-g="${g}" aria-pressed="${on}">${on?'<span class="num">✓</span>':''}<b>${esc(t.title)}</b><small>${esc(t.de)}</small>${dn.has(t.id)?'<span class="done">✓ schon geschrieben</span>':''}</button>`;}).join('')}</div>`;
- app.innerHTML=`${header()}<h1 style="font-size:clamp(30px,8vw,42px)"><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Jede Runde: Regel-Check, indirekte Rede üben, dann <b>zwei Berichte</b> wie bei der Schularbeit (je 120–150 Wörter).</p>${focusTips()}
+ app.innerHTML=`${header()}<h1 style="font-size:clamp(30px,8vw,42px)"><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Jede Runde: direkte und indirekte Rede üben, Regel-Check, dann <b>zwei Berichte</b> wie bei der Schularbeit (je 120–150 Wörter).</p>${focusTips()}
  ${S.cur?`<div class="card" style="border-color:var(--accent)"><h3>Angefangene Runde</h3><p class="note">${S.cur.tasks.map(id=>esc(T(id)?T(id).title:id)).join(' + ')}</p><div class="row"><button class="btn" id="cont">Weiterschreiben</button><button class="btn s sm" id="drop">Verwerfen</button></div></div>`:''}
  <h2>Neue Runde</h2><p class="note">Wähle je ein Thema aus beiden Gruppen – oder lass den Zufall entscheiden.</p>
  <h3 style="margin:12px 0 4px">Bericht 1: mit freier Hand</h3><p class="note" style="margin:0 0 8px">Nur Stichwörter oder eine Zeugenaussage in Umgangssprache – du formulierst selbst.</p>${grid('notizen')}
@@ -403,7 +436,7 @@ function viewHome(){rerender=viewHome;const dn=doneIds();
  <div class="row" style="margin:14px 0 6px"><button class="btn" id="go" ${sel.n&&sel.a?'':'disabled'}>Runde mit diesen 2 Berichten starten</button><button class="btn s" id="rnd">Zufällige Runde</button></div>
  <div class="row" style="margin:6px 0 18px"><label class="note">Stufe: <select id="lv" style="font:inherit">${[1,2,3].map(i=>`<option value="${i}" ${i===S.level?'selected':''}>${i}</option>`).join('')}</select></label><span class="note">${LEVELS[S.level]}</span></div>
  <div class="card"><h3>Formulierungen beim Schreiben</h3><div class="row"><button class="btn ${S.help?'':'s'}" id="hOn" aria-pressed="${S.help}">Einblenden</button><button class="btn ${S.help?'s':''}" id="hOff" aria-pressed="${!S.help}">Ausblenden</button></div><p class="note" style="margin:8px 0 0">${S.help?'Vor jedem Bericht siehst du die wichtigsten Formulierungen, beim Schreiben gibt es Satzanfänge zum Antippen.':'Du schreibst ohne Formulierungshilfe – wie bei der Schularbeit. Die Kontrolle bleibt eingeschaltet.'} Umschalten geht auch während des Schreibens.</p></div>
- ${S.hist.length?`<div class="card"><h3>Dein Fortschritt</h3><p class="note">${S.hist.length} Runde${S.hist.length>1?'n':''} · Bestwert ${Math.max(...S.hist.map(h=>h.s))} Punkte</p>${chart()}<div class="tablewrap"><table><tr><th>Datum</th><th>Berichte (antippen zum Lesen)</th><th>Stufe</th><th>Regeln</th><th>Ø</th></tr>${S.hist.map((h,i)=>[h,i]).reverse().map(([h,i])=>`<tr><td>${new Date(h.d*864e5).toLocaleDateString('de-AT')}</td><td>${(h.r||[]).map((r,j)=>`<button class="btn s sm old" data-i="${i}" data-j="${j}" style="margin:2px 0">${esc((T(r.t)||{}).title||r.t)}: ${r.s}</button>`).join('<br>')}</td><td>${h.l}${h.hp===0?'<br><small>ohne Hilfe</small>':''}</td><td>${h.q?h.q[0]+'/'+h.q[1]:'–'}${h.ir?`<br><small>Ind. Rede ${h.ir[0]}/${h.ir[1]}</small>`:''}</td><td><b>${h.s}</b></td></tr>`).join('')}</table></div></div>`:''}
+ ${S.hist.length?`<div class="card"><h3>Dein Fortschritt</h3><p class="note">${S.hist.length} Runde${S.hist.length>1?'n':''} · Bestwert ${Math.max(...S.hist.map(h=>h.s))} Punkte</p>${chart()}<div class="tablewrap"><table><tr><th>Datum</th><th>Berichte (antippen zum Lesen)</th><th>Stufe</th><th>Regeln</th><th>Ø</th></tr>${S.hist.map((h,i)=>[h,i]).reverse().map(([h,i])=>`<tr><td>${new Date(h.d*864e5).toLocaleDateString('de-AT')}</td><td>${(h.r||[]).map((r,j)=>`<button class="btn s sm old" data-i="${i}" data-j="${j}" style="margin:2px 0">${esc((T(r.t)||{}).title||r.t)}: ${r.s}</button>`).join('<br>')}</td><td>${h.l}${h.hp===0?'<br><small>ohne Hilfe</small>':''}</td><td>${h.q?h.q[0]+'/'+h.q[1]:'–'}${h.ir?`<br><small>Reden ${h.ir[0]}/${h.ir[1]}</small>`:''}</td><td><b>${h.s}</b></td></tr>`).join('')}</table></div></div>`:''}
  ${merkbox()}
  <div class="card"><h3>Auf ein anderes Gerät mitnehmen</h3><p class="note">Diesen Speicher-Code kopieren und auf dem anderen Gerät mit deinem Namen eingeben.</p><textarea readonly id="code" style="min-height:60px;font-size:13px">${code()}</textarea><div class="row" style="margin-top:8px"><button class="btn s sm" id="cp">Code kopieren</button><button class="btn s sm" id="rst" style="margin-left:auto">Anderer Schüler? Alles löschen</button></div></div>`;
  app.querySelectorAll('.task').forEach(b=>b.onclick=()=>{const g=b.dataset.g;sel[g]=sel[g]===b.dataset.t?null:b.dataset.t;viewHome();});
@@ -422,8 +455,8 @@ function viewOld(i,j){rerender=()=>viewOld(i,j);const h=S.hist[i],r=h.r[j],t=T(r
 /* ===================== RUNDE ===================== */
 function pickQuiz(){const wrong=(S.qw||[]).filter(i=>QUIZ[i]).slice(0,2);const rest=QUIZ.map((_,i)=>i).filter(i=>!wrong.includes(i)).sort(()=>Math.random()-.5);return [...wrong,...rest].slice(0,4).sort(()=>Math.random()-.5);}
 function pickIR(){return IRQ.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,3);}
-function startRound(ids){S.cur={tasks:ids,i:0,level:S.level,help:S.help,phase:'quiz',quiz:{ids:pickQuiz(),k:0,ans:[]},ir:{ids:pickIR(),k:0,out:[]},reps:ids.map(t=>({t,step:0,a:{},free:'',fsum:'',fhead:'',ai:{},start:null,fin:null,saved:null}))};save();window.scrollTo({top:0});viewQuiz();}
-function route(){const c=S.cur;if(!S.name)return viewStart();if(!c)return viewHome();window.scrollTo({top:0});({quiz:viewQuiz,ir:viewIR,intro:viewIntro,write:()=>c.level===3?viewFree():viewStep(),result:viewReport,round:viewRound}[c.phase]||viewHome)();}
+function startRound(ids){S.cur={tasks:ids,i:0,level:S.level,help:S.help,phase:'reden',quiz:{ids:pickQuiz(),k:0,ans:[]},rd:{items:pickRD(),k:0,out:[]},reps:ids.map(t=>({t,step:0,a:{},free:'',fsum:'',fhead:'',ai:{},start:null,fin:null,saved:null}))};save();window.scrollTo({top:0});viewRD();}
+function route(){const c=S.cur;if(!S.name)return viewStart();if(!c)return viewHome();window.scrollTo({top:0});({reden:viewRD,quiz:viewQuiz,intro:viewIntro,write:()=>c.level===3?viewFree():viewStep(),result:viewReport,round:viewRound}[c.phase]||viewHome)();}
 function viewQuiz(){rerender=viewQuiz;const c=S.cur,Q=c.quiz;if(Q.k>=Q.ids.length)return quizEnd();const q=QUIZ[Q.ids[Q.k]];const order=q.a.map((_,i)=>i).sort(()=>Math.random()-.5);
  app.innerHTML=`${header()}<h2>Regel-Check</h2><p class="sub">Bevor du schreibst: ${Q.ids.length} Fragen zu den Regeln des Zeitungsberichts.</p>
  <div class="steps">${Q.ids.map((_,j)=>`<i class="${j<Q.k?(Q.ans[j]?'ok':'no'):j===Q.k?'on':''}"></i>`).join('')}</div>
@@ -435,43 +468,100 @@ function viewQuiz(){rerender=viewQuiz;const c=S.cur,Q=c.quiz;if(Q.k>=Q.ids.lengt
 function quizEnd(){rerender=quizEnd;const c=S.cur,Q=c.quiz;const ok=Q.ans.filter(Boolean).length;
  app.innerHTML=`${header()}<h2>Regel-Check: ${ok} von ${Q.ids.length} richtig</h2><div class="card">${ok===Q.ids.length?'<div class="f ok">✓ Alle Regeln sitzen – super!</div>':`<p>Diese Regeln merkst du dir besonders gut – sie kommen in der nächsten Runde wieder:</p>${Q.ids.map((qi,j)=>Q.ans[j]?'':`<div class="f warn" style="margin:6px 0">! ${esc(QUIZ[qi].w)}</div>`).join('')}`}</div>
  <div class="card"><h3>Alle Regeln auf einen Blick</h3><ul class="rules">${RULES.map(r=>`<li>${r}</li>`).join('')}</ul></div>
- <div class="row"><button class="btn" id="go">Weiter: indirekte Rede üben</button></div>`;
- $('#go').onclick=()=>{c.phase='ir';save();window.scrollTo({top:0});viewIR();};}
+ <div class="row"><button class="btn" id="go">Weiter zu Bericht 1</button></div>`;
+ $('#go').onclick=()=>{c.phase='intro';save();window.scrollTo({top:0});viewIntro();};}
 
 /* ===================== INDIREKTE REDE ÜBEN ===================== */
 const IRNORM=t=>String(t||'').toLowerCase().replace(/[„“”"‚‘’'.,!?:;–\-()]/g,' ').replace(/\s+/g,' ').trim();
 const IRVERB=/(sagte|sagt|erklärte|berichtete|gab an|gab .* an|meinte|betonte|erzählte|teilte .*mit|teilte mit|schilderte|bestätigte|versicherte|laut|zufolge|wie .* (sagte|berichtete|erklärte|betonte))/;
-function irCheck(it,ans){if(/[„“"«»]/.test(ans))return {ok:false,msg:'In der indirekten Rede gibt es <b>keine Anführungszeichen</b>.'};const a=IRNORM(ans);
- if(!IRVERB.test(a))return {ok:false,msg:'Es fehlt die Einleitung mit einem Verb des Sagens: <i>… sagte, …</i> / <i>… gab an, …</i> / <i>Laut … sei …</i>'};
- const vars=it.a.flatMap(x=>{const n=IRNORM(x);const m=n.match(/^(?!dass )(.+?) (sei|seien|habe|hätten|hätte|bestehe|gebe) (.+)$/);return m?[n,m[2]+' '+m[1]+' '+m[3]]:[n];});const ok=vars.some(x=>a.includes(x));return ok?{ok:true}:{ok:false,msg:'Das stimmt noch nicht ganz. Vergleiche mit der Musterlösung.',cmp:true};}
+const PRON1=['ich','mir','mich','mein','meine','meinen','meinem','meiner','wir','uns','unser','unsere','unseren','unserem'];
+const KONJ=/(?<![a-zäöüß])(sei|seien|habe|hätte|hätten|werde|würde|würden|könne|müsse|dürfe|solle|wolle|gebe|bestehe|wisse|wäre|wären)(?![a-zäöüß])/;
+const INDIK=/(?<![a-zäöüß])(ist|sind|hat|war|waren|hatte|hatten|konnte|konnten|kann|muss|besteht|gibt|flüchtete|sprangen|durchbrachen)(?![a-zäöüß])/;
+const FUNCW=new Set('der die das den dem des ein eine einen einem eines einer und oder ich du er sie es wir ihr mir mich uns mein meine nicht auch noch nur zum zur im am vom beim laut wie glück'.split(' '));
+const SPEAKER=/^(polizist|polizistin|zeugin|zeuge|notarzt|notärztin|lenkerin|lenker|bauer|bäuerin|kommandant|feuerwehrkommandant|wanderer|feuerwehrmann|landwirtin|busfahrer|einsatzleiter|tierarzt|autolenkerin)$/i;
+const nounsOf=t=>words(t).filter(w=>(/^[A-ZÄÖÜ]/.test(w)&&!FUNCW.has(w.toLowerCase())&&!SPEAKER.test(w))||/^\d/.test(w));
+const hasWord=(a,w)=>wre(w,'i').test(a)||(w.length>5&&a.toLowerCase().includes(w.toLowerCase().slice(0,w.length-2)));
+const SAIDV=/(sagte|erklärte|berichtete|meinte|betonte|erzählte|rief|fragte|antwortete|schilderte|bestätigte|versicherte|gab|teilte)/i;
+function irCheck(it,ans){const L=[];const add=(ok,txt)=>L.push({ok,txt});const a=ans.trim();const low=a.toLowerCase();const body=low.replace(/^[^,]*,/,'');
+ const q=/[„“"«»]/.test(a);add(!q,q?'In der indirekten Rede stehen <b>keine Anführungszeichen</b>.':'Keine Anführungszeichen');
+ const intro=IRVERB.test(IRNORM(a));add(intro,intro?'Einleitung mit einem Verb des Sagens (bzw. „laut“)':'Es fehlt die Einleitung: <i>… sagte, …</i> / <i>… gab an, …</i> / <i>Laut … sei …</i>');
+ if(intro&&!/(?<![a-zäöüß])(laut|zufolge)(?![a-zäöüß])/i.test(a)){const m=a.match(/(?<![a-zäöüß])(sagte|erklärte|berichtete|meinte|betonte|erzählte|schilderte|bestätigte|versicherte|gab\s+an|teilte\s+mit)\s+[a-zäöüß]/i);add(!m,m?`Nach „${esc(m[1])}“ steht ein <b>Komma</b>: <i>… ${esc(m[1])}, sie …</i>`:'Komma nach dem Einleitungsverb');}
+ if(hasW(it.d,PRON1,'i').length){const left=hasW(a.replace(/^[^,]*,/,''),PRON1,'i');add(!left.length,left.length?`„<b>${esc(left[0])}</b>“ musst du umwandeln: ich → er/sie, wir → sie, mir → ihm/ihr, mein → sein/ihr.`:'Pronomen angepasst (ich/wir → er/sie)');}
+ const ind=INDIK.exec(body);const k=KONJ.test(body);
+ if(ind)add(false,`„<b>${ind[1]}</b>“ ist die Wirklichkeitsform. In der indirekten Rede brauchst du den Konjunktiv: <i>sei, seien, habe, hätten …</i>`);
+ else if(!k)add(false,/(?<![a-zäöüß])haben(?![a-zäöüß])/.test(body)?'„haben“ klingt gleich wie die Wirklichkeitsform – nimm <b>hätten</b>.':'Das Verb muss in den Konjunktiv: <i>sei, seien, habe, hätten, könne …</i>');
+ else add(true,'Verb im Konjunktiv');
+ const miss=nounsOf(it.d).filter(w=>!hasWord(a,w));add(!miss.length,miss.length?'Vom Inhalt fehlt noch: <b>'+miss.map(esc).join(', ')+'</b>':'Inhalt vollständig');
+ return {ok:L.every(x=>x.ok),list:L};}
+function drCheck(it,ans){const L=[];const add=(ok,txt)=>L.push({ok,txt});const t=ans.trim().replace(/"([^"]*)"/,'„$1“');
+ const m=t.match(/^(.*?)[„«“]([^„“”«»]+)[“”»](.*)$/);
+ if(!m){add(false,'Bei der direkten Rede brauchst du <b>Anführungszeichen</b>: unten am Anfang „ und oben am Ende “ (auf der Eingabehilfe).');return {ok:false,list:L};}
+ add(true,'Anführungszeichen');
+ const pre=m[1].trim(),inner=m[2].trim(),post=m[3].trim();const zs=[];
+ if(!pre&&!post)zs.push('Es fehlt der Begleitsatz – wer sagt das? (<i>„…“, sagte die Zeugin.</i>)');
+ if(pre){if(!/:$/.test(pre))zs.push('Steht der Begleitsatz vorne, kommt vor die Rede ein <b>Doppelpunkt</b>.');if(!SAIDV.test(pre))zs.push('Im Begleitsatz fehlt ein Verb des Sagens (sagte, erklärte, fragte …).');if(!/[.!?]$/.test(inner))zs.push('Begleitsatz vorne → die Rede endet mit Punkt (oder ? / !) <b>vor</b> dem Schlusszeichen.');}
+ else if(post){if(!/^,/.test(post))zs.push('Begleitsatz hinten → nach dem Schlusszeichen kommt ein <b>Komma</b>: <i>„…“, sagte sie.</i>');if(/\.$/.test(inner))zs.push('Begleitsatz hinten → in der Rede steht <b>kein Punkt</b>.');if(!SAIDV.test(post))zs.push('Im Begleitsatz fehlt ein Verb des Sagens (sagte, erklärte, fragte …).');else if(/^,\s*[A-ZÄÖÜ]/.test(post)&&SAIDV.test(post.replace(/^,\s*/,'').split(/\s+/)[0]))zs.push('Nach <i>„…“,</i> geht der Begleitsatz <b>klein</b> weiter.');}
+ if(/^[a-zäöü]/.test(inner))zs.push('Die direkte Rede beginnt mit einem <b>Großbuchstaben</b>.');
+ if(it.q&&!/\?$/.test(inner))zs.push('Das ist eine Frage – das <b>Fragezeichen</b> steht in der Rede.');
+ if(zs.length)zs.forEach(x=>add(false,x));else add(true,'Zeichensetzung und Begleitsatz');
+ const kj=(inner.toLowerCase().match(/(?<![a-zäöüß])(sei|seien|hätten|hätte|wäre|wären|habe)(?![a-zäöüß])/)||[])[1];
+ if(kj&&!(kj==='habe'&&/(?<![a-zäöüß])ich\s+habe|habe\s+ich(?![a-zäöüß])/i.test(inner)))add(false,`„<b>${kj}</b>“ ist Konjunktiv. In der direkten Rede steht die Wirklichkeitsform: <i>ist, sind, hat, haben</i>.`);else add(true,'Wirklichkeitsform in der Rede');
+ if(it.pron&&it.pron.length){const okp=hasW(inner,it.pron,'i').length>0;add(okp,okp?'Pronomen zurückverwandelt':`Wer selbst spricht, sagt <b>${it.pron.join(' / ')}</b> – nicht er/sie.`);}
+ const src=it.ind.replace(/^[^,]*,\s*/,'');const miss=nounsOf(src).filter(w=>!hasWord(t,w));add(!miss.length,miss.length?'Vom Inhalt fehlt noch: <b>'+miss.map(esc).join(', ')+'</b>':'Inhalt vollständig');
+ return {ok:L.every(x=>x.ok),list:L};}
 function irPrompt(it,ans){return `${BASE}
-Eine Schülerin soll eine Aussage als indirekte Rede wiedergeben.
+Eine Schülerin soll diese Aussage in INDIREKTE Rede umwandeln.
 Sprecher: ${it.who}
 Direkte Rede: „${it.d}“
-Musterlösung: ${it.m}
 Antwort der Schülerin: """${ans}"""
-Ist die Antwort richtig? Richtig heißt: Einleitung mit einem Verb des Sagens oder „laut …“, Pronomen angepasst (ich → er/sie, wir → sie), Verb im Konjunktiv (sei, habe, hätten …), keine Anführungszeichen, gleicher Inhalt. Andere passende Einleitungsverben und kleine Unterschiede in der Wortstellung sind erlaubt. Rechtschreibfehler nennst du, sie machen die Antwort aber nicht falsch, wenn die indirekte Rede stimmt.
-Antworte NUR mit JSON: {"richtig":true oder false,"erklaerung":"1 kurzer, kindgerechter Satz auf Deutsch, was falsch ist oder was gut ist"}`;}
-function viewIR(){rerender=viewIR;const c=S.cur,I=c.ir;if(I.k>=I.ids.length)return irEnd();const it=IRQ[I.ids[I.k]];const done=I.out[I.k];const sp=it.who.replace(/\s*\(\d+\)$/,'');
- app.innerHTML=`${header()}<h2>Indirekte Rede üben</h2><p class="sub">Im Bericht gibt es keine wörtliche Rede. Bau die Aussage als indirekte Rede ein – so wie bei der Schularbeit.</p>
- <div class="steps">${I.ids.map((_,j)=>`<i class="${j<I.k?(I.out[j]&&I.out[j].ok?'ok':'no'):j===I.k?'on':''}"></i>`).join('')}</div>
- <div class="card"><span class="pill">Satz ${I.k+1} von ${I.ids.length}</span><p style="margin:12px 0 4px"><b>${esc(it.who)}:</b></p><div class="clip" style="margin:0 0 12px">„${esc(it.d)}“</div>
- <div class="rule">So geht’s: <i>${esc(sp)} sagte, …</i> – ich/wir → er/sie, Verb in den Konjunktiv (<i>sei, habe, seien, hätten</i>), keine Anführungszeichen.</div>
- <textarea id="ta" style="min-height:70px" placeholder="${esc(sp)} sagte, …"${done?' disabled':''}></textarea>${done?'':keys()}
- ${done?'':'<div class="row" style="margin-top:8px"><button class="btn" id="chk">Prüfen</button></div>'}<div id="irfb" class="fb"></div></div>`;
- const ta=$('#ta');ta.value=done?done.ans:(I.draft||'');
- const showRes=r=>{$('#irfb').innerHTML=`<div class="f ${r.ok?'ok':'bad'}">${r.ok?'✓ Richtig!':'✗ '+r.msg}</div><div class="f warn"><b>Musterlösung:</b> <span class="ex">${esc(it.m)}</span><br><span class="ex">${esc(it.tip)}</span></div><div class="row"><button class="btn" id="nx">${I.k+1<I.ids.length?'Nächster Satz':'Weiter'}</button></div>`;$('#nx').onclick=()=>{I.k++;save();window.scrollTo({top:0});viewIR();};};
+Prüfe ihren Satz individuell (es gibt viele richtige Lösungen, vergleiche NICHT mit einer bestimmten Musterlösung): Einleitung mit Verb des Sagens oder „laut …“, Komma nach dem Einleitungsverb, Pronomen angepasst (ich → er/sie, wir → sie), Verb im Konjunktiv (sei, habe, hätten …; „sie haben“ → „sie hätten“), keine Anführungszeichen, Inhalt vollständig. „Zum Glück“ darf als Wertung wegfallen. Andere Einleitungsverben, „dass“-Sätze und andere Wortstellung sind erlaubt. Rechtschreibfehler nennst du, sie machen die indirekte Rede aber nicht falsch.
+Antworte NUR mit JSON: {"richtig":true oder false,"erklaerung":"1–2 kurze, kindgerechte Sätze auf Deutsch zu GENAU ihrem Satz: was passt, was nicht","verbessert":"ihr Satz, nur so weit korrigiert wie nötig (leer, wenn richtig)"}`;}
+function drPrompt(it,ans){return `${BASE}
+Eine Schülerin soll diese indirekte Rede in DIREKTE Rede umwandeln.
+Indirekte Rede: „${it.ind}“
+Antwort der Schülerin: """${ans}"""
+Prüfe ihren Satz individuell (es gibt viele richtige Lösungen, vergleiche NICHT mit einer bestimmten Musterlösung): Anführungszeichen „…“, Begleitsatz mit Verb des Sagens, richtige Zeichensetzung (Doppelpunkt vor der Rede bzw. Komma nach dem Schlusszeichen, kein Punkt in der Rede, wenn der Begleitsatz folgt), Pronomen zurückverwandelt (er/sie → ich, sie → wir), Wirklichkeitsform statt Konjunktiv (sei → ist, hätten → haben), Inhalt vollständig. Präteritum oder Perfekt in der Rede, andere Einleitungsverben und andere Wortstellung sind erlaubt.
+Antworte NUR mit JSON: {"richtig":true oder false,"erklaerung":"1–2 kurze, kindgerechte Sätze auf Deutsch zu GENAU ihrem Satz: was passt, was nicht","verbessert":"ihr Satz, nur so weit korrigiert wie nötig (leer, wenn richtig)"}`;}
+function pickRD(){const sh=a=>a.map((_,i)=>i).sort(()=>Math.random()-.5);return [...sh(DRMC).slice(0,2).map(i=>({t:'mc',i})),...sh(DRQ).slice(0,2).map(i=>({t:'dr',i})),...sh(IRQ).slice(0,2).map(i=>({t:'ir',i}))];}
+function merkRD(open){return `<details class="card"${open?' open':''}><summary><b>Merkbox: Direkte und indirekte Rede</b></summary><div class="merk" style="margin-top:10px">
+<p style="margin-top:0"><b>Direkte Rede</b> – wörtlich, mit Anführungszeichen: unten am Anfang <b>„</b>, oben am Ende <b>“</b>.</p><ul class="rules">
+<li>Begleitsatz vorne: <i>Der Polizist sagte<b>: „W</b>ir haben die Straße gesperrt<b>.“</b></i></li>
+<li>Begleitsatz hinten: <i><b>„</b>Mir ist nichts passiert<b>“, s</b>agte die Lenkerin.</i></li>
+<li>Frage oder Ausruf: <i><b>„</b>Hat jemand etwas gesehen<b>?“, f</b>ragte die Polizistin.</i></li>
+<li>Eingeschoben: <i><b>„</b>Wir haben<b>“,</b> sagte der Kommandant<b>, „d</b>en Brand gelöscht.<b>“</b></i></li></ul>
+<p><b>Indirekte Rede</b> – ohne Anführungszeichen, Verb im Konjunktiv: <i>Der Polizist sagte, sie <b>hätten</b> die Straße gesperrt.</i> · <i>Laut der Lenkerin <b>sei</b> ihr nichts passiert.</i><br>ich/wir → er/sie · ist → sei · hat → habe · haben → hätten · war → sei … gewesen</p>
+<p class="note" style="margin-bottom:0"><b>Schreib die Merkbox mit den Beispielen ins Heft ab.</b></p></div></details>`;}
+function viewRD(){rerender=viewRD;const c=S.cur,R=c.rd;if(R.k>=R.items.length)return rdEnd();const item=R.items[R.k];const done=R.out[R.k];
+ const head=`${header()}<h2>Direkte und indirekte Rede</h2><p class="sub">Zum Aufwärmen ${R.items.length} kurze Übungen. Im Bericht darfst du Aussagen direkt oder indirekt einbauen – beides muss richtig gesetzt sein.</p>${merkRD(R.k===0)}<div class="steps">${R.items.map((_,j)=>`<i class="${j<R.k?(R.out[j]&&R.out[j].ok?'ok':'no'):j===R.k?'on':''}"></i>`).join('')}</div>`;
+ const next=()=>{R.k++;save();window.scrollTo({top:0});viewRD();};
+ const nxBtn=`<div class="row"><button class="btn" id="nx">${R.k+1<R.items.length?'Nächste Übung':'Weiter'}</button></div>`;
+ if(item.t==='mc'){const q=DRMC[item.i];const order=done?done.order:q.a.map((_,i)=>i).sort(()=>Math.random()-.5);
+  app.innerHTML=head+`<div class="card"><span class="pill">Übung ${R.k+1} von ${R.items.length} · Zeichensetzung</span><h3 style="margin-top:10px">${esc(q.q)}</h3><div class="opts">${order.map(i=>`<button class="opt" data-i="${i}">${esc(q.a[i])}</button>`).join('')}</div><div id="fb" class="fb"></div></div>`;
+  const show=pick=>{app.querySelectorAll('.opt').forEach(o=>{o.disabled=true;if(+o.dataset.i===q.c)o.classList.add('right');else if(+o.dataset.i===pick)o.classList.add('wrong');});const ok=pick===q.c;$('#fb').innerHTML=`<div class="f ${ok?'ok':'bad'}">${ok?'✓ Richtig!':'✗ Leider falsch.'} <span class="ex">${esc(q.w)}</span></div>`+nxBtn;$('#nx').onclick=next;};
+  if(done)return show(done.pick);
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const pick=+b.dataset.i;R.out[R.k]={ok:pick===q.c,pick,order};save();show(pick);});return;}
+ const isIR=item.t==='ir';const it=isIR?IRQ[item.i]:DRQ[item.i];const sp=isIR?it.who.replace(/\s*\(\d+\)$/,''):'';
+ const task=isIR?`<span class="pill">Übung ${R.k+1} von ${R.items.length} · direkt → indirekt</span><p style="margin:12px 0 4px"><b>${esc(it.who)}:</b></p><div class="clip" style="margin:0 0 12px">„${esc(it.d)}“</div><div class="rule">Schreib als <b>indirekte Rede</b>: <i>${esc(sp)} sagte, …</i> – ich/wir → er/sie, Verb in den Konjunktiv (<i>sei, habe, seien, hätten</i>), keine Anführungszeichen.</div>`
+  :`<span class="pill">Übung ${R.k+1} von ${R.items.length} · indirekt → direkt</span><p style="margin:12px 0 4px">Indirekte Rede:</p><div class="clip" style="margin:0 0 12px">${esc(it.ind)}</div><div class="rule">Schreib als <b>direkte Rede</b> – Anführungszeichen „ “ findest du auf der Eingabehilfe. Zum Beispiel so aufgebaut: <i>${esc(it.hint)}</i></div>`;
+ app.innerHTML=head+`<div class="card">${task}<textarea id="ta" style="min-height:70px" placeholder="${isIR?esc(sp)+' sagte, …':esc(it.hint)}"${done?' disabled':''}></textarea>${done?'':keys()}${done?'':'<div class="row" style="margin-top:8px"><button class="btn" id="chk">Prüfen</button></div>'}<div id="fb" class="fb"></div></div>`;
+ const ta=$('#ta');ta.value=done?done.ans:(R.draft||'');
+ const showRes=r=>{const ai=r.ai;const L=ai&&ai.richtig?r.list.filter(x=>x.ok):r.list;
+  $('#fb').innerHTML=`<div class="f ${r.ok?'ok':'bad'}">${r.ok?'✓ Richtig – gut gemacht!':'✗ Noch nicht ganz richtig.'}</div>
+  <div class="note" style="margin-top:4px">Das wurde bei deinem Satz geprüft:</div>${L.map(x=>`<div class="f ${x.ok?'ok':'warn'}" style="padding:4px 10px">${x.ok?'✓':'!'} ${x.txt}</div>`).join('')}
+  ${ai&&ai.erklaerung?`<div class="f ${ai.richtig?'ok':'warn'}"><b>Claude zu deinem Satz:</b> <span class="ex">${esc(ai.erklaerung)}</span>${!ai.richtig&&ai.verbessert?`<br><b>So wäre dein Satz richtig:</b> <span class="ex">${esc(ai.verbessert)}</span>`:''}</div>`:''}
+  <div class="row"><button class="btn s sm" id="bsp">Weiteren richtigen Beispielsatz zeigen</button></div><div id="bspT" class="hidden note">Ein möglicher Satz (es gibt mehrere richtige Lösungen): <i>${esc(it.m)}</i><br>${esc(it.tip)}</div>`+nxBtn;
+  $('#bsp').onclick=()=>$('#bspT').classList.toggle('hidden');$('#nx').onclick=next;};
  if(done)return showRes(done);
- bindKeys();ta.oninput=()=>{I.draft=ta.value;save();};
- $('#chk').onclick=async()=>{const ans=ta.value.trim();if(!ans){ta.focus();return;}const b=$('#chk');let r=irCheck(it,ans);
-  if(!r.ok&&r.cmp){const sm=await getSample();if(sm&&!aiOff){b.disabled=true;$('#irfb').innerHTML='<div class="aist">Claude prüft deinen Satz …</div>';
-   try{const d=await sm.json(irPrompt(it,ans),{modelTier:'quick'});if(d&&d.richtig===true)r={ok:true};else if(d&&d.erklaerung)r={ok:false,msg:esc(d.erklaerung)};}catch(e){if(e&&e.code==='not_granted')aiOff=true;}}}
-  if(!document.body.contains(b))return;r.ans=ans;I.out[I.k]=r;I.draft='';save();viewIR();};}
-function irEnd(){rerender=irEnd;const c=S.cur,I=c.ir;const ok=I.out.filter(x=>x&&x.ok).length;
- app.innerHTML=`${header()}<h2>Indirekte Rede: ${ok} von ${I.ids.length} richtig</h2><div class="card"><p>Merke: In deinen Berichten baust du Aussagen genauso ein.</p><div class="clip" style="font-size:17px"><i>Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.<br>Die Lenkerin gab an, sie habe stark bremsen müssen.<br>Der Bauer erklärte, die Pferde hätten die Koppel durchbrochen.</i></div></div>
- <div class="row"><button class="btn" id="go">Weiter zu Bericht 1</button></div>`;
- $('#go').onclick=()=>{c.phase='intro';save();window.scrollTo({top:0});viewIntro();};}
+ bindKeys();ta.oninput=()=>{R.draft=ta.value;save();};
+ $('#chk').onclick=async()=>{const ans=ta.value.trim();if(!ans){ta.focus();return;}const b=$('#chk');const r=isIR?irCheck(it,ans):drCheck(it,ans);
+  const sm=await getSample();if(sm&&!aiOff){b.disabled=true;$('#fb').innerHTML='<div class="aist">Claude prüft deinen Satz …</div>';
+   try{const d=await sm.json(isIR?irPrompt(it,ans):drPrompt(it,ans),{modelTier:'quick'});if(d&&typeof d.richtig==='boolean'){r.ai={richtig:d.richtig,erklaerung:String(d.erklaerung||''),verbessert:String(d.verbessert||'')};r.ok=d.richtig;}}catch(e){if(e&&e.code==='not_granted')aiOff=true;}}
+  if(!document.body.contains(b))return;r.ans=ans;R.out[R.k]=r;R.draft='';save();viewRD();};}
 
+function rdEnd(){rerender=rdEnd;const c=S.cur,R=c.rd;const ok=R.out.filter(x=>x&&x.ok).length;
+ app.innerHTML=`${header()}<h2>Direkte und indirekte Rede: ${ok} von ${R.items.length} richtig</h2>${merkRD(ok<R.items.length)}
+ <div class="row"><button class="btn" id="go">Weiter zum Regel-Check</button></div>`;
+ $('#go').onclick=()=>{c.phase='quiz';save();window.scrollTo({top:0});viewQuiz();};}
 function viewIntro(){rerender=viewIntro;const c=S.cur,r=c.reps[c.i],t=T(r.t);
  app.innerHTML=`${header()}<h2>Bericht ${c.i+1} von 2: ${esc(t.title)}</h2><p class="sub"><b>${typeName(t)}.</b> ${t.type==='notizen'?(t.wit?'Mach aus der umgangssprachlichen Zeugenaussage einen sachlichen Bericht.':'Mach aus den Stichwörtern des Reporters einen vollständigen Bericht.'):'Beantworte die W-Fragen mit den Angaben und baue die Aussagen indirekt ein.'} Ziel: ${W[0]}–${W[1]} Wörter.</p>
  ${materialHTML(t,true)}${phraseCard()}
@@ -616,8 +706,8 @@ function showFinal(d){const out=$('#aiout');if(!out||!d)return;const errs=normEr
  ${reps.length?`<h3 style="margin-top:12px">Wortwiederholungen – so geht es abwechslungsreicher</h3><div class="fb">${reps.map(w=>`<div class="f warn">! <b>${esc(w.wort)}</b> → ${(Array.isArray(w.alternativen)?w.alternativen:[]).map(esc).join(', ')}</div>`).join('')}</div>`:''}
  ${tips.length?`<h3 style="margin-top:12px">Tipps</h3><ul>${tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
  ${d.verbessert?`<h3 style="margin-top:12px">Verbesserte Version</h3>${(()=>{const ls=splitP(d.verbessert);return clipHTML(ls[0]||'',ls[1]||'',ls.slice(2),[],[],false);})()}`:''}`;}
-function endRound(){const c=S.cur;const scores=c.reps.map(r=>r.saved?r.saved.s:0);const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);const Q=c.quiz,I=c.ir;const lvlBefore=c.level;
- S.hist.push({d:Math.floor(Date.now()/864e5),l:lvlBefore,hp:c.help?1:0,q:[Q.ans.filter(Boolean).length,Q.ids.length],ir:[I.out.filter(x=>x&&x.ok).length,I.ids.length],s:avg,r:c.reps.map(r=>({t:r.t,s:r.saved?r.saved.s:0,c:r.saved?r.saved.c:{},x:r.saved?r.saved.x:''}))});
+function endRound(){const c=S.cur;const scores=c.reps.map(r=>r.saved?r.saved.s:0);const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);const Q=c.quiz,R=c.rd;const lvlBefore=c.level;
+ S.hist.push({d:Math.floor(Date.now()/864e5),l:lvlBefore,hp:c.help?1:0,q:[Q.ans.filter(Boolean).length,Q.ids.length],ir:[R.out.filter(x=>x&&x.ok).length,R.items.length],s:avg,r:c.reps.map(r=>({t:r.t,s:r.saved?r.saved.s:0,c:r.saved?r.saved.c:{},x:r.saved?r.saved.x:''}))});
  c.lvlMsg='';if(avg>=75&&S.level<3&&S.level===lvlBefore){S.level++;c.lvlMsg=`<div class="f ok">🎉 Super! Du steigst auf <b>Stufe ${S.level}</b> auf: ${LEVELS[S.level].split('– ')[1]}.</div>`;}
  else if(avg<50&&lvlBefore>1)c.lvlMsg=`<div class="f warn">Tipp: Probier die nächste Runde noch einmal auf <b>Stufe ${lvlBefore-1}</b> (auf der Startseite einstellbar).</div>`;
  c.phase='round';save();window.scrollTo({top:0});viewRound();}
@@ -625,7 +715,7 @@ function viewRound(){rerender=viewRound;const c=S.cur;const h=S.hist[S.hist.leng
  const agg={};h.r.forEach(r=>Object.entries(r.c||{}).forEach(([k,v])=>agg[k]=(agg[k]||0)+v));const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3);
  app.innerHTML=`${header()}<h2>Rundenauswertung</h2>
  <div class="card"><div class="row" style="justify-content:space-between"><div><div class="score">${h.s}</div><div class="note">Durchschnitt der beiden Berichte</div></div><div class="note" style="text-align:right">${prev?`${h.s-prev.s>=0?'▲ +':'▼ '}${h.s-prev.s} zur letzten Runde`:'Erste Runde'}</div></div>
- <div class="tablewrap" style="margin-top:12px"><table><tr><th>Teil</th><th>Ergebnis</th></tr><tr><td>Regel-Check</td><td><b>${h.q[0]} / ${h.q[1]}</b> richtig</td></tr><tr><td>Indirekte Rede</td><td><b>${h.ir[0]} / ${h.ir[1]}</b> richtig</td></tr>${h.r.map((r,j)=>`<tr><td>Bericht ${j+1}: ${esc(T(r.t).title)}</td><td><b>${r.s}</b> Punkte</td></tr>`).join('')}</table></div>${c.lvlMsg?`<div style="margin-top:12px">${c.lvlMsg}</div>`:''}</div>
+ <div class="tablewrap" style="margin-top:12px"><table><tr><th>Teil</th><th>Ergebnis</th></tr><tr><td>Regel-Check</td><td><b>${h.q[0]} / ${h.q[1]}</b> richtig</td></tr><tr><td>Direkte und indirekte Rede</td><td><b>${h.ir[0]} / ${h.ir[1]}</b> richtig</td></tr>${h.r.map((r,j)=>`<tr><td>Bericht ${j+1}: ${esc(T(r.t).title)}</td><td><b>${r.s}</b> Punkte</td></tr>`).join('')}</table></div>${c.lvlMsg?`<div style="margin-top:12px">${c.lvlMsg}</div>`:''}</div>
  <div class="card"><h3>Zusammenfassung</h3>${top.length?`<p>In dieser Runde kamen diese Fehlerarten am häufigsten vor: ${top.map(([k,v])=>`<b>${esc(k)}</b> (${v}×)`).join(', ')}. Darauf achtest du in der nächsten Runde besonders.</p>`:'<p>Beide Berichte waren sprachlich sehr sauber!</p>'}
  <p>Schreib <b>beide verbesserten Berichte ins Heft</b>.</p><div class="row"><button class="btn" id="again">Nächste Runde</button></div></div>${merkbox()}`;
  $('#again').onclick=()=>{S.cur=null;save();window.scrollTo({top:0});viewHome();};}
