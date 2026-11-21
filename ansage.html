@@ -113,6 +113,7 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
       <button class="ghost" id="printBtn">Drucken</button>
       <label>für <select id="kidSel"></select></label>
     </div>
+    <p class="status no-print" id="genStatus" style="margin:-4px 0 10px"></p>
     <div id="tabs" class="row no-print" hidden style="margin-bottom:12px"></div>
     <div id="weekBox" hidden></div>
     <div id="heft"><div class="empty">Tippe auf „Neue Ansage erstellen“.</div></div>
@@ -144,6 +145,7 @@ summary{cursor:pointer;color:var(--ink);font-weight:700}
 
   <section>
     <h2>Satzsammlung (<span id="satzCount"></span> Sätze)</h2>
+    <p class="status" id="satzInfo" style="margin-top:0"></p>
     <p class="status" style="margin-top:0">Die Sätze der Ansage kommen aus dieser Sammlung. Sätze mit Wörtern der 3. Klasse werden am öftesten gewählt.</p>
     <p class="status warn" id="coverage"></p>
     <textarea id="newSaetze" placeholder="Eigene Sätze mit den neuen Wörtern – ein Satz pro Zeile"></textarea>
@@ -319,7 +321,7 @@ function wordText(it){
 }
 function makeWord(cov,onlyNewest){
   const pool=items.filter(i=>(['N','V','A','P'].includes(i.type)||(onlyNewest&&i.type==='W'))&&!cov.has(i.id)&&(!onlyNewest||isNewest(i)));
-  const it=weightedTop(pool,priority,onlyNewest?50:12);if(!it)return null;
+  const it=weightedTop(pool,priority,onlyNewest?50:40);if(!it)return null;
   cov.add(it.id);return {kind:'wort',text:wordText(it),ids:[it.id]};
 }
 
@@ -369,7 +371,8 @@ function addSentence(s,cov,usedS){usedS.add(s);const ids=sentenceItems(s).map(i=
 let sampleFn=null;
 if(window.claude&&claude.use){claude.use('sample').then(s=>{sampleFn=s;updateAiUi()}).catch(()=>{})}
 function updateAiUi(){
-  document.getElementById('aiBtn').hidden=!sampleFn;document.getElementById('copyBtn').hidden=!!sampleFn;
+  document.getElementById('aiBtn').hidden=true;document.getElementById('copyBtn').hidden=!!sampleFn;
+  if(sampleFn){document.getElementById('satzInfo').textContent='Hier schreibt Claude bei jedem Wochenplan neue Sätze nach deinen Einstellungen. Die Sammlung wird nur gebraucht, wenn Claude nicht verfügbar ist (z. B. auf GitHub Pages).';coverageHint()}
   if(sampleFn&&sampleFn.limits)sampleFn.limits().then(l=>{if(l&&l.images){document.getElementById('photoIn').accept=l.images.mediaTypes.join(',');document.getElementById('photoBtn').hidden=false}}).catch(()=>{});
 }
 async function readPhoto(file){
@@ -448,7 +451,7 @@ function addSaetze(){
   st.textContent=arr.length===1?'1 Satz hinzugefügt.':arr.length+' Sätze hinzugefügt.';
 }
 function coverageHint(){
-  const el=document.getElementById('coverage');const m=missingNewest();
+  const el=document.getElementById('coverage');if(sampleFn){el.textContent='';return}const m=missingNewest();
   el.textContent=m.length?'Für diese neuen Wörter gibt es noch zu wenige Sätze: '+m.map(label).join(', '):'';
   document.getElementById('aiBtn').classList.toggle('ghost',!m.length);document.getElementById('copyBtn').classList.toggle('ghost',!m.length);
 }
@@ -485,10 +488,12 @@ function markText(el,text,stems){
 
 /* ---------- Ansage zusammenstellen ---------- */
 let ansage=[],ansageDone=false;
-function buildAnsage(){
+function buildAnsage(given){
   rebuild();const ansage=[];const cov=new Set(),usedS=new Set();
   const nW=+settings.nWords,nS=+settings.nSent;
-  const sents=[];for(let i=0;i<nS;i++){const s=makeSentence(cov,usedS);s&&sents.push(s)}
+  const sents=[];
+  if(given&&given.length)given.forEach(x=>sents.push(addSentence(x,cov,usedS)));
+  else for(let i=0;i<nS;i++){const s=makeSentence(cov,usedS);s&&sents.push(s)}
   // Einzelwörter: zuerst ALLE neuesten Wörter, die in den Sätzen noch nicht vorkommen
   const words=[];
   if(settings.boost){let w;while((w=makeWord(cov,true)))words.push(w)}
@@ -512,19 +517,76 @@ function savePlan(){const p=plan();if(p&&p.days[curDay]){p.days[curDay].lines=an
 function loadDay(i){const p=plan();if(!p||!p.days.length){ansage=[];ansageDone=false;curDay=0;return}curDay=Math.max(0,Math.min(i,p.days.length-1));ansage=p.days[curDay].lines;ansageDone=p.days[curDay].done}
 // Was an anderen Tagen der Woche schon vorkommt, wird seltener gewählt (neue Wörter ausgenommen)
 function setPlanUsed(except){planUsedIds=new Set();planUsedS=new Set();const p=plan();if(!p)return;p.days.forEach((d,i)=>{if(i===except)return;d.lines.forEach(a=>{a.ids.forEach(id=>planUsedIds.add(id));if(a.kind==='satz')planUsedS.add(a.text)})})}
-function generate(){
+// Wörter, die in den Sätzen einer Ansage vorkommen sollen
+function pickTargets(){
+  rebuild();const nS=+settings.nSent;
+  const newest=items.filter(i=>['N','V','A'].includes(i.type)&&isNewest(i));
+  const pool=items.filter(i=>['N','V','A'].includes(i.type)&&!isNewest(i));
+  const taken=new Set(),others=[];
+  for(let k=0;k<nS*2;k++){
+    let cand=pool.filter(i=>!taken.has(i.id)&&!planUsedIds.has(i.id));if(!cand.length)cand=pool.filter(i=>!taken.has(i.id));
+    const it=weightedTop(cand,priority,80);if(!it)break;taken.add(it.id);others.push(it)}
+  return {newest,others};
+}
+async function aiAnsagen(targets){
+  const [mn,mx]=settings.len.split('-');const nS=+settings.nSent;
+  const prompt=`Du schreibst Ansagen (Diktate) für ein Kind in der 3. Klasse Volksschule in Österreich.
+
+ALLE LERNWÖRTER (nach Klasse):
+${['3','2','1'].map(k=>k+'. Klasse: '+data[k].join(' / ')).join('\n')}
+
+Schreibe ${targets.length} ${targets.length===1?'Ansage':'Ansagen'} mit je genau ${nS} Sätzen.
+
+${targets.map((t,i)=>`Ansage ${i+1}:`+(t.newest.length?`\n- neue Wörter, jedes muss in dieser Ansage vorkommen: ${t.newest.map(label).join(', ')}`:'')+`\n- diese Wörter sollen möglichst auch vorkommen: ${t.others.map(label).join(', ')}`).join('\n\n')}
+
+REGELN:
+- Jeder Satz ergibt Sinn und beschreibt etwas, das ein Kind sich gut vorstellen kann. Keine schrägen oder unlogischen Wortkombinationen.
+- Jeder Satz hat ${mn} bis ${mx} Wörter und mehrere Satzglieder (Subjekt, Prädikat, Objekt, Angaben zu Zeit, Ort, Art und Weise).
+- Jeder Satz enthält mindestens zwei Eigenschaftswörter.
+- Die neuen Wörter auf die Sätze verteilen; Nomen dürfen in der Mehrzahl stehen, Verben in passender Personalform, Eigenschaftswörter gebeugt.
+- Fast nur Lernwörter verwenden. Zusätzlich erlaubt: Artikel, Pronomen, Präpositionen, Bindewörter, sein, haben, werden, Zahlwörter, sehr, heute, gestern, morgen. Höchstens ein anderes Wort pro Satz.
+- Kein Satz darf doppelt vorkommen, auch nicht in verschiedenen Ansagen. Abwechslungsreiche Satzanfänge und Inhalte.
+- Österreichisches Deutsch, fehlerfreie Rechtschreibung und Beistriche.
+
+Antworte nur mit JSON: {"ansagen": [["Satz 1", "Satz 2"], ["Satz 1", "Satz 2"]]}`;
+  const r=await sampleFn.json(prompt,{modelTier:'default',cache:false});
+  return ((r&&r.ansagen)||[]).map(a=>(Array.isArray(a)?a:[]).map(s=>String(s).trim()).filter(s=>s.split(/\s+/).length>=3));
+}
+function setBusy(on,msg,warn){
+  ['weekBtn','genBtn'].forEach(id=>document.getElementById(id).disabled=on);
+  const s=document.getElementById('genStatus');s.textContent=msg||'';s.className='status no-print'+(warn?' warn':'');
+}
+function keepSentences(lists){
+  const add=lists.flat().filter(s=>!data.saetze.includes(s));
+  if(add.length){data.saetze.push(...add);dirty=true;saveData();renderSaetze()}
+}
+const aiFail=e=>e&&e.code==='not_granted'?'Claude darf auf dieser Seite gerade keine Sätze schreiben – die Sätze kommen aus der Satzsammlung.':e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – die Sätze kommen diesmal aus der Satzsammlung.':'Claude konnte gerade keine Sätze schreiben – die Sätze kommen diesmal aus der Satzsammlung.';
+async function generate(){
   if(!plan())plans[kids.current]={created:Date.now(),days:[{lines:[],done:false}]};
   if(ansage.some(a=>a.recorded)&&!confirm('Für diese Ansage ist schon etwas als geübt gespeichert. Trotzdem eine neue erstellen?'))return;
-  setPlanUsed(curDay);const lines=buildAnsage();
-  plan().days[curDay]={lines,done:false};loadDay(curDay);weekView=false;render();updateDoneBtn();
+  setPlanUsed(curDay);let given=null,msg='',warn=false;
+  if(sampleFn){
+    setBusy(true,'Claude schreibt neue Sätze …');
+    try{given=(await aiAnsagen([pickTargets()]))[0];keepSentences([given||[]])}catch(e){msg=aiFail(e);warn=true}
+  }
+  plan().days[curDay]={lines:buildAnsage(given),done:false};
+  setBusy(false,msg,warn);loadDay(curDay);weekView=false;render();updateDoneBtn();
 }
-function makeWeek(){
+async function makeWeek(){
   const n=Math.max(1,Math.min(7,+document.getElementById('weekN').value||5));settings.weekN=n;store.set(LS_SET,settings);
   const p=plan();if(p&&p.days.some(d=>d.lines.some(a=>a.recorded))&&!confirm('Einen neuen Wochenplan erstellen? Der bisherige wird ersetzt – was schon als geübt gespeichert ist, bleibt im Fortschritt.'))return;
+  let lists=null,msg='',warn=false;
+  if(sampleFn){
+    setBusy(true,'Claude schreibt neue Sätze für die ganze Woche … das dauert etwa eine Minute.');
+    const old=plans[kids.current];plans[kids.current]=null;planUsedIds=new Set();
+    const targets=[];for(let i=0;i<n;i++){const tg=pickTargets();targets.push(tg);tg.others.forEach(it=>planUsedIds.add(it.id))}
+    plans[kids.current]=old;
+    try{lists=await aiAnsagen(targets);keepSentences(lists);msg='Neue Sätze von Claude.'}catch(e){msg=aiFail(e);warn=true}
+  }
   plans[kids.current]={created:Date.now(),days:[]};
-  for(let i=0;i<n;i++){setPlanUsed(-1);plan().days.push({lines:buildAnsage(),done:false})}
+  for(let i=0;i<n;i++){setPlanUsed(-1);plan().days.push({lines:buildAnsage(lists&&lists[i]),done:false})}
   planUsedIds=new Set();planUsedS=new Set();
-  loadDay(0);weekView=false;render();updateDoneBtn();
+  setBusy(false,msg,warn);loadDay(0);weekView=false;render();updateDoneBtn();
 }
 function showDay(i){savePlan();loadDay(i);weekView=false;render();updateDoneBtn()}
 function renderTabs(){
@@ -686,7 +748,7 @@ function addWords(){
   dirty=true;saveData();renderSaetze();renderProgress();
   st.textContent=`Als Ansage Nr. ${data[c].length} zur ${c}. Klasse hinzugefügt. Schreib in der Satzsammlung Sätze dazu und speichere dann die Excel-Datei.`;
   document.getElementById('newWords').value='';renderLists();
-  if(sampleFn){st.textContent=`Zur ${c}. Klasse hinzugefügt. Claude schreibt jetzt passende Sätze dazu …`;aiWrite()}
+  if(sampleFn)st.textContent=`Zur ${c}. Klasse hinzugefügt. Beim nächsten Wochenplan schreibt Claude Sätze mit den neuen Wörtern.`;
 }
 function saveData(){store.set(LS_DATA,data);store.set('ansagen_dirty',dirty);updateFileStatus();if(dirty&&fileHandle)scheduleWrite()}
 function updateFileStatus(){
