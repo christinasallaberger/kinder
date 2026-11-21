@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zeitungsbericht-Trainer</title>
+<meta name="uebersicht-kapitel" content="Deutsch: Schreiben">
+<meta name="uebersicht-thema" content="Zeitungsbericht (Deutschstunde 3, S. 29–34)">
+<meta name="uebersicht-info" content="Regel-Check, indirekte Rede üben, je Runde 2 Berichte (1 mit freier Hand, 1 mit vielen Angaben, je 120–150 Wörter), Summary und Headline zum Schluss, Sofort-Kontrolle mit Fehlern und Wortwiederholungen">
+<meta name="uebersicht-gruppe" content="3. Klasse">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F4EE;--surface:#FFFFFF;--clip:#FBFBF6;--ink:#1F2A23;--soft:#5B6A5F;--line:#D8DED2;--marker:#D4EC8E;--accent:#2E6B3C;--accent-ink:#FFFFFF;--chip:#EAF0E1;--ok:#1E7A45;--ok-bg:#E3F5EA;--warn:#8A5A00;--warn-bg:#FFF3D6;--bad:#B8213A;--bad-bg:#FCE6E9;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#131A15;--surface:#1B241E;--clip:#202A23;--ink:#E7EEE6;--soft:#A3B2A6;--line:#2E3B32;--marker:#4B6A1F;--accent:#B7DD6A;--accent-ink:#131A15;--chip:#24302A;--ok:#7FDCA4;--ok-bg:#16382A;--warn:#FFD27A;--warn-bg:#3D3215;--bad:#FF95A5;--bad-bg:#4A1C27;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#131A15;--surface:#1B241E;--clip:#202A23;--ink:#E7EEE6;--soft:#A3B2A6;--line:#2E3B32;--marker:#4B6A1F;--accent:#B7DD6A;--accent-ink:#131A15;--chip:#24302A;--ok:#7FDCA4;--ok-bg:#16382A;--warn:#FFD27A;--warn-bg:#3D3215;--bad:#FF95A5;--bad-bg:#4A1C27;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 90px}
+h1,h2,h3{font-family:"Newsreader",Georgia,"Times New Roman",serif;line-height:1.12;margin:0}
+h1{font-size:clamp(34px,9vw,52px);font-weight:800;letter-spacing:-.015em}
+h2{font-size:26px;font-weight:700;margin:4px 0 8px}h3{font-size:20px;font-weight:700;margin:0 0 6px}
+.mark{background:linear-gradient(transparent 58%,var(--marker) 58%,var(--marker) 92%,transparent 92%)}
+.sub{color:var(--soft);margin:6px 0 14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.s{background:var(--chip);color:var(--ink)}.btn.sm{padding:6px 10px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:default}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:10px;width:100%}
+textarea{min-height:110px;resize:vertical}
+input:focus,textarea:focus,.btn:focus-visible,.chip:focus-visible,.opt:focus-visible,.task:focus-visible{outline:3px solid var(--marker);outline-offset:1px}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--chip)}
+.who{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.lvl{display:flex;gap:6px}.lvl span{width:30px;height:8px;border-radius:4px;background:var(--line)}.lvl span.on{background:var(--accent)}
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.task{text-align:left;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px;font:inherit;cursor:pointer;position:relative}
+.task.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.task b{display:block;font-family:"Newsreader",Georgia,serif;font-size:18px;line-height:1.2;padding-right:22px}.task small{color:var(--soft)}
+.task .done{display:block;font-size:12px;color:var(--ok);font-weight:700}.task .num{position:absolute;top:8px;right:10px;font-weight:800;color:var(--accent)}
+.steps{display:flex;gap:4px;margin:10px 0 14px}.steps i{flex:1;height:6px;border-radius:3px;background:var(--line)}.steps i.on{background:var(--accent)}.steps i.ok{background:var(--ok)}.steps i.no{background:var(--bad)}
+.de{color:var(--soft);font-size:15px;margin:2px 0 10px}
+.rule{background:var(--chip);border-left:4px solid var(--accent);border-radius:6px;padding:6px 10px;font-size:15px;margin:6px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:14px;cursor:pointer}
+.keys{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.keys .chip{border-radius:8px;min-width:38px;font-weight:700}
+.example{display:none;background:var(--chip);border-radius:10px;padding:8px 12px;margin:8px 0;font-style:italic}.example.show{display:block}
+.fb{margin-top:10px;display:flex;flex-direction:column;gap:6px}.fb:empty{display:none}
+.f{border-radius:10px;padding:7px 10px;font-size:15px}
+.f.bad{background:var(--bad-bg);color:var(--bad)}.f.warn{background:var(--warn-bg);color:var(--warn)}.f.ok{background:var(--ok-bg);color:var(--ok)}
+.f b{font-weight:700}.f .q{font-style:italic;opacity:.9}.f .ex{color:var(--ink)}
+.wc{font-size:14px;color:var(--soft)}.wc.in{color:var(--ok);font-weight:700}
+.clip{background:var(--clip);border:1px solid var(--line);border-radius:4px;padding:16px 18px;font-family:"Newsreader",Georgia,serif;font-size:18px;line-height:1.5;box-shadow:3px 3px 0 var(--line)}
+.clip .hl{font-size:clamp(22px,6vw,30px);font-weight:800;line-height:1.1;margin:0 0 10px;letter-spacing:-.01em}
+.clip .hl.empty{color:var(--soft);font-weight:500;font-style:italic;font-size:18px}
+.clip p{margin:0 0 10px}.clip p.lead{font-weight:700}.clip .by{font-size:14px;color:var(--soft);text-align:right;margin:0}
+mark.er{background:transparent;color:inherit;text-decoration:underline wavy var(--bad);text-decoration-thickness:2px;text-underline-offset:3px}
+mark.rp{color:#1F2A23;border-radius:3px;padding:0 2px}
+sup.en{font-family:"Atkinson Hyperlegible",sans-serif;font-size:11px;font-weight:700;color:var(--bad);margin-left:1px}
+.score{font-family:"Newsreader",Georgia,serif;font-size:60px;font-weight:800;line-height:1}
+.bars{display:grid;grid-template-columns:110px 1fr 54px;gap:6px 10px;align-items:center;font-size:15px}
+.bars .b{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.bars .b i{display:block;height:100%;background:var(--accent)}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:15px}td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.facts td:first-child{font-weight:700;white-space:nowrap;padding-right:10px}
+.wit{border-left:3px solid var(--line);padding:2px 0 2px 12px;margin:10px 0}.wit b{display:block}
+.merk{background:var(--chip);border-radius:12px;padding:14px}
+.note{font-size:14px;color:var(--soft)}
+.hidden{display:none!important}
+.timer{font-weight:700;font-variant-numeric:tabular-nums}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.opt{text-align:left;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;cursor:pointer}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.phr h4{margin:10px 0 4px;font-size:15px}.phr ul{margin:0;padding-left:18px}.phr li{margin:2px 0}
+.rules{margin:6px 0;padding-left:20px}.rules li{margin:3px 0}
+.aist{font-size:14px;color:var(--soft);margin-top:8px}.aist:empty{display:none}
+.modal{position:fixed;inset:0;background:rgba(10,20,12,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.mbox{background:var(--surface);color:var(--ink);border-radius:14px;padding:18px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.mbox p{margin:0 0 14px}
+details>summary{cursor:pointer}
+@media (max-width:480px){.bars{grid-template-columns:96px 1fr 46px}.clip{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ===================== HILFSFUNKTIONEN ===================== */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const LT='a-zäöüßA-ZÄÖÜ';
+function wre(p,fl='i'){return new RegExp('(?<!['+LT+'])'+reEsc(p).replace(/\s+/g,'\\s+')+'(?!['+LT+'])',fl);}
+const words=t=>(String(t||'').match(/[A-Za-zÄÖÜäöüß0-9]+(?:[-’'][A-Za-zÄÖÜäöüß0-9]+)*/g)||[]);
+const wc=t=>words(t).length;
+const W=[120,150];
+
+/* ===================== AUFGABEN ===================== */
+/* type 'notizen' = Bericht mit freier Hand (Reporter-Notizen oder umgangssprachliche Zeugenaussage)
+   type 'angaben' = Bericht mit vielen Angaben (Eckdaten + Aussagen der handelnden Personen) */
+const TASKS=[
+{id:'fussgaenger',type:'notizen',title:'Schüler von Auto erfasst',de:'Reporter-Notizen',ort:'St. Johann im Pongau',
+ notes:'Verkehrsunfall – Fußgänger – Schüler Muammar I. (13) – Heimweg von der Schule – Brechtstraße, St. Johann im Pongau – Donnerstag, 21. Juni, 13.30 Uhr – PKW-Lenkerin Madlen M. (35) – konnte nicht mehr bremsen – Motorhaube – Zeugen – Rettung – leicht verletzt – Blechschaden',
+ keys:[{f:'Wer? (Opfer)',h:'Muammar I. (13)',w:['Muammar','13-jährig','13-Jährig','Schüler']},{f:'Wer? (Lenkerin)',h:'Madlen M. (35)',w:['Madlen','Lenkerin','35-J','Fahrerin']},{f:'Wo?',h:'Brechtstraße, St. Johann',w:['Brechtstraße','Brechtstrasse','St. Johann']},{f:'Wann?',h:'21. Juni, 13.30 Uhr',w:['21. Juni','Donnerstag','13.30','13:30']},{f:'Wie?',h:'konnte nicht mehr bremsen, Motorhaube',w:['bremse','Motorhaube','erfasst','kollid']},{f:'Folgen?',h:'leicht verletzt, Blechschaden',w:['leicht verletzt','leichte Verletzung','Blechschaden','Sachschaden']}],
+ model:{headline:'Schüler auf dem Heimweg von Auto erfasst',summary:'Ein 13-jähriger Schüler wurde am Donnerstag in St. Johann im Pongau von einem PKW erfasst. Er erlitt leichte Verletzungen.',hauptteil:'St. Johann im Pongau. Am 21. Juni war Muammar I. (13) gegen 13.30 Uhr auf dem Heimweg von der Schule. In der Brechtstraße betrat er die Fahrbahn, als sich gerade der PKW von Madlen M. (35) näherte. Die Lenkerin bremste sofort, konnte ihr Fahrzeug aber nicht mehr rechtzeitig anhalten. Der Bub wurde auf die Motorhaube geschleudert. Augenzeugen verständigten umgehend die Rettung, die den Schüler ins Krankenhaus brachte. Kurz darauf traf auch eine Polizeistreife ein und sicherte die Unfallstelle ab.',schluss:'Laut den Ärzten erlitt der 13-Jährige nur leichte Verletzungen. Am Wagen der 35-Jährigen entstand Blechschaden. Die Brechtstraße war während der Unfallaufnahme kurzzeitig gesperrt. Die Polizei ermittelt nun den genauen Unfallhergang.'}},
+{id:'radweg',type:'notizen',title:'Zusammenstoß auf dem Radweg',de:'Reporter-Notizen',ort:'Wels',
+ notes:'Zusammenstoß – Traunradweg bei Wels – Samstag, 14. September, 10.15 Uhr – Schülerin Lena F. (12), Fahrrad – E-Bike-Fahrer Herbert K. (58) – überholte zu knapp – Sturz in Böschung – Helm – Spaziergängerin, Erste Hilfe – Klinikum Wels – Handgelenk gebrochen – Polizei: Abstand halten',
+ keys:[{f:'Wer? (Schülerin)',h:'Lena F. (12)',w:['Lena','12-J','Schülerin','Radfahrerin']},{f:'Wer? (E-Bike)',h:'Herbert K. (58)',w:['Herbert','58-J','E-Bike']},{f:'Wo?',h:'Traunradweg bei Wels',w:['Traunradweg','Radweg']},{f:'Wann?',h:'14. September, 10.15 Uhr',w:['14. September','Samstag','10.15','10:15']},{f:'Wie?',h:'zu knapp überholt, Sturz in Böschung',w:['überhol','Böschung','Abstand']},{f:'Folgen?',h:'Handgelenk gebrochen',w:['Handgelenk','gebrochen','Bruch']}],
+ model:{headline:'Radfahrerin nach Überholmanöver verletzt',summary:'Bei einem Zusammenstoß auf dem Traunradweg wurde am Samstag eine 12-jährige Radfahrerin verletzt. Ein E-Bike-Fahrer hatte zu knapp überholt.',hauptteil:'Wels. Am 14. September war Lena F. (12) gegen 10.15 Uhr mit ihrem Fahrrad auf dem Traunradweg unterwegs. Zur selben Zeit näherte sich von hinten der E-Bike-Fahrer Herbert K. (58) mit hoher Geschwindigkeit. Beim Überholen hielt er zu wenig Abstand, sodass sich die Lenker der beiden Räder berührten. Die Schülerin verlor das Gleichgewicht und stürzte in die Böschung. Eine Spaziergängerin leistete Erste Hilfe und verständigte die Rettung. Auch Herbert K. hielt an und kümmerte sich um die Verletzte.',schluss:'Die 12-Jährige wurde ins Klinikum Wels gebracht. Sie erlitt einen Bruch des Handgelenks, ihr Helm verhinderte Kopfverletzungen. Der 58-Jährige blieb unverletzt. Die Polizei appelliert an alle Radfahrer, beim Überholen Abstand zu halten.'}},
+{id:'mure',type:'notizen',title:'Mure verschüttet Straße',de:'Reporter-Notizen',ort:'Arzl im Pitztal',
+ notes:'Unwetter – Mure – Landesstraße ins Pitztal bei Arzl – Sonntag, 27. Juli, ca. 21 Uhr – Starkregen – Schlamm und Geröll auf 50 Metern – 3 Autos, 7 Insassen eingeschlossen – Feuerwehren aus 3 Gemeinden – Bagger – nach 2 Stunden befreit – niemand verletzt – Geologe prüft Hang – Straße bis Dienstag gesperrt',
+ keys:[{f:'Wer?',h:'7 Insassen in 3 Autos',w:['sieben','Insassen','drei Autos','7 ']},{f:'Wo?',h:'Pitztal, Arzl',w:['Pitztal','Arzl']},{f:'Wann?',h:'27. Juli, 21 Uhr',w:['27. Juli','Sonntag','21 Uhr']},{f:'Was?',h:'Mure verschüttet Straße',w:['Mure','verschüttet','Schlamm','Geröll']},{f:'Wie?',h:'Starkregen, Bagger',w:['Starkregen','Gewitter','Unwetter','Bagger']},{f:'Folgen?',h:'niemand verletzt, gesperrt',w:['niemand','gesperrt','Geologe']}],
+ model:{headline:'Mure verschüttet Straße ins Pitztal',summary:'Nach einem heftigen Gewitter verschüttete am Sonntag eine Mure die Landesstraße ins Pitztal. Sieben Menschen saßen in ihren Autos fest.',hauptteil:'Arzl im Pitztal. Am 27. Juli ging gegen 21 Uhr ein Unwetter mit Starkregen über dem Tal nieder. Dadurch rutschte oberhalb der Straße ein Hang ab, und Schlamm sowie Geröll bedeckten die Fahrbahn auf einer Länge von rund 50 Metern. Drei Autos mit insgesamt sieben Insassen wurden eingeschlossen und konnten weder vor noch zurück. Feuerwehren aus drei Gemeinden rückten aus und räumten mit Baggern einen Weg frei. Nach etwa zwei Stunden waren alle Betroffenen befreit.',schluss:'Verletzt wurde niemand. Die Straße bleibt bis Dienstag gesperrt, da ein Geologe den Hang noch untersuchen muss. Bis dahin müssen die Bewohner des Tals eine Umleitung nehmen.'}},
+{id:'kater',type:'notizen',title:'Kater sitzt auf Baum fest',de:'Reporter-Notizen',ort:'Klagenfurt',
+ notes:'Feuerwehreinsatz – Kater Moritz – 15 Meter hohe Pappel – Park am Lendkanal, Klagenfurt – Freitagabend, 9. Mai, bis Samstag, 10. Mai, 15 Uhr – hat Vogel gejagt – Besitzerin Elif Y. (10) – Futter half nicht – Drehleiter – unverletzt, hungrig',
+ keys:[{f:'Wer?',h:'Kater Moritz, Elif Y. (10)',w:['Moritz','Kater','Elif']},{f:'Wo?',h:'Lendkanal, Klagenfurt',w:['Lendkanal','Klagenfurt','Pappel']},{f:'Wann?',h:'9./10. Mai',w:['9. Mai','10. Mai','Freitag','Samstag']},{f:'Wie?',h:'Vogel gejagt, Drehleiter',w:['Vogel','Drehleiter']},{f:'Folgen?',h:'unverletzt, hungrig',w:['unverletzt','hungrig']}],
+ model:{headline:'Feuerwehr holt Kater nach 20 Stunden vom Baum',summary:'In Klagenfurt befreite die Feuerwehr am Samstag einen Kater aus einer Baumkrone. Das Tier war dort rund 20 Stunden festgesessen.',hauptteil:'Klagenfurt. Am Freitagabend, dem 9. Mai, jagte Kater Moritz im Park am Lendkanal einem Vogel nach und kletterte dabei auf eine 15 Meter hohe Pappel. Danach traute sich das Tier nicht mehr hinunter. Seine Besitzerin, die zehnjährige Elif Y., versuchte gemeinsam mit ihrer Familie vergeblich, den Vierbeiner mit Futter anzulocken. Am Samstag verständigte sie schließlich die Feuerwehr. Gegen 15 Uhr fuhr ein Feuerwehrmann mit der Drehleiter in die Baumkrone und holte Moritz sicher herunter. Zahlreiche Spaziergänger verfolgten die Rettungsaktion.',schluss:'Der Kater blieb unverletzt, war aber sehr hungrig. Elif brachte ihn anschließend nach Hause und gab ihm sofort zu fressen. Laut den Einsatzkräften sollte man spätestens nach einem Tag Hilfe holen.'}},
+{id:'pony',type:'notizen',title:'Pony auf der Bundesstraße',de:'Reporter-Notizen',ort:'Enns',
+ notes:'Pony entlaufen – Pony Flocke vom Reiterhof – B1 zwischen Enns und Asten – Montag, 7. April, 7.20 Uhr – Weidetor offen – Polizei sperrt Straße – Besitzerin Anna G. (31) – Karotten – 30 Minuten Stau – niemand verletzt',
+ keys:[{f:'Wer?',h:'Pony Flocke, Anna G. (31)',w:['Pony','Flocke']},{f:'Wo?',h:'B1, Enns – Asten',w:['B1','Enns','Asten','Bundesstraße']},{f:'Wann?',h:'7. April, 7.20 Uhr',w:['7. April','Montag','7.20','7:20']},{f:'Wie?',h:'Weidetor offen, Karotten',w:['Tor','Weide','Karotte']},{f:'Folgen?',h:'Stau, niemand verletzt',w:['Stau','niemand','unverletzt']}],
+ model:{headline:'Entlaufenes Pony sorgt für Stau auf der B1',summary:'Ein entlaufenes Pony legte am Montag den Frühverkehr auf der B1 bei Enns lahm. Verletzt wurde niemand.',hauptteil:'Enns. Am 7. April bemerkten mehrere Autofahrer gegen 7.20 Uhr ein Pony, das zwischen Enns und Asten auf der Bundesstraße trabte. Einige Lenker mussten stark abbremsen. Das Tier war von der Weide eines nahe gelegenen Reiterhofs entkommen, weil das Tor offen gestanden war. Zwei Polizeistreifen sperrten die Fahrbahn daraufhin kurzzeitig ab. Wenig später traf die Besitzerin Anna G. (31) ein und lockte das Tier mit Karotten von der Straße. Anschließend brachte sie es zurück in den Stall.',schluss:'Durch den Vorfall bildete sich ein etwa 30 Minuten langer Stau. Verletzt wurde niemand, auch das Pony Flocke blieb unverletzt. Der Reiterhof will das Weidetor nun mit einem zusätzlichen Schloss sichern.'}},
+{id:'b129',type:'notizen',title:'Motorradunfall auf der B129',de:'Reporter-Notizen',ort:'Wilhering',
+ notes:'Verkehrsunfall – schwer – Bundesstraße 129 – Kreuzung Wilhering – 17. November – Motorrad – Vorrang missachtet – 1 Toter (Manfred S., 36) – 2 Verletzte (Susanne O., 32, und Sohn Theo, 5 Monate) – Feuerwehr – Bergeschere – Straße bis Mitternacht gesperrt',
+ keys:[{f:'Wer? (Motorrad)',h:'Manfred S. (36)',w:['Manfred','36-J','Motorrad']},{f:'Wer? (PKW)',h:'Susanne O. (32), Sohn Theo',w:['Susanne','32-J','Theo','Sohn']},{f:'Wo?',h:'B129, Kreuzung Wilhering',w:['B129','Bundesstraße 129','Wilhering']},{f:'Wann?',h:'17. November',w:['17. November']},{f:'Wie?',h:'Vorrang missachtet',w:['Vorrang']},{f:'Folgen?',h:'1 Toter, 2 Verletzte, gesperrt',w:['ums Leben','tödlich','starb','erlag','zu spät','verletzt','gesperrt']}],
+ model:{headline:'Motorradfahrer auf der B129 tödlich verunglückt',summary:'Bei einem schweren Verkehrsunfall auf der B129 kam am 17. November ein Motorradfahrer ums Leben. Eine Mutter und ihr Baby wurden verletzt.',hauptteil:'Wilhering. Manfred S. (36) war mit seinem Motorrad auf der Bundesstraße 129 unterwegs. An der Kreuzung Wilhering missachtete er vermutlich die Vorrangregel. Zur selben Zeit fuhr Susanne O. (32) mit ihrem PKW in die Kreuzung ein, auf der Rückbank saß ihr fünf Monate alter Sohn Theo. Die beiden Fahrzeuge prallten zusammen, der Motorradfahrer stürzte auf die Fahrbahn. Augenzeugen verständigten sofort die Einsatzkräfte. Die Feuerwehr musste Mutter und Kind mit einer Bergeschere aus dem Wrack befreien.',schluss:'Für den 36-Jährigen kam jede Hilfe zu spät. Die 32-Jährige und ihr Sohn wurden verletzt ins Krankenhaus gebracht. Die B129 blieb bis Mitternacht gesperrt. Die Polizei ermittelt nun den genauen Unfallhergang.'}},
+{id:'tankstelle',type:'notizen',title:'Überfall auf Tankstelle',de:'Zeugenaussage in Umgangssprache',ort:'Ried im Innkreis',
+ src:'Aus der Zeugenaussage von Tobias Wimmer (31) über einen Überfall auf eine Tankstelle in Ried im Innkreis am 3. Dezember:',
+ wit:[{text:'„Boah, das ging voll schnell! Ein Typ mit Sturmhaube, so um halb sieben am Abend.“'},{text:'„Ich war grad beim Tanken und hab alles durch die Scheibe gesehen.“'},{text:'„Der hat dem Kassier ein Messer gezeigt und gesagt, er soll die Kassa ausräumen. So 2.000 Euro hat er mitgenommen, glaub ich.“'},{text:'„Dann ist er auf ein Moped und weg Richtung Bahnhof.“'},{text:'„Verletzt ist keiner worden, der Kassier war aber total fertig.“'},{text:'„Die Polizei war nach fünf Minuten da und hat überall gesucht – mit Hund und so. Erwischt haben sie ihn aber nicht.“'}],
+ keys:[{f:'Wer? (Täter)',h:'maskierter Mann',w:['maskiert','Täter','Sturmhaube','Mann']},{f:'Wer? (Zeuge)',h:'Tobias W. (31)',w:['Tobias','Zeuge','31']},{f:'Wo?',h:'Tankstelle, Ried im Innkreis',w:['Ried','Tankstelle']},{f:'Wann?',h:'3. Dezember, 18.30 Uhr',w:['3. Dezember','18.30','18:30','halb sieben']},{f:'Wie?',h:'Messer, Flucht mit Moped',w:['Messer','Moped']},{f:'Folgen?',h:'2.000 Euro Beute, niemand verletzt, flüchtig',w:['2.000','2000','niemand','flüchtig','Flucht']}],
+ model:{headline:'Bewaffneter Überfall auf Tankstelle in Ried',summary:'Ein unbekannter Täter überfiel am 3. Dezember eine Tankstelle in Ried im Innkreis. Er erbeutete rund 2.000 Euro und ist weiterhin auf der Flucht.',hauptteil:'Ried im Innkreis. Am 3. Dezember betrat gegen 18.30 Uhr ein Mann mit Sturmhaube die Tankstelle. Er bedrohte den Kassier mit einem Messer und forderte das Geld aus der Kassa. Laut dem Augenzeugen Tobias W. (31), der gerade tankte, erbeutete der Täter etwa 2.000 Euro. Der Zeuge beobachtete den gesamten Überfall durch die Scheibe. Anschließend flüchtete er auf einem Moped in Richtung Bahnhof. Die Polizei traf wenige Minuten später ein und leitete eine Fahndung mit einem Suchhund ein.',schluss:'Verletzt wurde niemand, der Kassier stand jedoch unter Schock. Trotz der sofortigen Suche mit einem Polizeihund fehlt von dem Täter jede Spur. Die Polizei bittet um Hinweise aus der Bevölkerung.'}},
+{id:'scheune',type:'notizen',title:'Scheunenbrand in Eferding',de:'Zeugenaussage in Umgangssprache',ort:'Eferding',
+ src:'Aus der Zeugenaussage von Gerti Mayr (67) über einen Brand auf dem Bauernhof ihres Nachbarn in Eferding am 12. August:',
+ wit:[{text:'„Na, das war ein Wahnsinn! Um drei in der Früh hat’s auf einmal so komisch gerochen.“'},{text:'„Ich schau raus und die Scheune vom Nachbarn steht schon in Flammen. Sofort hab ich die Feuerwehr angerufen.“'},{text:'„Die waren mit fünf Wehren da, fast hundert Mann! Die Kühe haben sie Gott sei Dank noch alle rausgebracht.“'},{text:'„Löschen hat ewig gedauert, so um sieben war’s vorbei.“'},{text:'„Die Scheune ist komplett hin, das ganze Heu auch. Die sagen, mindestens 300.000 Euro Schaden.“'},{text:'„Warum’s gebrannt hat? Keine Ahnung, die Polizei schaut sich das jetzt an.“'}],
+ keys:[{f:'Wer?',h:'Nachbarin Gerti M. (67), Feuerwehren',w:['Gerti','Nachbarin','67']},{f:'Wo?',h:'Bauernhof in Eferding',w:['Eferding','Bauernhof','Scheune']},{f:'Wann?',h:'12. August, 3 Uhr',w:['12. August','3 Uhr']},{f:'Wie?',h:'Brandgeruch, Feuerwehr gerufen, Kühe gerettet',w:['Kühe','Feuerwehr']},{f:'Folgen?',h:'Scheune zerstört, 300.000 Euro, Ursache unklar',w:['300.000','300000','zerstört','Ursache','ermittelt']}],
+ model:{headline:'Großbrand zerstört Scheune in Eferding',summary:'Bei einem Großbrand in Eferding wurde am 12. August eine Scheune völlig zerstört. Alle Tiere konnten gerettet werden.',hauptteil:'Eferding. Am 12. August bemerkte gegen 3 Uhr früh die Nachbarin Gerti M. (67) Brandgeruch. Als sie aus dem Fenster blickte, stand die Scheune eines landwirtschaftlichen Betriebs bereits in Flammen, die schon von Weitem zu sehen waren. Sie verständigte sofort die Feuerwehr. Fünf Feuerwehren mit fast 100 Einsatzkräften rückten aus. Zunächst brachten die Helfer alle Kühe aus dem angrenzenden Stall in Sicherheit. Die Löscharbeiten dauerten bis etwa 7 Uhr.',schluss:'Verletzt wurde niemand. Die Scheune und die Heuvorräte wurden völlig zerstört, der Schaden beträgt mindestens 300.000 Euro. Die Feuerwehr hielt noch bis zum Vormittag Brandwache. Die Brandursache ist noch unklar, die Polizei ermittelt.'}},
+{id:'kuehe',type:'angaben',title:'Kühe auf der Autobahn',de:'Eckdaten + 4 Personen',ort:'Seewalchen',
+ info:'2. Oktober, 6.40 Uhr, im Gemeindegebiet von Seewalchen, Kühe auf der Westautobahn (A1), Auffahrunfall mit Sachschaden, Polizei treibt die Tiere zusammen, Bauer holt sie mit dem Viehanhänger, A1 Richtung Salzburg eineinhalb Stunden gesperrt.',
+ wit:[{who:'Landwirtin Monika S. (48)',text:'„Ein Gewitter in der Nacht hat die Tiere unruhig gemacht. Sechs Kühe haben den Weidezaun niedergerissen. Als ich es bemerkt habe, habe ich sofort die Polizei verständigt.“'},{who:'Polizist Gerhard T. (39)',text:'„Wir haben die Autobahn in Fahrtrichtung Salzburg sofort gesperrt. Mit vier Streifen haben wir die Kühe auf einen Parkplatz getrieben.“'},{who:'Autolenker Kevin P. (23)',text:'„Plötzlich standen zwei Kühe mitten auf der Fahrbahn. Ich musste eine Vollbremsung machen. Der Wagen hinter mir ist mir hinten aufgefahren. Zum Glück ist niemand verletzt worden.“'},{who:'Landwirt Josef S. (52)',text:'„Ich bin mit dem Viehanhänger gekommen und habe die Kühe zurück auf den Hof gebracht. Keinem Tier ist etwas passiert.“'}],
+ keys:[{f:'Wer?',h:'Kühe, Kevin P. (23), Polizei, Landwirte',w:['Kühe','Kevin','Monika','Josef']},{f:'Wo?',h:'A1 bei Seewalchen',w:['A1','Westautobahn','Seewalchen']},{f:'Wann?',h:'2. Oktober, 6.40 Uhr',w:['2. Oktober','6.40','6:40']},{f:'Was?',h:'Auffahrunfall',w:['aufgefahren','auffuhr','Auffahrunfall']},{f:'Wie?',h:'Zaun niedergerissen, Parkplatz, Viehanhänger',w:['Zaun','Parkplatz','Viehanhänger','Anhänger']},{f:'Folgen?',h:'Sachschaden, 1,5 Stunden gesperrt',w:['Sachschaden','gesperrt','eineinhalb']}],
+ model:{headline:'Entlaufene Kühe legen Westautobahn lahm',summary:'Sechs entlaufene Kühe verursachten am 2. Oktober auf der Westautobahn bei Seewalchen einen Auffahrunfall. Die A1 war eineinhalb Stunden gesperrt.',hauptteil:'Seewalchen. In der Nacht hatte ein Gewitter die Tiere eines Bauernhofs unruhig gemacht. Laut Landwirtin Monika S. (48) hätten sechs Kühe den Weidezaun niedergerissen. Die Landwirtin verständigte sofort die Polizei. Gegen 6.40 Uhr standen plötzlich zwei von ihnen auf der Fahrbahn der A1. Autolenker Kevin P. (23) musste eine Vollbremsung machen, worauf ein nachfolgender Wagen auffuhr. Die Polizei sperrte die Autobahn in Richtung Salzburg und trieb die Kühe mit vier Streifen auf einen Parkplatz.',schluss:'Verletzt wurde niemand, an beiden Autos entstand Sachschaden. Landwirt Josef S. (52) brachte die Tiere mit einem Viehanhänger unverletzt auf den Hof zurück. Die Autobahn war in Richtung Salzburg eineinhalb Stunden gesperrt.'}},
+{id:'handymast',type:'angaben',title:'Jugendliche auf Handymast',de:'Eckdaten + 3 Personen',ort:'Wiener Neustadt',
+ info:'24. Oktober, Freitagabend, Austraße in Wiener Neustadt, 14-Jährige klettert auf einen Handymast, gerät in Panik, Feuerwehr holt sie mit der Drehleiter herunter, niemand verletzt, Eltern müssen den Einsatz bezahlen.',
+ wit:[{who:'Schülerin Samira L. (14)',text:'„Ich wollte mit meinen Freundinnen den Sonnenuntergang filmen. Deshalb bin ich auf den Handymast geklettert. Oben ist mir plötzlich schwindelig geworden. Meine Freundinnen haben dann die Feuerwehr gerufen.“'},{who:'Feuerwehrkommandant Hendrik G. (47)',text:'„Das Mädchen war völlig in Panik. Wir haben sie mit der Drehleiter sicher heruntergeholt. Das hat eine Viertelstunde gedauert.“'},{who:'Polizeibeamtin Dilara K. (33)',text:'„Es ist streng verboten und lebensgefährlich, auf Handymasten zu klettern. Die Eltern müssen die Kosten für den Einsatz übernehmen.“'}],
+ keys:[{f:'Wer?',h:'Samira L. (14)',w:['Samira','14-J','Jugendliche','Schülerin','Mädchen']},{f:'Wo?',h:'Austraße, Wiener Neustadt',w:['Wiener Neustadt','Austraße']},{f:'Wann?',h:'24. Oktober, Freitagabend',w:['24. Oktober','Freitag']},{f:'Was?',h:'auf Handymast geklettert',w:['Handymast','Mast']},{f:'Wie?',h:'schwindelig, Drehleiter',w:['schwindel','Drehleiter','Panik']},{f:'Folgen?',h:'unverletzt, Eltern zahlen',w:['unverletzt','niemand','Kosten','bezahlen','verboten']}],
+ model:{headline:'14-Jährige mit Drehleiter von Handymast geholt',summary:'In Wiener Neustadt musste die Feuerwehr am Freitagabend eine 14-Jährige von einem Handymast holen. Das Mädchen blieb unverletzt.',hauptteil:'Wiener Neustadt. Am 24. Oktober wollte die Schülerin Samira L. (14) mit ihren Freundinnen den Sonnenuntergang filmen. Dafür kletterte sie in der Austraße auf einen Handymast. Oben wurde ihr plötzlich schwindelig, und sie traute sich nicht mehr hinunter. Ihre Freundinnen, die von unten zusahen, verständigten daraufhin die Einsatzkräfte. Laut Feuerwehrkommandant Hendrik G. sei die Jugendliche völlig in Panik gewesen. Mithilfe der Drehleiter brachten die Helfer sie nach einer Viertelstunde sicher zu Boden.',schluss:'Verletzt wurde niemand. Wie Polizeibeamtin Dilara K. betonte, sei das Klettern auf Handymasten verboten und lebensgefährlich. Die Kosten für den Einsatz müssen die Eltern übernehmen. Die Polizei warnt eindringlich vor solchen gefährlichen Mutproben.'}},
+{id:'bergrettung',type:'angaben',title:'Wanderer im Nebel verirrt',de:'Eckdaten + 3 Personen',ort:'Puchberg am Schneeberg',
+ info:'12. Oktober, Schneeberg bei Puchberg, Wanderer verirrt sich im Nebel, Notruf mit fast leerem Handy-Akku, zwölf Bergretter steigen auf, Hubschrauber kann nicht fliegen, Mann um 18 Uhr gefunden, stark unterkühlt.',
+ wit:[{who:'Wanderer Thomas B. (42)',text:'„Ich bin um 9 Uhr allein losgegangen. Am Nachmittag ist plötzlich dichter Nebel aufgezogen, und ich habe den Weg nicht mehr gefunden. Mit dem letzten Akku habe ich den Notruf gewählt.“'},{who:'Einsatzleiterin Karin S. (45)',text:'„Wir sind mit zwölf Bergrettern zu Fuß aufgestiegen. Wegen des Nebels konnte der Hubschrauber nicht fliegen. Um 18 Uhr haben wir den Mann unterhalb des Gipfels gefunden.“'},{who:'Hüttenwirtin Maria W. (58)',text:'„Der Mann war stark unterkühlt und hat sich bei uns in der Hütte aufgewärmt. Ich rate allen: Schauen Sie vor jeder Tour auf den Wetterbericht!“'}],
+ keys:[{f:'Wer?',h:'Thomas B. (42)',w:['Thomas','42-J','Wanderer']},{f:'Wo?',h:'Schneeberg, Puchberg',w:['Schneeberg','Puchberg']},{f:'Wann?',h:'12. Oktober',w:['12. Oktober','Sonntag']},{f:'Was?',h:'im Nebel verirrt',w:['Nebel','verirrt','Weg nicht']},{f:'Wie?',h:'zwölf Bergretter, kein Hubschrauber',w:['Bergrett','Hubschrauber']},{f:'Folgen?',h:'unterkühlt, Hütte',w:['unterkühlt','Hütte']}],
+ model:{headline:'Wanderer im Nebel von Bergrettung gefunden',summary:'Am Schneeberg rettete die Bergrettung am 12. Oktober einen Wanderer, der sich im Nebel verirrt hatte. Der Mann war stark unterkühlt.',hauptteil:'Puchberg am Schneeberg. Thomas B. (42) brach gegen 9 Uhr allein zu einer Wanderung auf. Am Nachmittag zog plötzlich dichter Nebel auf, sodass er den Weg nicht mehr fand. Mit fast leerem Akku gelang es ihm gerade noch, den Notruf zu wählen. Die Bergrettung startete sofort einen Sucheinsatz. Laut Einsatzleiterin Karin S. seien zwölf Bergretter zu Fuß aufgestiegen, weil der Hubschrauber nicht fliegen konnte. Gegen 18 Uhr fanden die Helfer den Mann unterhalb des Gipfels.',schluss:'Der 42-Jährige wärmte sich anschließend in einer Hütte auf. Die Hüttenwirtin rät allen Wanderern, vor einer Tour den Wetterbericht zu beachten. Zuvor hatten ihn die Bergretter sicher ins Tal begleitet.'}},
+{id:'eisteich',type:'angaben',title:'Bub bricht im Eis ein',de:'Eckdaten + 3 Personen',ort:'Wals-Siezenheim',
+ info:'18. Jänner, 14 Uhr, Teich in Wals-Siezenheim, Elfjähriger bricht im Eis ein, Spaziergänger rettet ihn mit seinem Schal, Feuerwehr, Rettung bringt das Kind ins Krankenhaus, Polizei warnt vor dünnem Eis.',
+ wit:[{who:'Spaziergänger Markus R. (34)',text:'„Ich habe einen Buben um Hilfe schreien gehört. Er war mitten auf dem Teich eingebrochen. Ich habe mich flach auf das Eis gelegt und ihm meinen Schal zugeworfen. So habe ich ihn ans Ufer gezogen.“'},{who:'Feuerwehrkommandant Florian E. (50)',text:'„Als wir eingetroffen sind, war der elfjährige Felix M. schon am Ufer. Er war völlig durchnässt und unterkühlt. Der Passant hat genau richtig gehandelt.“'},{who:'Polizeisprecherin Sabine T. (41)',text:'„Das Eis ist nur wenige Zentimeter dick. Wir warnen davor, zugefrorene Gewässer zu betreten, solange sie nicht freigegeben sind.“'}],
+ keys:[{f:'Wer? (Kind)',h:'Felix M. (11)',w:['Felix','lfjährig','11-J','Bub']},{f:'Wer? (Retter)',h:'Markus R. (34)',w:['Markus','34-J','Spaziergänger','Passant']},{f:'Wo?',h:'Teich, Wals-Siezenheim',w:['Wals','Teich']},{f:'Wann?',h:'18. Jänner, 14 Uhr',w:['18. Jänner','18. Januar','14 Uhr']},{f:'Wie?',h:'Schal, ans Ufer gezogen',w:['Schal','Ufer']},{f:'Folgen?',h:'unterkühlt, Krankenhaus, Warnung',w:['unterkühlt','durchnässt','Krankenhaus','warn']}],
+ model:{headline:'Spaziergänger rettet Elfjährigen aus eisigem Teich',summary:'In Wals-Siezenheim brach am 18. Jänner ein elfjähriger Bub auf einem zugefrorenen Teich ein. Ein Spaziergänger zog ihn rechtzeitig ans Ufer.',hauptteil:'Wals-Siezenheim. Gegen 14 Uhr spazierte Markus R. (34) mit seinem Hund am Gewässer entlang, als er Hilferufe hörte. Der elfjährige Felix M. war mitten auf dem Teich durch das Eis gebrochen. Der 34-Jährige legte sich flach auf die Eisfläche, warf dem Buben seinen Schal zu und zog ihn so ans Ufer. Andere Spaziergänger verständigten in der Zwischenzeit die Feuerwehr. Laut Feuerwehrkommandant Florian E. sei das Kind völlig durchnässt und unterkühlt gewesen.',schluss:'Die Rettung brachte den Elfjährigen zur Kontrolle ins Krankenhaus. Laut Polizeisprecherin Sabine T. sei das Eis nur wenige Zentimeter dick. Die Polizei warnt davor, zugefrorene Gewässer zu betreten, solange sie nicht freigegeben sind.'}},
+{id:'kuechenbrand',type:'angaben',title:'Küchenbrand in Graz',de:'Eckdaten + 4 Personen',ort:'Graz',
+ info:'3. Dezember, 18.45 Uhr, Annenstraße in Graz, Küchenbrand im 3. Stock, Pfanne mit Öl, Rauchmelder, Nachbar hilft, Feuerwehr mit 25 Einsatzkräften, leichte Rauchgasvergiftung, Wohnung unbewohnbar.',
+ wit:[{who:'Pensionistin Gertrude H. (79)',text:'„Ich wollte mir Schnitzel herausbacken und habe die Pfanne mit dem Öl auf dem Herd vergessen. Plötzlich hat der Rauchmelder gepiepst und die ganze Küche war voller Rauch.“'},{who:'Nachbar Lukas P. (16)',text:'„Ich habe das Piepsen gehört und sofort bei Frau H. geläutet. Ich habe ihr aus der Wohnung geholfen und dann die Feuerwehr gerufen.“'},{who:'Einsatzleiter Andreas W. (51)',text:'„Wir sind mit vier Fahrzeugen und 25 Leuten ausgerückt. Nach 20 Minuten war der Brand gelöscht. Die Wohnung ist derzeit nicht bewohnbar.“'},{who:'Notarzt Stefan R. (45)',text:'„Die Frau hat eine leichte Rauchgasvergiftung. Wir bringen sie zur Beobachtung ins Krankenhaus.“'}],
+ keys:[{f:'Wer? (Bewohnerin)',h:'Gertrude H. (79)',w:['Gertrude','79-J','Pensionistin']},{f:'Wer? (Nachbar)',h:'Lukas P. (16)',w:['Lukas','16-J','Nachbar']},{f:'Wo?',h:'Annenstraße, Graz',w:['Annenstraße','Graz']},{f:'Wann?',h:'3. Dezember, 18.45 Uhr',w:['3. Dezember','18.45','18:45']},{f:'Wie?',h:'Pfanne mit Öl vergessen',w:['Pfanne','Öl']},{f:'Folgen?',h:'Rauchgasvergiftung, unbewohnbar',w:['Rauchgas','unbewohnbar','nicht bewohnbar']}],
+ model:{headline:'Nachbar rettet Pensionistin aus verrauchter Wohnung',summary:'Bei einem Küchenbrand in Graz wurde am 3. Dezember eine 79-jährige Frau leicht verletzt. Ein Nachbar half ihr aus der Wohnung.',hauptteil:'Graz. Gegen 18.45 Uhr vergaß Gertrude H. (79) in der Annenstraße eine Pfanne mit heißem Öl auf dem Herd. Das Öl fing Feuer, und kurz darauf schlug der Rauchmelder Alarm. Der 16-jährige Nachbar Lukas P. hörte das Piepsen, läutete sofort an der Tür und half der Pensionistin ins Freie. Anschließend verständigte er die Feuerwehr, die mit vier Fahrzeugen und 25 Einsatzkräften ausrückte. Laut Einsatzleiter Andreas W. sei der Brand nach rund 20 Minuten gelöscht gewesen.',schluss:'Die 79-Jährige erlitt eine leichte Rauchgasvergiftung und wurde zur Beobachtung ins Krankenhaus gebracht. Die Küche wurde durch die Flammen schwer beschädigt, die Wohnung ist derzeit unbewohnbar.'}},
+{id:'schulbus',type:'angaben',title:'Schulbus im Graben',de:'Eckdaten + 4 Personen',ort:'Bad Leonfelden',
+ info:'15. Jänner, 7.10 Uhr, Landesstraße vor Bad Leonfelden, Schulbus mit 22 Kindern rutscht bei Glatteis in den Straßengraben, niemand verletzt, Bergung mit einem Kran, Straße zwei Stunden gesperrt.',
+ wit:[{who:'Busfahrer Johann R. (52)',text:'„In der Kurve war plötzlich Glatteis. Ich konnte den Bus nicht mehr abfangen. Ich habe sofort den Notruf gewählt und die Kinder beruhigt.“'},{who:'Schülerin Hanna K. (11)',text:'„Auf einmal hat es gerutscht, und der Bus ist schief im Graben gestanden. Wir sind alle über den Notausstieg hinausgeklettert.“'},{who:'Sanitäterin Lisa M. (29)',text:'„Wir haben alle Kinder untersucht. Verletzt wurde niemand.“'},{who:'Feuerwehrkommandant Herbert L. (58)',text:'„Wir haben den Bus mit einem Kran geborgen. Die Straße war dafür zwei Stunden gesperrt.“'}],
+ keys:[{f:'Wer?',h:'Johann R. (52), 22 Kinder',w:['Johann','52-J','Busfahrer','22']},{f:'Wo?',h:'Landesstraße, Bad Leonfelden',w:['Bad Leonfelden','Landesstraße']},{f:'Wann?',h:'15. Jänner, 7.10 Uhr',w:['15. Jänner','15. Januar','7.10','7:10']},{f:'Was?',h:'Bus im Graben',w:['Graben']},{f:'Wie?',h:'Glatteis, Notausstieg',w:['Glatteis','Notausstieg']},{f:'Folgen?',h:'niemand verletzt, Kran, gesperrt',w:['niemand','Kran','gesperrt']}],
+ model:{headline:'Schulbus rutscht bei Glatteis in den Graben',summary:'Ein Schulbus mit 22 Kindern landete am 15. Jänner bei Bad Leonfelden im Straßengraben. Verletzt wurde niemand.',hauptteil:'Bad Leonfelden. Gegen 7.10 Uhr war Busfahrer Johann R. (52) mit den Schülerinnen und Schülern auf der Landesstraße unterwegs. In einer Kurve geriet der Bus auf Glatteis. Der Lenker konnte das Fahrzeug nicht mehr abfangen, sodass es schräg im Graben zum Stehen kam. Er wählte sofort den Notruf. Laut Schülerin Hanna K. sei der Bus plötzlich schief im Graben gestanden. Über den Notausstieg kletterten alle ins Freie. Die Sanitäter untersuchten anschließend jedes Kind.',schluss:'Laut Sanitäterin Lisa M. sei niemand verletzt worden. Die Feuerwehr barg den Bus mit einem Kran, die Straße war dafür zwei Stunden lang gesperrt. Ein Ersatzbus brachte die Schülerinnen und Schüler anschließend zur Schule.'}}
+];
+const T=id=>TASKS.find(x=>x.id===id);
+
+/* ===================== SCHRITTE & FORMULIERUNGEN ===================== */
+const ZEUGEN_ST=['Laut ',' sei ',' habe ',' seien ',' hätten ','Wie ',' berichtete, ',' gab an, '];
+const STEPS=[
+{k:'hauptteil',kind:'haupt',label:'Hauptteil: Was? Wo? Wann? Wer? Wie?',de:'Beginne mit der Ortsmarke (Ort + Punkt). Erzähl dann der Reihe nach, was passiert ist und wer geholfen hat. Absätze machst du mit ↵.',rule:'Präteritum, sachlich, keine wörtliche Rede – Aussagen indirekt mit sei / habe einbauen.',ph:'Ort. Am … war …',st:t=>[t.ort+'. ','Am ',', dem ',' gegen ',' Uhr war ',' unterwegs, als ','Zur selben Zeit ','Vermutlich ','Dabei übersah ','In weiterer Folge ','Kurz darauf ','Augenzeugen verständigten sofort die Einsatzkräfte. ','Daraufhin ','Wenig später ',...((t.wit||t.type==='angaben')?ZEUGEN_ST:[])]},
+{k:'schluss',kind:'body',label:'Schluss: Welche Folgen?',de:'Welche Folgen hatte der Vorfall? Verletzungen, Schaden, Sperre, Ermittlungen, Warnung der Polizei.',rule:'Hier darf der aktuelle Stand im Präsens stehen: „Die Polizei ermittelt.“',ph:'… erlitt …',st:t=>[' erlitt ','leichte Verletzungen. ','Verletzt wurde niemand. ','Am Fahrzeug entstand Sachschaden. ','Die Straße war ',' gesperrt. ','Die Polizei ermittelt nun ','Die Polizei warnt davor, ','Mittlerweile ']},
+{k:'summary',kind:'summary',label:'Summary (1–2 Sätze)',de:'Jetzt, wo der Artikel fertig ist: Fasse ihn in 1–2 Sätzen zusammen. Das Summary steht später fett über dem Hauptteil.',rule:'Nur das Wichtigste: Wer? Was? Wo? Wann? Keine Einzelheiten.',ph:'Bei einem … wurde am … in …',st:t=>['Bei einem ',' wurde am ',' in ',' kam es am ',' zu einem ',' leicht verletzt.',' schwer verletzt.','Verletzt wurde niemand.']},
+{k:'headline',kind:'headline',label:'Headline im Telegrammstil',de:'Zum Schluss die Schlagzeile: knapp wie ein Telegramm – ohne Artikel am Anfang und ohne „ist“ oder „wurde“.',rule:'Richtig: „Motorradfahrer tödlich verunglückt“ – nicht: „Ein Motorradfahrer ist tödlich verunglückt“.',ph:'z. B. Radfahrerin bei Sturz verletzt',st:t=>['Großeinsatz in ',' verletzt',' gerettet',' geborgen',' tödlich verunglückt','Feuerwehr rettet ',' sorgt für Stau']}
+];
+const PHRASES=[
+['Hauptteil beginnen',['[Ort]. Am Montag, dem …, war … gegen … Uhr unterwegs, als …','[Ort]. Gegen … Uhr bemerkte …']],
+['Hergang erzählen',['Zur selben Zeit …','Vermutlich aufgrund …','Aus bisher ungeklärter Ursache …','Dabei übersah …','In weiterer Folge …','Augenzeugen verständigten sofort die Einsatzkräfte.','Die Feuerwehr rückte mit … Fahrzeugen aus.','… wurde mit dem Rettungswagen ins Krankenhaus gebracht.']],
+['Aussagen indirekt einbauen',['Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.','Wie die Tierärztin berichtete, habe sie die Pferde betäubt.','Die Lenkerin gab an, sie habe stark bremsen müssen.','Der Bauer erklärte, die Pferde hätten die Koppel durchbrochen.']],
+['Schluss: Folgen',['… erlitt leichte / schwere Verletzungen.','Verletzt wurde niemand.','Am Fahrzeug entstand Sachschaden.','Die Straße war bis … gesperrt.','Die Polizei ermittelt nun die Unfallursache.']],
+['Summary (zum Schluss schreiben)',['Bei einem … wurde am … in … ein … verletzt.','In … kam es am … zu einem …']],
+['Statt „dann“',['anschließend','daraufhin','kurz darauf','wenig später','in weiterer Folge','zur selben Zeit','schließlich']],
+['Statt immer denselben Namen',['Maria K. → die Lenkerin → die 26-Jährige','Josef H. → der Polizist → der Beamte']],
+['Headline im Telegrammstil',['Motorradfahrer tödlich verunglückt','Pferde legen Autobahn lahm','Radfahrerin bei Sturz verletzt']]
+];
+const RULES=['<b>Länge:</b> 120 bis 150 Wörter.','<b>Hauptteil</b> mit Ortsmarke: Was? Wo? Wann? Wer? Wie?','<b>Schluss</b>: Welche Folgen?','<b>Summary</b> (1–2 Sätze) und <b>Headline</b> erst zum Schluss schreiben.','<b>Headline im Telegrammstil</b>: <i>Motorradfahrer tödlich verunglückt</i> – ohne Artikel, ohne „ist“.','<b>Präteritum</b>, <b>sachlich</b>, keine Meinung und keine Gefühle.','<b>Keine wörtliche Rede</b> – Aussagen indirekt mit <i>sei / habe</i>.','<b>Namen abkürzen</b> + Alter: <i>Maria K. (26)</i>.'];
+
+/* ===================== REGEL-QUIZ ===================== */
+const QUIZ=[
+{q:'Wie viele Wörter soll dein Zeitungsbericht haben?',a:['50 bis 80','120 bis 150','200 bis 250','So viele wie möglich'],c:1,w:'Bei der Schularbeit: 120 bis 150 Wörter. Zähl am Ende nach!'},
+{q:'Welche Headline ist im Telegrammstil geschrieben?',a:['Motorradfahrer tödlich verunglückt','Ein Motorradfahrer ist tödlich verunglückt','Gestern ist ein Motorradfahrer verunglückt.','Was für ein schrecklicher Unfall!'],c:0,w:'Telegrammstil: kein Artikel am Anfang, kein „ist / wurde“, kein Punkt – nur die wichtigsten Wörter.'},
+{q:'Wann schreibst du Summary und Headline?',a:['Ganz am Anfang','Zum Schluss, wenn der Artikel fertig ist','Gar nicht','Zwischen Hauptteil und Schluss'],c:1,w:'Erst wenn der Artikel fertig ist, weißt du, was das Wichtigste ist. Dann schreibst du Summary und Headline.'},
+{q:'Was steht im Summary?',a:['Die ganze Geschichte mit allen Details','Der Bericht in 1–2 Sätzen zusammengefasst','Deine Meinung','Eine Frage an die Leser'],c:1,w:'Das Summary fasst den Bericht in 1–2 Sätzen zusammen und steht fett über dem Hauptteil.'},
+{q:'Welche Fragen beantwortet der Hauptteil?',a:['Was? Wo? Wann? Wer? Wie?','Nur: Welche Folgen?','Was denkst du darüber?','Keine – er erzählt eine Geschichte'],c:0,w:'Hauptteil: Was? Wo? Wann? Wer? Wie? – der Schluss beantwortet: Welche Folgen?'},
+{q:'Was gehört in den Schluss?',a:['Die Folgen: Verletzungen, Schaden, Sperre, Ermittlungen','Eine spannende Frage','Deine Meinung','Die Headline'],c:0,w:'Der Schluss beantwortet die Frage: Welche Folgen hatte der Vorfall?'},
+{q:'In welcher Zeitform schreibt man einen Zeitungsbericht?',a:['Präsens','Präteritum','Perfekt','Futur'],c:1,w:'Präteritum: ereignete sich, fuhr, stürzte. Nur der aktuelle Stand darf im Präsens stehen: „Die Polizei ermittelt.“'},
+{q:'„Wir haben die Autobahn sofort gesperrt“, sagte der Polizist. – Welche indirekte Rede ist richtig?',a:['Der Polizist sagte, sie hätten die Autobahn sofort gesperrt.','Der Polizist sagte, wir haben die Autobahn sofort gesperrt.','Der Polizist sagte: „Wir haben gesperrt.“','Der Polizist sagt, sie sperren die Autobahn.'],c:0,w:'wir → sie, und „haben“ wird zu „hätten“ (weil „sie haben“ gleich klingt wie die normale Form).'},
+{q:'„Mir ist nichts passiert“, sagte die Lenkerin. – Wie lautet die indirekte Rede?',a:['Die Lenkerin sagte, ihr sei nichts passiert.','Die Lenkerin sagte, mir ist nichts passiert.','Die Lenkerin sagte, ihr ist nichts passiert worden.','Die Lenkerin sagt: Ihr sei nichts.'],c:0,w:'mir → ihr, ist → sei. Keine Anführungszeichen.'},
+{q:'Darf dein Bericht wörtliche Rede enthalten?',a:['Ja, mit vielen Anführungszeichen','Nein – Aussagen baust du als indirekte Rede ein','Nur in der Headline','Nur am Schluss'],c:1,w:'Direkte Rede wird indirekt eingebaut: „Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.“'},
+{q:'Was gehört NICHT in einen Zeitungsbericht?',a:['Ort und Zeit','Die Folgen','Gefühle und Wertungen wie „Gott sei Dank“ oder „voll schlimm“','Die Namen der Beteiligten'],c:2,w:'Ein Bericht ist objektiv. Wertungen und Umgangssprache aus Zeugenaussagen lässt du weg.'},
+{q:'Ein Zeuge sagt: „Die Bankräuber sind futsch.“ Wie schreibst du das im Bericht?',a:['Die Bankräuber sind futsch.','Die Täter konnten flüchten.','Die Räuber waren voll schnell weg.','„Futsch“, sagte der Zeuge.'],c:1,w:'Umgangssprache wird in Standardsprache umgeformt: Die Täter konnten flüchten / sind flüchtig.'},
+{q:'Wie werden Personen genannt?',a:['Mit vollem Namen und Adresse','Vorname, abgekürzter Nachname und Alter: Maria K. (26)','Nur mit Spitznamen','Gar nicht'],c:1,w:'So schützt die Zeitung die Beteiligten. Später abwechseln: die 26-Jährige, die Lenkerin.'},
+{q:'Was ist eine Ortsmarke?',a:['Der Ort am Anfang des Hauptteils mit Punkt: „Gallneukirchen.“','Eine Briefmarke','Der Ort in der Headline','Der Wohnort des Autors'],c:0,w:'Der Hauptteil beginnt mit dem Ort und einem Punkt: „Wels. Am Samstag …“'},
+{q:'Welcher Satz ist sachlich?',a:['Der arme Bub hatte schreckliche Schmerzen.','Der 13-Jährige wurde leicht verletzt.','Zum Glück ist nichts Schlimmes passiert!','Der Lenker war total unvorsichtig.'],c:1,w:'„arm, schrecklich, zum Glück, total“ sind Wertungen oder Umgangssprache. Sachlich: nur die Fakten.'},
+{q:'„Der Wagen ist gegen die Leitplanke gekracht.“ – Wie lautet der Satz im Präteritum?',a:['Der Wagen kracht gegen die Leitplanke.','Der Wagen krachte gegen die Leitplanke.','Der Wagen wird gegen die Leitplanke krachen.','Der Wagen war gekracht worden.'],c:1,w:'Perfekt (ist gekracht) → Präteritum (krachte).'},
+{q:'Welche Schreibweise ist richtig?',a:['der 36-jährige wurde verletzt','der 36-Jährige wurde verletzt','der 36 Jährige wurde verletzt','der 36- jährige wurde verletzt'],c:1,w:'Steht „Jährige“ allein, schreibt man es groß: der 36-Jährige. Folgt ein Nomen, klein: der 36-jährige Motorradfahrer.'},
+{q:'Statt „dann“ kannst du schreiben …',a:['anschließend, daraufhin, kurz darauf','und dann, und dann','danndann','gar nichts'],c:0,w:'Abwechslungsreiche Satzanfänge machen den Bericht besser lesbar.'}
+];
+
+/* ===================== INDIREKTE REDE ===================== */
+const IRQ=[
+{who:'Polizist Gerhard T. (39)',d:'Wir haben die Autobahn sofort gesperrt.',m:'Polizist Gerhard T. sagte, sie hätten die Autobahn sofort gesperrt.',a:['sie hätten die autobahn sofort gesperrt','dass sie die autobahn sofort gesperrt hätten','sie haben die autobahn sofort gesperrt','dass sie die autobahn sofort gesperrt haben','man habe die autobahn sofort gesperrt','die polizei habe die autobahn sofort gesperrt','die autobahn sei sofort gesperrt worden'],tip:'wir → sie; haben → hätten (weil „sie haben“ gleich klingt wie die normale Form).'},
+{who:'Feuerwehrkommandant Karl B. (55)',d:'Das Feuer ist gelöscht.',m:'Feuerwehrkommandant Karl B. sagte, das Feuer sei gelöscht.',a:['das feuer sei gelöscht','dass das feuer gelöscht sei'],tip:'ist → sei.'},
+{who:'Zeugin Anna M. (41)',d:'Ich habe den Unfall genau gesehen.',m:'Zeugin Anna M. gab an, sie habe den Unfall genau gesehen.',a:['sie habe den unfall genau gesehen','dass sie den unfall genau gesehen habe'],tip:'ich → sie; habe bleibt habe (Konjunktiv).'},
+{who:'Lenker Peter K. (50)',d:'Ich konnte nicht mehr bremsen.',m:'Lenker Peter K. sagte, er habe nicht mehr bremsen können.',a:['er habe nicht mehr bremsen können','dass er nicht mehr habe bremsen können','dass er nicht mehr bremsen habe können','dass er nicht mehr bremsen können habe'],tip:'ich → er; konnte → habe … können.'},
+{who:'Notärztin Eva S. (38)',d:'Der Bub ist nur leicht verletzt.',m:'Notärztin Eva S. erklärte, der Bub sei nur leicht verletzt.',a:['der bub sei nur leicht verletzt','dass der bub nur leicht verletzt sei','er sei nur leicht verletzt','der junge sei nur leicht verletzt'],tip:'ist → sei.'},
+{who:'Landwirtin Monika S. (48)',d:'Die Kühe sind über den Zaun gesprungen.',m:'Landwirtin Monika S. berichtete, die Kühe seien über den Zaun gesprungen.',a:['die kühe seien über den zaun gesprungen','dass die kühe über den zaun gesprungen seien'],tip:'sind → seien.'},
+{who:'Busfahrer Johann R. (52)',d:'Die Straße war spiegelglatt.',m:'Busfahrer Johann R. sagte, die Straße sei spiegelglatt gewesen.',a:['die straße sei spiegelglatt gewesen','dass die straße spiegelglatt gewesen sei','die fahrbahn sei spiegelglatt gewesen'],tip:'war → sei … gewesen.'},
+{who:'Polizistin Sabine T. (35)',d:'Es besteht keine Gefahr mehr.',m:'Polizistin Sabine T. betonte, es bestehe keine Gefahr mehr.',a:['es bestehe keine gefahr mehr','dass keine gefahr mehr bestehe','dass es keine gefahr mehr gebe','es gebe keine gefahr mehr'],tip:'besteht → bestehe.'},
+{who:'Wanderer Thomas B. (42)',d:'Ich habe im Nebel den Weg verloren.',m:'Wanderer Thomas B. erzählte, er habe im Nebel den Weg verloren.',a:['er habe im nebel den weg verloren','er habe den weg im nebel verloren','dass er im nebel den weg verloren habe','dass er den weg im nebel verloren habe'],tip:'ich → er; habe bleibt habe.'},
+{who:'Zeuge Tobias W. (31)',d:'Der Täter flüchtete mit einem Moped.',m:'Zeuge Tobias W. gab an, der Täter sei mit einem Moped geflüchtet.',a:['der täter sei mit einem moped geflüchtet','dass der täter mit einem moped geflüchtet sei','der täter sei mit einem moped geflohen','dass der täter mit einem moped geflohen sei','der täter sei auf einem moped geflüchtet','der täter sei auf einem moped geflohen'],tip:'flüchtete → sei … geflüchtet.'},
+{who:'Einsatzleiter Andreas W. (51)',d:'Wir hatten den Brand nach 20 Minuten unter Kontrolle.',m:'Einsatzleiter Andreas W. sagte, sie hätten den Brand nach 20 Minuten unter Kontrolle gehabt.',a:['sie hätten den brand nach 20 minuten unter kontrolle gehabt','dass sie den brand nach 20 minuten unter kontrolle gehabt hätten','die feuerwehr habe den brand nach 20 minuten unter kontrolle gehabt','man habe den brand nach 20 minuten unter kontrolle gehabt'],tip:'wir → sie; hatten → hätten … gehabt.'},
+{who:'Autolenkerin Lisa P. (26)',d:'Mir ist zum Glück nichts passiert.',m:'Autolenkerin Lisa P. sagte, ihr sei nichts passiert.',a:['ihr sei nichts passiert','ihr sei zum glück nichts passiert','dass ihr nichts passiert sei','dass ihr zum glück nichts passiert sei'],tip:'mir → ihr; ist → sei. „Zum Glück“ ist eine Wertung – im Bericht weglassen.'},
+{who:'Tierarzt Martin L. (57)',d:'Ich habe die Pferde mit einem Gewehr betäubt.',m:'Tierarzt Martin L. berichtete, er habe die Pferde mit einem Gewehr betäubt.',a:['er habe die pferde mit einem gewehr betäubt','dass er die pferde mit einem gewehr betäubt habe','er habe die pferde mit einem betäubungsgewehr betäubt'],tip:'ich → er; habe bleibt habe.'},
+{who:'Bäuerin Rosa G. (63)',d:'Die Schafe sind durch ein Loch im Zaun entkommen.',m:'Bäuerin Rosa G. erklärte, die Schafe seien durch ein Loch im Zaun entkommen.',a:['die schafe seien durch ein loch im zaun entkommen','dass die schafe durch ein loch im zaun entkommen seien'],tip:'sind → seien.'}
+];
+
+/* ===================== PRÜFREGELN ===================== */
+const WERT=['leider','Leider','zum Glück','Zum Glück','Gott sei Dank','glücklicherweise','Glücklicherweise','dumm','dumme','dummen','dummer','dummes','schrecklich','schreckliche','schrecklichen','furchtbar','furchtbare','schlimm','schlimme','schlimmen','arme','armen','armer','unglaublich','unglaubliche','Unglaublich','hoffentlich','Hoffentlich','toll','super','Super','grausam','grausame','Wahnsinn','wahnsinnig','traurig','traurige','Traurig','tragisch','tragische','entsetzlich','katastrophal','Oh nein','was für ein','Was für ein'];
+const UMG=['voll','krass','mega','echt','total','halt','irgendwie','ziemlich','gecheckt','cool','oder so','Typ','Kumpel','ur','eh','na ja','Na ja','okay','ok','checken','futsch','grad','hab','hab’s','hat’s','gab’s','war’s','raus','rein','rausgebracht','reingestürmt','abgehauen','Boah','boah','und so','glaub ich','fertig','hin','ewig'];
+const ICH=['ich','wir','mir','mich','uns','unser','unsere','unseren','unserem','mein','meine','meinen','meinem','meiner'];
+const PRAES={fährt:'fuhr',kommt:'kam',geht:'ging',sagt:'sagte',sieht:'sah',stürzt:'stürzte',ruft:'rief',bringt:'brachte',kracht:'krachte',läuft:'lief',fällt:'fiel',klettert:'kletterte',rettet:'rettete',erleidet:'erlitt',übersieht:'übersah',verständigt:'verständigte',rückt:'rückte',bricht:'brach',brennt:'brannte',holt:'holte',zieht:'zog',springt:'sprang',wirft:'warf',findet:'fand',bemerkt:'bemerkte',kollidiert:'kollidierte',prallt:'prallte',rutscht:'rutschte',hört:'hörte',fliegt:'flog',trifft:'traf',entsteht:'entstand',stößt:'stieß',hilft:'half',verliert:'verlor',gerät:'geriet',schreit:'schrie',bremst:'bremste',lenkt:'lenkte'};
+const PART={passiert:'passierte',gestürzt:'stürzte',gekracht:'krachte',gefahren:'fuhr',gekommen:'kam',gebracht:'brachte',gerufen:'rief',gesehen:'sah',gelaufen:'lief',gefallen:'fiel',geklettert:'kletterte',gerettet:'rettete',verständigt:'verständigte',gesagt:'sagte',erzählt:'erzählte',geflogen:'flog',gerutscht:'rutschte',übersehen:'übersah',kollidiert:'kollidierte',gebrannt:'brannte',gelöscht:'löschte',gefunden:'fand',gegangen:'ging',geholfen:'half',gerannt:'rannte',gestorben:'starb',geschehen:'geschah',ereignet:'ereignete sich',erlitten:'erlitt',eingebrochen:'brach ein',ausgerückt:'rückte aus',gesprungen:'sprang',geworfen:'warf',gebremst:'bremste',geprallt:'prallte',gewesen:'war',geworden:'wurde',geholt:'holte',gezogen:'zog',gehört:'hörte',bemerkt:'bemerkte',eingeliefert:'lieferte ein',alarmiert:'alarmierte',getroffen:'traf',verloren:'verlor',geraten:'geriet',gelegt:'legte',entlaufen:'entlief',entkommen:'entkam',worden:'wurde … (Passiv im Präteritum)'};
+const SEIN=new Set(['gefahren','gestürzt','gekommen','gelaufen','gefallen','geklettert','gerutscht','geflogen','gestorben','eingebrochen','geprallt','gekracht','gerannt','gesprungen','gegangen','gewesen','geworden','geschehen','passiert','kollidiert','verunglückt','ertrunken','entkommen','entlaufen','abgestürzt','ausgerückt','eingetroffen','geraten','aufgebrochen','losgegangen','aufgestiegen','abgerutscht','geblieben','worden']);
+const SPELL={krankenheus:'Krankenhaus',krankenhauß:'Krankenhaus',krankenwaagen:'Krankenwagen',rettungswaagen:'Rettungswagen',unfal:'Unfall',unfahl:'Unfall',feuerwer:'Feuerwehr',feurwehr:'Feuerwehr',feuerwhr:'Feuerwehr',notartz:'Notarzt',nohtarzt:'Notarzt',plözlich:'plötzlich',plötzlig:'plötzlich',plötzich:'plötzlich',warscheinlich:'wahrscheinlich',wahrscheinlig:'wahrscheinlich',vieleicht:'vielleicht',villeicht:'vielleicht',wärend:'während',wehrend:'während',nähmlich:'nämlich',garnicht:'gar nicht',aufeinmal:'auf einmal',fussgänger:'Fußgänger',fussgängerin:'Fußgängerin',fußgenger:'Fußgänger',strasse:'Straße',strassen:'Straßen',landesstrasse:'Landesstraße',bundesstrasse:'Bundesstraße',gross:'groß',grosse:'große',grossen:'großen',grosser:'großer',heiss:'heiß',heisse:'heiße',heissem:'heißem',schliesslich:'schließlich',ausserdem:'außerdem',ausser:'außer',draussen:'draußen',fuss:'Fuß',gemäss:'gemäß',grösser:'größer',mitwoch:'Mittwoch',sammstag:'Samstag',sontag:'Sonntag',donerstag:'Donnerstag',merz:'März',kreutzung:'Kreuzung',kreuzug:'Kreuzung',kollidirte:'kollidierte',kolidierte:'kollidierte',ereigente:'ereignete',ereignite:'ereignete',ereignette:'ereignete',passirte:'passierte',passierde:'passierte',schwerverletzt:'schwer verletzt',leichtverletzt:'leicht verletzt',schwerverletzte:'schwer verletzte',motorad:'Motorrad',motorrat:'Motorrad',motoradfahrer:'Motorradfahrer',motoradlenker:'Motorradlenker',hubschraber:'Hubschrauber',hubschrauper:'Hubschrauber',sanitäther:'Sanitäter',sanitätter:'Sanitäter',verständikte:'verständigte',einsatzkrefte:'Einsatzkräfte',leidplanke:'Leitplanke',fahrban:'Fahrbahn',farbahn:'Fahrbahn',vorgangstafel:'Vorrangtafel',vorangstafel:'Vorrangtafel',widerum:'wiederum',wiederrum:'wiederum',ziehmlich:'ziemlich',seperat:'separat',standart:'Standard',agressiv:'aggressiv',reperatur:'Reparatur',reperaturarbeiten:'Reparaturarbeiten',interresse:'Interesse',endschieden:'entschieden',entgültig:'endgültig',tödlig:'tödlich',feuerwehrman:'Feuerwehrmann',bremsste:'bremste',stürtzte:'stürzte',stürzde:'stürzte',bergretung:'Bergrettung',drehleitter:'Drehleiter',rettungswagn:'Rettungswagen',spitahl:'Spital',unglüklich:'unglücklich'};
+const NOUNS=new Set('polizei feuerwehr rettung krankenhaus unfall straße fahrbahn kreuzung auto fahrzeug motorrad notarzt hubschrauber uhr montag dienstag mittwoch donnerstag freitag samstag sonntag jänner januar februar märz april juni juli august september oktober november dezember lenker lenkerin fahrer fahrerin zeuge zeugen zeugin schüler schülerin mädchen bub kind kinder mutter vater sohn tochter frau verletzungen verletzung schaden einsatz einsatzkräfte sanitäter pkw leitplanke stau ermittlungen brand wohnung küche teich bergrettung nebel gipfel pony bus schulbus mure baum katze kater rettungswagen unfallstelle polizistin polizisten passant passanten jugendliche mann'.split(' '));
+const BERICHT=['ereignete sich','kam es zu','laut','zufolge','verständigte','verständigten','eingeliefert','geborgen','erlitt','Sachschaden','Blechschaden','Einsatzkräfte','Lenkerin','Lenker','kollidierte','kollidierten','vermutlich','ermittelt','rückte','rückten','Unfallstelle','Augenzeugen','Passanten','versorgte','versorgten','gesperrt','befreite','befreiten','barg','bargen'];
+const CONN=['anschließend','daraufhin','kurz darauf','wenig später','in weiterer Folge','zur selben Zeit','inzwischen','zuvor','schließlich','mittlerweile','unmittelbar','bereits','dadurch','sodass','während'];
+const SYN={unfall:['Zusammenstoß','Kollision','Unglück','Vorfall'],auto:['PKW','Fahrzeug','Wagen'],pkw:['Fahrzeug','Wagen','Auto'],fahrzeug:['Wagen','PKW'],wagen:['Fahrzeug','PKW'],polizei:['Beamte','Polizeibeamte','Exekutive','Polizeistreife'],feuerwehr:['Einsatzkräfte','Feuerwehrleute','Florianis','Helfer'],rettung:['Rettungswagen','Sanitäter','Rettungskräfte','Notarzt'],krankenhaus:['Klinik','Spital','Klinikum'],mann:['der …-Jährige','der Lenker','der Verletzte'],frau:['die …-Jährige','die Lenkerin','die Pensionistin'],kind:['der Bub / das Mädchen','der …-Jährige','der Schüler'],fuhr:['lenkte','war unterwegs','steuerte'],sagte:['berichtete','erklärte','gab an','betonte','teilte mit'],dann:['danach','anschließend','kurz darauf','wenig später','daraufhin'],danach:['anschließend','kurz darauf','daraufhin','später'],kam:['traf ein','erreichte'],wurde:['Satz aktiv formulieren: Die Feuerwehr barg …'],war:['befand sich','genaueres Verb: lag, stand, saß'],hatte:['erlitt','trug davon'],verletzt:['erlitt Verletzungen','trug Verletzungen davon'],schwer:['erheblich','ernsthaft'],plötzlich:['unerwartet','auf einmal','unvermittelt'],sofort:['umgehend','unverzüglich','rasch'],sehr:['äußerst','besonders','stark'],viele:['zahlreiche','mehrere','etliche'],gebracht:['eingeliefert','transportiert'],ging:['lief','begab sich'],machte:['führte durch','unternahm'],gemacht:['durchgeführt','unternommen'],straße:['Fahrbahn','Bundesstraße','Landesstraße'],verletzungen:['Blessuren','Prellungen','Schürfwunden'],einsatzkräfte:['Helfer','Feuerwehr','Rettungskräfte'],lenker:['Fahrer','der …-Jährige'],lenkerin:['Fahrerin','die …-Jährige'],gerettet:['geborgen','in Sicherheit gebracht'],schnell:['rasch','zügig','umgehend'],passierte:['ereignete sich','geschah','kam es zu'],sah:['bemerkte','entdeckte','beobachtete'],jugendliche:['die …-Jährige','die Schülerin','das Mädchen'],zeugen:['Augenzeugen','Passanten','Anwesende'],laut:['zufolge','nach Angaben von','wie … mitteilte']};
+const STOP=new Set('der die das den dem des ein eine einen einem eines einer und oder aber auch noch nur nicht sich sie er es ihr ihre ihren ihrem ihrer ihn ihm sein seine seinen seinem seiner seines mit von vom zu zum zur auf aus bei beim nach in im ins an am um für über unter vor durch gegen ohne als wie dass da so wo wer was wann dabei dort hier dieser diese dieses diesen diesem man mehr bis uhr ist sind hat haben werden wird kein keine keinen schon rund etwa'.split(' '));
+const LIM={dann:2,danach:2,plötzlich:2,sofort:2,sehr:2,sagte:2,machte:2,gemacht:2,ging:2,kam:3,war:4,waren:4,wurde:4,wurden:4,hatte:3,fuhr:3};
+const REPC=['#FFE08A','#BDE7FF','#FFC9D6','#C9F2C2','#E3D2FF','#FFD8B0'];
+const ABBR=/^(st|nr|dr|ca|bzw|usw|vgl|hr|fr|str|abs|ggf|inkl|evtl|z|b|u|a|d|h|o|ä|mag|ing)$/i;
+function splitSentences(text){const out=[];const t=String(text||'').replace(/\s+/g,' ').trim();let start=0;
+ for(let i=0;i<t.length;i++){const c=t[i];if(c!=='.'&&c!=='!'&&c!=='?')continue;let j=i+1;while(j<t.length&&/[“”"»«)]/.test(t[j]))j++;
+  if(c==='.'){if(j<t.length&&t[j]!==' ')continue;const tok=(t.slice(start,i).split(' ').pop()||'').replace(/^[(„"]+/,'');
+   if(/^\d{1,2}$/.test(tok))continue;if(/^[A-ZÄÖÜ]$/.test(tok))continue;if(ABBR.test(tok))continue;
+   const nx=t.slice(j).match(/^\s*(\S)/);if(nx&&/[a-zäöü0-9,(]/.test(nx[1]))continue;}
+  out.push(t.slice(start,j).trim());start=j;}
+ if(t.slice(start).trim())out.push(t.slice(start).trim());return out.filter(Boolean);}
+function hasW(s,list,fl=''){return list.filter(p=>wre(p,fl).test(s));}
+function styleChecks(s,add,q,isHead){
+ const quoted=/[„“”"«»]/.test(s);
+ if(quoted){const inner=(s.match(/[„"«»“]([^„“”"«»]+)[“”"«»]/)||[])[1]||'';if(/:\s*[„"«»]/.test(s)||wc(inner)>=4)add('bad','Wörtliche Rede','Keine wörtliche Rede im Bericht. Schreib indirekt, z. B. <i>Der Kommandant sagte, die Jugendliche <b>sei</b> in Panik gewesen.</i>',q);else add('warn','Wörtliche Rede','Anführungszeichen? Für Aussagen im Bericht lieber die indirekte Rede verwenden.',q);}
+ else{const ich=hasW(s,ICH,'i');if(ich.length)add('bad','Berichtsstil',`Ein Bericht ist <b>nicht in der Ich-Form</b> („${esc(ich[0])}“). Schreib über die Personen: <i>Die 14-Jährige …</i>`,q);}
+ const wt=hasW(s,WERT);if(wt.length)add('warn','Sachlichkeit',`<b>${wt.map(esc).join(', ')}</b> ist eine Wertung oder ein Gefühl. Ein Bericht bleibt sachlich – nur die Fakten.`,q);
+ const um=hasW(s,UMG);if(um.length)add('warn','Ausdruck',`<b>${um.map(esc).join(', ')}</b> ist Umgangssprache. Im Bericht: Standardsprache.`,q);
+ if(!isHead&&/!\s*["”“]?$/.test(s))add('warn','Sachlichkeit','Kein Ausrufezeichen im Bericht – sachlich bleiben.',q);
+ if(!isHead&&/\?\s*["”“]?$/.test(s))add('warn','Sachlichkeit','Keine Fragen an die Leser – ein Bericht informiert.',q);}
+function spell(s,add,q){words(s).forEach(w=>{const lw=w.toLowerCase();if(SPELL[lw])add('bad','Rechtschreibung',`Schreibweise: <b>${SPELL[lw]}</b> (nicht „${esc(w)}“).`,q);else if(NOUNS.has(lw)&&w===lw)add('bad','Großschreibung',`<b>${esc(w[0].toUpperCase()+w.slice(1))}</b> ist ein Nomen – groß schreiben.`,q);});}
+function checkText(text,kind){const out=[];const add=(lvl,cat,msg,q)=>out.push({lvl,cat,msg,q});const t=String(text||'').trim();if(!t)return out;
+ if(kind==='headline'){const n=wc(t);
+  if(n>10)add('warn','Aufbau',`Die Headline hat ${n} Wörter – kürzer ist besser (höchstens 8–10).`);
+  if(n<3)add('warn','Aufbau','Die Headline ist sehr kurz. Sie soll informieren: <i>Wer? Was?</i>');
+  if(/\.\s*$/.test(t))add('warn','Zeichensetzung','Nach der Headline steht <b>kein Punkt</b>.');
+  if(/[!?]\s*$/.test(t))add('warn','Sachlichkeit','Kein Ausrufe- oder Fragezeichen in der Headline – sachlich bleiben.');
+  if(/^(ein|eine|der|die|das|den|dem)\s/i.test(t))add('warn','Aufbau','Telegrammstil: <b>kein Artikel</b> am Anfang – z. B. <i>Motorradfahrer tödlich verunglückt</i>.');
+  if(/(?<![a-zäöüß])(ist|sind|wurde|wurden|hat|haben|war|waren)(?![a-zäöüß])/i.test(t))add('warn','Aufbau','Telegrammstil: <b>ohne „ist / wurde / hat“</b> – nicht <i>Ein Motorradfahrer ist tödlich verunglückt</i>, sondern <i>Motorradfahrer tödlich verunglückt</i>.');
+  styleChecks(t,add,'',true);spell(t,add,'');
+  if(!out.length)add('ok','Aufbau','Knapp, sachlich, im Telegrammstil – so soll eine Headline sein.');return out;}
+ const ss=splitSentences(t);
+ if(kind==='summary'){const n=wc(t);if(ss.length>2)add('warn','Aufbau',`Das Summary hat ${ss.length} Sätze – höchstens 2.`);if(n>45)add('warn','Aufbau',`Das Summary ist mit ${n} Wörtern zu lang. Nur das Wichtigste in 1–2 Sätzen.`);if(n>=8&&ss.length<=2&&n<=45)add('ok','Aufbau','Kurz und knapp – so soll ein Summary sein.');}
+ if(kind==='haupt'){const first=ss[0]||'';if(wc(first)>4||!/\.$/.test(first))add('warn','Aufbau','Beginne den Hauptteil mit der <b>Ortsmarke</b>: Ort + Punkt, z. B. <i>Wels.</i>');else add('ok','Aufbau','Ortsmarke ✓');}
+ ss.forEach((s,si)=>{const q=s.length>80?s.slice(0,77)+'…':s;const low=s.toLowerCase();
+  if(si===0&&wc(s)<=4&&/\.$/.test(s)&&!/\s(war|ist|wurde|fuhr|kam)(\s|\.)/.test(low))return;
+  if(/^[a-zäöü]/.test(s))add('bad','Großschreibung','Satzanfang groß schreiben.',q);
+  styleChecks(s,add,q,false);
+  if(/^und\s/i.test(s))add('warn','Satzbau','Einen Satz nicht mit <b>Und</b> beginnen.',q);
+  s.split(/[,;]/).forEach(cl=>{const ws=cl.replace(/[.!?“”"»«)]+$/,'').trim().split(/\s+/);const lowc=cl.toLowerCase();const last=(ws[ws.length-1]||'').toLowerCase();const prev=(ws[ws.length-2]||'').toLowerCase();let part='',aux='';
+   if(/^(hat|haben|ist|sind)$/.test(last)){aux=last;part=prev;}else{const m=lowc.match(/(?<![a-zäöüß])(hat|haben|ist|sind)(?![a-zäöüß])/);if(m){aux=m[1];part=last;}}
+   if(aux&&part&&!/^(gegen|genug|gern|gestern|gerade|gesperrt|geöffnet|geschlossen|besetzt|beschädigt|zerstört|verschüttet|bekannt|verletzt|unverletzt|gesichert|geplant|geeignet|gefährlich)$/.test(part)){
+    const isPart=/^(ge[a-zäöüß]{2,}(t|en)|[a-zäöüß]{2,}ge[a-zäöüß]{2,}(t|en)|[a-zäöüß]{3,}iert|(ver|er|ent|be|zer|über)[a-zäöüß]{2,}(t|en))$/.test(part);
+    const ok=(aux==='ist'||aux==='sind')?SEIN.has(part):isPart;
+    if(ok)add('warn','Zeitform',`Das ist Perfekt („${esc(aux)} … ${esc(part)}“). Im Bericht: <b>Präteritum</b>${PART[part]?` → <i>${PART[part]}</i>`:''}.`,q);}});
+  {const hits=Object.keys(PRAES).filter(v=>wre(v).test(s));if(hits.length&&!/(?<![a-zäöüß])(hat|haben|ist|sind)(?![a-zäöüß])/.test(low))add('warn','Zeitform',`Präsens beim Erzählen? Im Bericht: <b>Präteritum</b> – ${hits.slice(0,2).map(v=>`<i>${v} → ${PRAES[v]}</i>`).join(', ')}.`,q);}
+  if(/(sagte|berichtete|erklärte|meinte|betonte|gab an|teilte mit|stellte fest|vermutet|bekannt|warnt|warnte),?\s+das\s/.test(low))add('bad','Rechtschreibung','Hier ist das Bindewort <b>dass</b> gemeint (mit ss).',q);
+  {const re=/([a-zäöüßA-ZÄÖÜ0-9)])\s+(dass|weil|obwohl|nachdem|sodass|bevor|wodurch|wobei)(?![a-zäöüß])/g;let m;while((m=re.exec(s))){const before=s.slice(0,m.index+1).trim().split(/\s+/).pop().toLowerCase();if(/^(und|oder|so|aber|noch|kurz|lange|schon|erst|gerade|sowie|ohne)$/.test(before))continue;if(m.index<2)continue;add('warn','Zeichensetzung',`Vor <b>${m[2]}</b> steht ein <b>Komma</b>.`,q);break;}
+   const m2=s.match(/([a-zäöüß])\s+als\s+(er|sie|es|der|die|das|ein|eine|plötzlich|sich|gerade)\s/);if(m2&&!/(mehr|weniger|anders|eher|früher|später|länger|größer|kleiner|besser|schneller|sowohl)\s+als/.test(low))add('warn','Zeichensetzung','Vor <b>als</b> (zeitlich: „…, als er …“) steht ein <b>Komma</b>.',q);}
+  if(/(?<![a-zäöüß])seid(?![a-zäöüß])/.test(low))add('bad','Rechtschreibung','Zeitlich heißt es <b>seit</b> (seit Montag). <i>seid</i> kommt von „ihr seid“.',q);
+  if(/\S\s+Man(?![a-zäöüß])/.test(s))add('bad','Rechtschreibung','<b>man</b> (Pronomen) schreibt man klein – oder meinst du <b>Mann</b> (Person) mit nn?',q);
+  if(/\d\s*-\s+[a-zA-ZäÄ]|\d\s+-\s*[a-zA-ZäÄ]|\d\s+jährig/i.test(s))add('warn','Rechtschreibung','Ohne Leerzeichen: <i>36-jährige</i>, <i>der 36-Jährige</i>.',q);
+  if(/[A-Za-zÄÖÜäöü]-\s+[A-ZÄÖÜ]/.test(s))add('warn','Rechtschreibung','Nach dem Bindestrich kein Leerzeichen: <i>PKW-Lenkerin</i>.',q);
+  if(/(?<![a-zäöüß])([Dd](er|ie|en|em|es)|[Ee]in(e|en|em|es)?)\s+\d+-jährige[nmrs]?(?![a-zäöüß])(?!\s+[A-ZÄÖÜ])/.test(s))add('bad','Großschreibung','Steht <b>Jährige</b> allein (ohne Nomen danach), schreibt man es groß: <i>der 36-Jährige</i>.',q);
+  if(/\d+-Jährige[nmrs]?\s+[A-ZÄÖÜ][a-zäöüß]{2,}(fahrer|lenker|lenkerin|in|er|e|ling)(?![a-zäöüß])/.test(s))add('warn','Großschreibung','Folgt ein Nomen, schreibt man klein: <i>der 13-jährige Schüler</i>.',q);
+  {const m=s.match(/(?<![a-zäöüß])(der|die|das|dem|den|des|ein|eine|einen|einem|eines|einer|zur|zum|beim|im|am|vom|ins)\s+([a-zäöü][a-zäöüß]*(ung|heit|keit|schaft|tion|tät|nis|ling))(?![a-zäöüß])/);if(m)add('bad','Großschreibung',`<b>${esc(m[2][0].toUpperCase()+m[2].slice(1))}</b> ist ein Nomen – groß schreiben.`,q);}
+  {const m=s.match(/(?<![a-zäöüß])(gestern|heute|morgen|am)\s+(abend|nachmittag|vormittag|früh|morgen|mittag)(?![a-zäöüß])/);if(m)add('bad','Großschreibung',`Tageszeiten groß: <b>${m[1]} ${m[2][0].toUpperCase()+m[2].slice(1)}</b>.`,q);}
+  {const m=s.match(/([A-ZÄÖÜ][a-zäöü]+)\s+([A-ZÄÖÜ][a-zäöü]{2,})\s*\(\d{1,2}\)/);if(m&&!/^(Feuerwehrkommandant|Kommandant|Lenkerin|Lenker|Schülerin|Schüler|Polizistin|Bürgermeister|Herr|Frau|Busfahrer|Nachbar|Passant|Spaziergänger|Besitzerin|Einsatzleiterin|Motorradlenker|Lehrerin|Lehrer)$/.test(m[1]))add('warn','Berichtsstil',`Nachnamen abkürzen: <i>${esc(m[1])} ${esc(m[2][0])}. (…)</i>`,q);}
+  {const m=s.match(/(?<![a-zäöüß])(schwer|leicht)\s+verletzte[n]?\s+(wurde|wurden|waren|kamen|mussten|lagen)(?![a-zäöüß])/);if(m)add('bad','Großschreibung',`Hier ist es ein Nomen: <i>zwei ${m[1]} <b>Verletzte</b></i> (oder <i>${m[1][0].toUpperCase()+m[1].slice(1)}verletzte</i>).`,q);}
+  if(wc(s)>28)add('warn','Satzbau','Sehr langer Satz – teile ihn in zwei Sätze.',q);
+  spell(s,add,q);
+ });
+ if(!/[.!?“”"]\s*$/.test(t))add('warn','Zeichensetzung','Am Ende fehlt ein Punkt.');
+ const ber=BERICHT.filter(p=>wre(p).test(t));if(ber.length)add('ok','Berichtsprache','Gut: '+ber.slice(0,5).map(x=>'<b>'+x+'</b>').join(', '));
+ if(/(?<![a-zäöüß])(sei|seien|habe|hätte|hätten|wäre|wären)(?![a-zäöüß])/i.test(t))add('ok','Indirekte Rede','Konjunktiv verwendet (<i>sei / habe</i>) – richtig für Aussagen.');
+ const cn=CONN.filter(p=>wre(p).test(t));if(cn.length)add('ok','Verbindungen','Abwechslung: '+cn.map(x=>'<b>'+x+'</b>').join(', '));
+ return out;}
+function findRepeats(body){const ws=words(body).filter(w=>!/^\d/.test(w));const cnt={},orig={};ws.forEach(w=>{const l=w.toLowerCase();if(STOP.has(l))return;if(l.length<4&&!LIM[l])return;cnt[l]=(cnt[l]||0)+1;orig[l]=orig[l]||w;});
+ const out=[];Object.entries(cnt).forEach(([l,c])=>{const lim=LIM[l]||3;if(c>=lim)out.push({w:orig[l],l,c,sug:SYN[l]||null});});return out.sort((a,b)=>b.c-a.c).slice(0,6);}
+function startRepeats(body){const st={};splitSentences(body).forEach(x=>{if(wc(x)<=4&&/\.$/.test(x))return;const f=(x.match(/^[A-Za-zÄÖÜäöüß]+/)||[''])[0];if(!f||/^(der|die|das|ein|eine)$/i.test(f))return;st[f]=(st[f]||0)+1;});return Object.entries(st).filter(([f,c])=>c>=3||(/^dann$/i.test(f)&&c>=2));}
+function checkWhole(body){const out=[];
+ findRepeats(body).forEach(r=>out.push({lvl:'warn',cat:'Wiederholung',msg:`<b>${esc(r.w)}</b> kommt ${r.c}× vor (farbig markiert).${r.sug?' Abwechseln mit: <b>'+r.sug.map(esc).join('</b>, <b>')+'</b>':' Versuch es einmal mit einem anderen Wort oder bau den Satz um.'}`}));
+ startRepeats(body).forEach(([f,c])=>out.push({lvl:'warn',cat:'Wiederholung',msg:`${c} Sätze beginnen mit „<b>${esc(f)}</b>“. Abwechseln, z. B. mit: <b>Anschließend</b>, <b>Kurz darauf</b>, <b>Wenig später</b>, <b>Daraufhin</b>, <b>Zur selben Zeit</b>, <b>Laut Polizei</b> …`}));
+ return out;}
+function wCheck(t,text){const low=text.toLowerCase();return t.keys.map(k=>({f:k.f,h:k.h,ok:k.w.some(w=>low.includes(w.toLowerCase()))}));}
+
+/* ===================== MARKIERUNGEN ===================== */
+function curErrs(ai,src){if(!ai||!ai.errs)return [];const l=String(src||'').toLowerCase();return ai.errs.filter(e=>e.original&&l.includes(e.original.toLowerCase()));}
+function markHTML(text,errs=[],reps=[],num=false){const R=[];const tl=text.toLowerCase();
+ errs.forEach((e,i)=>{const o=e.original.trim();if(!o)return;let p=text.indexOf(o);if(p<0)p=tl.indexOf(o.toLowerCase());if(p<0)return;R.push({s:p,e:p+o.length,h:`<mark class="er" title="${esc(e.korrektur||'')}">`,c:'</mark>'+(num?`<sup class="en">${i+1}</sup>`:'')});});
+ reps.forEach((r,i)=>{const re=wre(r.w,'gi');let m;while((m=re.exec(text))){R.push({s:m.index,e:m.index+m[0].length,h:`<mark class="rp" style="background:${REPC[i%REPC.length]}">`,c:'</mark>'});}});
+ R.sort((a,b)=>a.s-b.s||(b.e-b.s)-(a.e-a.s));const keep=[];let last=-1;R.forEach(r=>{if(r.s>=last){keep.push(r);last=r.e;}});
+ let h='',pos=0;keep.forEach(r=>{h+=esc(text.slice(pos,r.s))+r.h+esc(text.slice(r.s,r.e))+r.c;pos=r.e;});return h+esc(text.slice(pos));}
+function initials(){return (S.name||'').split(/\s+/).filter(Boolean).map(x=>x[0].toUpperCase()).join('').slice(0,3)||'XY';}
+function clipHTML(head,sum,paras,reps=[],errs=[],by=true){const ps=paras.map(p=>String(p).trim()).filter(Boolean);const h=String(head||'').trim(),sm=String(sum||'').trim();
+ return `<article class="clip"><h4 class="hl${h?'':' empty'}">${h?markHTML(h,errs,[]):'(Headline kommt zum Schluss)'}</h4><p class="lead"${sm?'':' style="font-weight:400;font-style:italic;color:var(--soft)"'}>${sm?markHTML(sm,errs,[]):'(Summary kommt zum Schluss)'}</p>${ps.length?ps.map(p=>`<p>${markHTML(p,errs,reps)}</p>`).join(''):'<p class="note">Hier entsteht dein Bericht …</p>'}${ps.length&&by?`<p class="by">(${esc(initials())})</p>`:''}</article>`;}
+function fbHTML(list){if(!list.length)return '';const ord={bad:0,warn:1,ok:2};return [...list].sort((a,b)=>ord[a.lvl]-ord[b.lvl]).map(f=>`<div class="f ${f.lvl}">${f.lvl==='bad'?'✗':f.lvl==='warn'?'!':'✓'} <b>${f.cat}:</b> ${f.msg}${f.q?` <span class="q">– „${esc(f.q)}“</span>`:''}</div>`).join('');}
+function aiListHTML(errs){return errs.map((e,i)=>`<div class="f bad"><b>${i+1}</b> ${e.art?`<b>${esc(e.art)}:</b> `:''}„${esc(e.original)}“ → <b>${esc(e.korrektur)}</b>${e.erklaerung?`<br><span class="ex">${esc(e.erklaerung)}</span>`:''}</div>`).join('');}
+
+/* ===================== ZUSTAND ===================== */
+const KEY='zb-trainer-v1';
+let S={name:'',level:1,help:true,hist:[],qw:[],cur:null};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+if(S.cur&&!S.cur.ir)S.cur=null;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const app=$('#app');let rerender=()=>{};
+function ask(msg,yes='OK',no='Abbrechen'){return new Promise(res=>{const d=document.createElement('div');d.className='modal';d.innerHTML=`<div class="mbox" role="dialog" aria-modal="true"><p>${msg}</p><div class="row"><button class="btn" data-y>${yes}</button><button class="btn s" data-n>${no}</button></div></div>`;document.body.appendChild(d);const done=v=>{d.remove();res(v);};d.querySelector('[data-y]').onclick=()=>done(true);d.querySelector('[data-n]').onclick=()=>done(false);d.querySelector('[data-y]').focus();});}
+function hash(s){let h=7;for(const c of s.toLowerCase().trim())h=(h*31+c.charCodeAt(0))%1679616;return h.toString(36).padStart(4,'0');}
+function code(){const p={n:S.name,l:S.level,q:S.qw,h:S.hist};return 'ZB-'+hash(S.name)+'-'+btoa(unescape(encodeURIComponent(JSON.stringify(p))));}
+function restore(c,name){try{const [,hs,b]=c.trim().match(/^ZB-(\w{4})-(.+)$/);if(hs!==hash(name))return 'Der Code gehört zu einem anderen Namen.';const p=JSON.parse(decodeURIComponent(escape(atob(b))));if(p.n.trim().toLowerCase()!==name.trim().toLowerCase())return 'Der Code gehört zu einem anderen Namen.';S={name:p.n,level:p.l||1,help:true,hist:p.h||[],qw:p.q||[],cur:null};save();return '';}catch(e){return 'Der Code ist ungültig.';}}
+const LEVELS={1:'Stufe 1 – mit Formulierungen und Musterbeispielen',2:'Stufe 2 – nur mit Formulierungen',3:'Stufe 3 – frei schreiben wie bei der Schularbeit'};
+
+/* ===================== CLAUDE ===================== */
+let sampleP=null;function getSample(){if(!sampleP)sampleP=(window.claude&&window.claude.use?window.claude.use('sample'):Promise.resolve(null)).catch(()=>null);return sampleP;}
+let aiOff=false;
+const ART='Rechtschreibung|Grammatik|Satzbau|Zeichensetzung|Großschreibung|Zeitform|Berichtsstil|Ausdruck';
+const BASE=`Du bist Deutschlehrerin an einem österreichischen Gymnasium (3. Klasse, Schüler/innen 12–13 Jahre). Österreichisches Deutsch gilt als richtig (Jänner, Spital, heuer, PKW, Rettung, Bub).
+Regeln für den Zeitungsbericht: Präteritum (nur der aktuelle Stand darf im Präsens stehen), sachlich ohne Wertungen und Gefühle, keine wörtliche Rede (Aussagen indirekt mit Konjunktiv: sei, habe), keine Ich-Form, Nachnamen abgekürzt mit Alter (Manfred S. (36)), Summary beginnt mit Ortsmarke („Wels.“), Headline ohne Punkt.`;
+function stepPrompt(t,label,txt){return `${BASE}
+Prüfe diesen Teil eines Zeitungsberichts (Teil: ${label}). Thema: ${t.title}.
+Text:
+"""${txt}"""
+Finde echte Fehler: Rechtschreibung, Grammatik (Fälle, Endungen, Verbformen), Satzbau, Zeichensetzung (vor allem Kommas), Groß- und Kleinschreibung, falsche Zeitform und Verstöße gegen die Bericht-Regeln.
+Antworte NUR mit JSON, ohne Markdown:
+{"fehler":[{"original":"wörtlich aus dem Text kopierter, möglichst kurzer Ausschnitt (1–6 Wörter, bei fehlendem Komma das Wort davor und danach)","korrektur":"richtige Form","art":"${ART}","erklaerung":"ein kurzer, kindgerechter Satz auf Deutsch"}]}
+Höchstens 8 Fehler, die wichtigsten zuerst. Erfinde keine Fehler. Wenn alles stimmt: {"fehler":[]}`;}
+function normErrs(a){return (Array.isArray(a)?a:[]).filter(e=>e&&e.original&&e.korrektur&&String(e.original).trim()!==String(e.korrektur).trim()).slice(0,10).map(e=>({original:String(e.original),korrektur:String(e.korrektur),art:String(e.art||''),erklaerung:String(e.erklaerung||'')}));}
+async function aiCheck(t,label,txt){const sample=await getSample();if(!sample||aiOff)throw {code:'none'};try{const r=await sample.json(stepPrompt(t,label,txt),{modelTier:'quick'});return normErrs(r&&r.fehler);}catch(e){if(e&&e.code==='not_granted')aiOff=true;throw e;}}
+function aiErrMsg(e){return e&&e.code==='rate_limited'?'Gerade zu viele Anfragen – bitte in einer Minute noch einmal.':e&&e.code==='not_granted'?'Die Claude-Prüfung ist hier nicht erlaubt. Die Sofort-Kontrolle läuft weiter.':e&&e.code==='none'?'':'Die Claude-Prüfung hat nicht geklappt. Bitte noch einmal versuchen.';}
+
+/* ===================== BAUSTEINE ===================== */
+function header(){const c=S.cur;const lv=c?c.level:S.level;return `<div class="who"><div><span class="pill">${esc(S.name)}</span> <span class="note">${LEVELS[lv]}</span></div><div class="lvl" aria-label="Stufe ${lv} von 3">${[1,2,3].map(i=>`<span class="${i<=lv?'on':''}"></span>`).join('')}</div></div>`;}
+function typeName(t){return t.type==='notizen'?'Bericht mit freier Hand':'Bericht mit vielen Angaben';}
+function materialHTML(t,open){let inner='';
+ if(t.type==='notizen'&&!t.wit)inner=`<p class="note" style="margin:0 0 4px">Aus den Notizen eines Reporters:</p><p style="margin:0">${esc(t.notes)}</p><p class="note">Hier hast du „freie Hand“: Mach aus den Stichwörtern ganze Sätze und einen zusammenhängenden Bericht. Erfinde nichts Wichtiges dazu.</p>`;
+ else if(t.type==='notizen')inner=`<p class="note" style="margin:0 0 4px"><b>${esc(t.src)}</b></p>${t.wit.map(w=>`<div class="wit">${esc(w.text)}</div>`).join('')}<p class="note">Achtung: Der Zeuge spricht Umgangssprache. Schreib sachlich in Standardsprache – ohne Wertungen und ohne wörtliche Rede.</p>`;
+ else inner=`<p style="margin:0 0 8px">${esc(t.info)}</p><p class="note" style="margin:0"><b>Die handelnden Personen:</b></p>${t.wit.map(w=>`<div class="wit"><b>${esc(w.who)}</b>${esc(w.text)}</div>`).join('')}<p class="note">Beantworte die W-Fragen mit diesen Angaben. Die Aussagen baust du als <b>indirekte Rede</b> ein (<i>Laut Polizist Gerhard T. sei …</i>).</p>`;
+ return `<details class="card" ${open?'open':''}><summary><b>${typeName(t)}</b> <span class="note">(${esc(t.title)})</span></summary><div style="margin-top:10px">${inner}</div></details>`;}
+function phraseCard(){const on=S.cur?S.cur.help:S.help;return on?`<div class="card phr"><div class="row" style="justify-content:space-between"><h3>Wichtige Formulierungen</h3><button class="btn s sm" id="phT">Formulierungen ausblenden</button></div><p class="note" style="margin:0">Lies sie dir durch, bevor du schreibst. Wenn du sicher bist, blende sie aus – bei der Schularbeit hast du sie auch nicht.</p>${PHRASES.map(([h,l])=>`<h4>${esc(h)}</h4><ul>${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>`:`<div class="card row" style="justify-content:space-between"><span class="note">Formulierungen sind ausgeblendet.</span><button class="btn s sm" id="phT">Formulierungen einblenden</button></div>`;}
+function bindPhrase(){const b=$('#phT');if(b)b.onclick=()=>{if(S.cur){S.cur.help=!S.cur.help;S.help=S.cur.help;}else S.help=!S.help;save();rerender();};}
+function merkbox(){return `<details class="card"><summary><b>Merkbox: So schreibst du einen Zeitungsbericht</b></summary><div class="merk" style="margin-top:10px">
+<p><b>Länge:</b> 120 bis 150 Wörter.</p>
+<p><b>1. Headline</b> im Telegrammstil – ohne Artikel, ohne „ist / wurde“, ohne Punkt: <i>Motorradfahrer tödlich verunglückt</i> (nicht: <i>Ein Motorradfahrer ist tödlich verunglückt</i>).<br><b>2. Summary</b> – 1 bis 2 Sätze, fasst den Bericht zusammen.<br><b>3. Hauptteil</b> – beginnt mit der Ortsmarke (<i>Linz.</i>), beantwortet die W-Fragen: Was? Wo? Wann? Wer? Wie?<br><b>4. Schluss</b> – Welche Folgen?</p>
+<p><b>Reihenfolge beim Schreiben:</b> zuerst Hauptteil und Schluss, <b>danach</b> Summary und Headline.</p>
+<p><b>Sprache:</b> Präteritum · sachlich, ohne Meinung und Gefühle · Umgangssprache in Standardsprache umformen · keine wörtliche Rede, sondern indirekt (<i>Laut Polizist Josef H. sei …</i>) · Namen abkürzen mit Alter: <i>Eva K. (45)</i>.</p>
+<p><b>Beispiel:</b></p>${clipHTML('Feuerwehr rettet Hund aus der Donau','In Linz zog die Feuerwehr am Sonntag einen Hund aus der Donau. Das Tier blieb unverletzt.',['Linz. Am 6. April sprang der Labrador Bello gegen 16 Uhr beim Spielen ins Wasser und wurde von der Strömung abgetrieben. Seine Besitzerin Eva K. (45) verständigte sofort die Einsatzkräfte. Wenig später zogen die Feuerwehrleute das erschöpfte Tier mit einem Boot ans Ufer.','Laut Feuerwehr sei der Hund unverletzt geblieben. Seine Besitzerin muss nun besser auf ihn aufpassen.'],[],[],false)}
+<p class="note" style="margin-top:10px"><b>Schreib die Merkbox mit dem Beispiel ins Heft ab.</b></p></div></details>`;}
+function keys(){return `<div class="keys" aria-label="Eingabehilfe">${['ä','ö','ü','ß','Ä','Ö','Ü',',','.','-','–','(',')',':'].map(k=>`<button class="chip" data-k="${k}">${k}</button>`).join('')}<button class="chip" data-k="\n">↵</button></div>`;}
+function insertAt(f,txt){if(f.tagName==='INPUT'&&txt==='\n')return;const s=f.selectionStart??f.value.length,e=f.selectionEnd??f.value.length;f.value=f.value.slice(0,s)+txt+f.value.slice(e);const p=s+txt.length;f.focus();f.setSelectionRange(p,p);f.dispatchEvent(new Event('input'));}
+let lastField=null;function bindKeys(){app.querySelectorAll('textarea:not([readonly]),input[type=text]').forEach(f=>f.addEventListener('focus',()=>lastField=f));app.querySelectorAll('.keys .chip').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{const f=lastField&&document.body.contains(lastField)?lastField:app.querySelector('#ta');if(f)insertAt(f,b.dataset.k);};});}
+
+/* ===================== START ===================== */
+function viewStart(){rerender=viewStart;app.innerHTML=`<h1><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Regeln lernen, indirekte Rede üben und Zeitungsberichte schreiben. Wie bei der Schularbeit gibt es in jeder Runde <b>zwei Berichte</b> mit je 120 bis 150 Wörtern: einen mit freier Hand und einen mit vielen Angaben.</p>
+<div class="card"><h3>Wie heißt du?</h3><p class="note">Achtung: Der Name kann danach nicht mehr geändert werden.</p><input type="text" id="nm" autocomplete="off" placeholder="Vor- und Nachname"><div class="row" style="margin-top:10px"><button class="btn" id="go">Los geht’s</button></div></div>
+<div class="card"><h3>Schon auf einem anderen Gerät geübt?</h3><p class="note">Namen oben eintragen und den Speicher-Code einfügen.</p><input type="text" id="cd" placeholder="ZB-…" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn s" id="rs">Fortschritt laden</button><span id="msg" class="note"></span></div></div>`;
+ $('#go').onclick=async()=>{const n=$('#nm').value.trim();if(n.length<2){$('#nm').focus();return;}if(!await ask(`Ist „<b>${esc(n)}</b>“ richtig? Der Name kann danach nicht mehr geändert werden.`,'Ja, stimmt','Nein, ändern'))return;S.name=n;save();viewHome();};
+ $('#rs').onclick=()=>{const n=$('#nm').value.trim();if(n.length<2){$('#msg').textContent='Bitte zuerst den Namen eintragen.';return;}const e=restore($('#cd').value,n);if(e)$('#msg').textContent=e;else viewHome();};}
+
+/* ===================== STARTSEITE ===================== */
+let sel={n:null,a:null};
+function doneIds(){const s=new Set();S.hist.forEach(h=>(h.r||[]).forEach(x=>s.add(x.t)));return s;}
+function chart(){if(S.hist.length<2)return '';const h=S.hist.slice(-12);const Wd=320,H=120,p=24;const xs=i=>p+i*(Wd-2*p)/Math.max(1,h.length-1),ys=v=>H-p-(v/100)*(H-2*p);
+ return `<svg viewBox="0 0 ${Wd} ${H}" width="100%" role="img" aria-label="Punkte der letzten Runden"><line x1="${p}" y1="${ys(75)}" x2="${Wd-p}" y2="${ys(75)}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="${Wd-p}" y="${ys(75)-4}" font-size="10" text-anchor="end" fill="var(--soft)">75 = nächste Stufe</text><polyline fill="none" stroke="var(--accent)" stroke-width="3" points="${h.map((x,i)=>xs(i)+','+ys(x.s)).join(' ')}"/>${h.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys(x.s)}" r="4" fill="var(--accent)"/><text x="${xs(i)}" y="${ys(x.s)-8}" font-size="10" text-anchor="middle" fill="var(--ink)">${x.s}</text>`).join('')}</svg>`;}
+function focusTips(){const agg={};S.hist.slice(-2).forEach(h=>(h.r||[]).forEach(r=>Object.entries(r.c||{}).forEach(([k,v])=>agg[k]=(agg[k]||0)+v)));const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,2);
+ const TIP={'Zeitform':'Erzähl im <b>Präteritum</b>: fuhr, stürzte, verständigte – nicht „ist gefahren“.','Wörtliche Rede':'Aussagen <b>indirekt</b>: <i>Der Zeuge gab an, er habe … gesehen.</i>','Sachlichkeit':'Keine Wertungen: weg mit <i>leider, zum Glück, Gott sei Dank</i>.','Berichtsstil':'Keine Ich-Form, Namen abkürzen: <i>Lena F. (12)</i>.','Großschreibung':'Nomen groß: <i>die Polizei, der 36-Jährige</i>.','Rechtschreibung':'Klassiker prüfen: <i>Straße, dass, Krankenhaus, plötzlich</i>.','Zeichensetzung':'Komma vor <i>dass, weil, als, nachdem</i>.','Wiederholung':'Abwechseln: <i>anschließend, kurz darauf, die Lenkerin, die 35-Jährige</i>.','Satzbau':'Kurze, klare Sätze statt Schlangensätze.','Aufbau':'Headline im Telegrammstil, Summary höchstens 2 Sätze, Ortsmarke im Hauptteil.','Grammatik':'Endungen prüfen: <i>dem Buben, den Schüler, des Fahrzeugs</i>.','Ausdruck':'Umgangssprache in Standardsprache umformen.'};
+ return top.length?`<div class="card" style="border-color:var(--warn)"><h3>Dein Fokus für diese Runde</h3>${top.map(([k,v])=>`<div class="f warn" style="margin:6px 0"><b>${esc(k)}</b> (${v}× in den letzten Runden): ${TIP[k]||''}</div>`).join('')}</div>`:'';}
+function viewHome(){rerender=viewHome;const dn=doneIds();
+ const grid=type=>`<div class="tasks">${TASKS.filter(t=>t.type===type).map(t=>{const g=type[0];const on=sel[g]===t.id;return `<button class="task${on?' sel':''}" data-t="${t.id}" data-g="${g}" aria-pressed="${on}">${on?'<span class="num">✓</span>':''}<b>${esc(t.title)}</b><small>${esc(t.de)}</small>${dn.has(t.id)?'<span class="done">✓ schon geschrieben</span>':''}</button>`;}).join('')}</div>`;
+ app.innerHTML=`${header()}<h1 style="font-size:clamp(30px,8vw,42px)"><span class="mark">Zeitungsbericht</span>-Trainer</h1><p class="sub">Jede Runde: Regel-Check, indirekte Rede üben, dann <b>zwei Berichte</b> wie bei der Schularbeit (je 120–150 Wörter).</p>${focusTips()}
+ ${S.cur?`<div class="card" style="border-color:var(--accent)"><h3>Angefangene Runde</h3><p class="note">${S.cur.tasks.map(id=>esc(T(id)?T(id).title:id)).join(' + ')}</p><div class="row"><button class="btn" id="cont">Weiterschreiben</button><button class="btn s sm" id="drop">Verwerfen</button></div></div>`:''}
+ <h2>Neue Runde</h2><p class="note">Wähle je ein Thema aus beiden Gruppen – oder lass den Zufall entscheiden.</p>
+ <h3 style="margin:12px 0 4px">Bericht 1: mit freier Hand</h3><p class="note" style="margin:0 0 8px">Nur Stichwörter oder eine Zeugenaussage in Umgangssprache – du formulierst selbst.</p>${grid('notizen')}
+ <h3 style="margin:16px 0 4px">Bericht 2: mit vielen Angaben</h3><p class="note" style="margin:0 0 8px">Eckdaten und Aussagen mehrerer Personen – beantworten und schreiben.</p>${grid('angaben')}
+ <div class="row" style="margin:14px 0 6px"><button class="btn" id="go" ${sel.n&&sel.a?'':'disabled'}>Runde mit diesen 2 Berichten starten</button><button class="btn s" id="rnd">Zufällige Runde</button></div>
+ <div class="row" style="margin:6px 0 18px"><label class="note">Stufe: <select id="lv" style="font:inherit">${[1,2,3].map(i=>`<option value="${i}" ${i===S.level?'selected':''}>${i}</option>`).join('')}</select></label><span class="note">${LEVELS[S.level]}</span></div>
+ <div class="card"><h3>Formulierungen beim Schreiben</h3><div class="row"><button class="btn ${S.help?'':'s'}" id="hOn" aria-pressed="${S.help}">Einblenden</button><button class="btn ${S.help?'s':''}" id="hOff" aria-pressed="${!S.help}">Ausblenden</button></div><p class="note" style="margin:8px 0 0">${S.help?'Vor jedem Bericht siehst du die wichtigsten Formulierungen, beim Schreiben gibt es Satzanfänge zum Antippen.':'Du schreibst ohne Formulierungshilfe – wie bei der Schularbeit. Die Kontrolle bleibt eingeschaltet.'} Umschalten geht auch während des Schreibens.</p></div>
+ ${S.hist.length?`<div class="card"><h3>Dein Fortschritt</h3><p class="note">${S.hist.length} Runde${S.hist.length>1?'n':''} · Bestwert ${Math.max(...S.hist.map(h=>h.s))} Punkte</p>${chart()}<div class="tablewrap"><table><tr><th>Datum</th><th>Berichte (antippen zum Lesen)</th><th>Stufe</th><th>Regeln</th><th>Ø</th></tr>${S.hist.map((h,i)=>[h,i]).reverse().map(([h,i])=>`<tr><td>${new Date(h.d*864e5).toLocaleDateString('de-AT')}</td><td>${(h.r||[]).map((r,j)=>`<button class="btn s sm old" data-i="${i}" data-j="${j}" style="margin:2px 0">${esc((T(r.t)||{}).title||r.t)}: ${r.s}</button>`).join('<br>')}</td><td>${h.l}${h.hp===0?'<br><small>ohne Hilfe</small>':''}</td><td>${h.q?h.q[0]+'/'+h.q[1]:'–'}${h.ir?`<br><small>Ind. Rede ${h.ir[0]}/${h.ir[1]}</small>`:''}</td><td><b>${h.s}</b></td></tr>`).join('')}</table></div></div>`:''}
+ ${merkbox()}
+ <div class="card"><h3>Auf ein anderes Gerät mitnehmen</h3><p class="note">Diesen Speicher-Code kopieren und auf dem anderen Gerät mit deinem Namen eingeben.</p><textarea readonly id="code" style="min-height:60px;font-size:13px">${code()}</textarea><div class="row" style="margin-top:8px"><button class="btn s sm" id="cp">Code kopieren</button><button class="btn s sm" id="rst" style="margin-left:auto">Anderer Schüler? Alles löschen</button></div></div>`;
+ app.querySelectorAll('.task').forEach(b=>b.onclick=()=>{const g=b.dataset.g;sel[g]=sel[g]===b.dataset.t?null:b.dataset.t;viewHome();});
+ $('#go').onclick=()=>{if(sel.n&&sel.a){const s=[sel.n,sel.a];sel={n:null,a:null};startRound(s);}};
+ $('#rnd').onclick=()=>{const pick=type=>{const all=TASKS.filter(t=>t.type===type);const open=all.filter(t=>!dn.has(t.id));const pool=open.length?open:all;return pool[Math.floor(Math.random()*pool.length)].id;};sel={n:null,a:null};startRound([pick('notizen'),pick('angaben')]);};
+ $('#lv').onchange=e=>{S.level=+e.target.value;save();viewHome();};$('#hOn').onclick=()=>{S.help=true;save();viewHome();};$('#hOff').onclick=()=>{S.help=false;save();viewHome();};
+ app.querySelectorAll('.old').forEach(b=>b.onclick=()=>viewOld(+b.dataset.i,+b.dataset.j));
+ if($('#cont'))$('#cont').onclick=()=>route();if($('#drop'))$('#drop').onclick=async()=>{if(await ask('Angefangene Runde verwerfen?','Ja, verwerfen','Nein')){S.cur=null;save();viewHome();}};
+ $('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(code());$('#cp').textContent='Kopiert ✓';}catch(e){$('#code').select();}};
+ $('#rst').onclick=async()=>{if(await ask('Wirklich alles löschen – Name und Fortschritt?','Ja, löschen','Nein')){S={name:'',level:1,help:true,hist:[],qw:[],cur:null};save();viewStart();}};}
+function viewOld(i,j){rerender=()=>viewOld(i,j);const h=S.hist[i],r=h.r[j],t=T(r.t)||{title:r.t};const lines=String(r.x||'').split('\n');const head=lines[0]||'',sum=lines[1]||'',body=lines.slice(2);
+ app.innerHTML=`${header()}<h2>Alter Bericht: ${esc(t.title)}</h2><p class="note">${new Date(h.d*864e5).toLocaleDateString('de-AT')} · Stufe ${h.l} · <b>${r.s} Punkte</b> · ${wc(sum+' '+body.join(' '))} Wörter</p>${clipHTML(head,sum,body,findRepeats(body.join('\n')))}
+ <div class="row" style="margin-top:14px"><button class="btn s" id="bk">Zurück</button><button class="btn s sm" id="cpy">Text kopieren</button></div>`;
+ $('#bk').onclick=()=>viewHome();$('#cpy').onclick=async()=>{try{await navigator.clipboard.writeText(r.x);$('#cpy').textContent='Kopiert ✓';}catch(e){}};window.scrollTo({top:0});}
+
+/* ===================== RUNDE ===================== */
+function pickQuiz(){const wrong=(S.qw||[]).filter(i=>QUIZ[i]).slice(0,2);const rest=QUIZ.map((_,i)=>i).filter(i=>!wrong.includes(i)).sort(()=>Math.random()-.5);return [...wrong,...rest].slice(0,4).sort(()=>Math.random()-.5);}
+function pickIR(){return IRQ.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,3);}
+function startRound(ids){S.cur={tasks:ids,i:0,level:S.level,help:S.help,phase:'quiz',quiz:{ids:pickQuiz(),k:0,ans:[]},ir:{ids:pickIR(),k:0,out:[]},reps:ids.map(t=>({t,step:0,a:{},free:'',fsum:'',fhead:'',ai:{},start:null,fin:null,saved:null}))};save();window.scrollTo({top:0});viewQuiz();}
+function route(){const c=S.cur;if(!S.name)return viewStart();if(!c)return viewHome();window.scrollTo({top:0});({quiz:viewQuiz,ir:viewIR,intro:viewIntro,write:()=>c.level===3?viewFree():viewStep(),result:viewReport,round:viewRound}[c.phase]||viewHome)();}
+function viewQuiz(){rerender=viewQuiz;const c=S.cur,Q=c.quiz;if(Q.k>=Q.ids.length)return quizEnd();const q=QUIZ[Q.ids[Q.k]];const order=q.a.map((_,i)=>i).sort(()=>Math.random()-.5);
+ app.innerHTML=`${header()}<h2>Regel-Check</h2><p class="sub">Bevor du schreibst: ${Q.ids.length} Fragen zu den Regeln des Zeitungsberichts.</p>
+ <div class="steps">${Q.ids.map((_,j)=>`<i class="${j<Q.k?(Q.ans[j]?'ok':'no'):j===Q.k?'on':''}"></i>`).join('')}</div>
+ <div class="card"><span class="pill">Frage ${Q.k+1} von ${Q.ids.length}</span><h3 style="margin-top:10px">${esc(q.q)}</h3><div class="opts">${order.map(i=>`<button class="opt" data-i="${i}">${esc(q.a[i])}</button>`).join('')}</div><div id="qfb" class="fb"></div></div>`;
+ app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(Q.ans.length>Q.k)return;const i=+b.dataset.i;const ok=i===q.c;Q.ans.push(ok);const qi=Q.ids[Q.k];S.qw=(S.qw||[]).filter(x=>x!==qi);if(!ok)S.qw.unshift(qi);save();
+  app.querySelectorAll('.opt').forEach(o=>{o.disabled=true;if(+o.dataset.i===q.c)o.classList.add('right');else if(o===b)o.classList.add('wrong');});
+  $('#qfb').innerHTML=`<div class="f ${ok?'ok':'bad'}">${ok?'✓ Richtig!':'✗ Leider falsch.'} <span class="ex">${esc(q.w)}</span></div><div class="row"><button class="btn" id="nx">${Q.k+1<Q.ids.length?'Nächste Frage':'Auswertung'}</button></div>`;
+  $('#nx').onclick=()=>{Q.k++;save();viewQuiz();};$('#nx').focus();});}
+function quizEnd(){rerender=quizEnd;const c=S.cur,Q=c.quiz;const ok=Q.ans.filter(Boolean).length;
+ app.innerHTML=`${header()}<h2>Regel-Check: ${ok} von ${Q.ids.length} richtig</h2><div class="card">${ok===Q.ids.length?'<div class="f ok">✓ Alle Regeln sitzen – super!</div>':`<p>Diese Regeln merkst du dir besonders gut – sie kommen in der nächsten Runde wieder:</p>${Q.ids.map((qi,j)=>Q.ans[j]?'':`<div class="f warn" style="margin:6px 0">! ${esc(QUIZ[qi].w)}</div>`).join('')}`}</div>
+ <div class="card"><h3>Alle Regeln auf einen Blick</h3><ul class="rules">${RULES.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+ <div class="row"><button class="btn" id="go">Weiter: indirekte Rede üben</button></div>`;
+ $('#go').onclick=()=>{c.phase='ir';save();window.scrollTo({top:0});viewIR();};}
+
+/* ===================== INDIREKTE REDE ÜBEN ===================== */
+const IRNORM=t=>String(t||'').toLowerCase().replace(/[„“”"‚‘’'.,!?:;–\-()]/g,' ').replace(/\s+/g,' ').trim();
+const IRVERB=/(sagte|sagt|erklärte|berichtete|gab an|gab .* an|meinte|betonte|erzählte|teilte .*mit|teilte mit|schilderte|bestätigte|versicherte|laut|zufolge|wie .* (sagte|berichtete|erklärte|betonte))/;
+function irCheck(it,ans){if(/[„“"«»]/.test(ans))return {ok:false,msg:'In der indirekten Rede gibt es <b>keine Anführungszeichen</b>.'};const a=IRNORM(ans);
+ if(!IRVERB.test(a))return {ok:false,msg:'Es fehlt die Einleitung mit einem Verb des Sagens: <i>… sagte, …</i> / <i>… gab an, …</i> / <i>Laut … sei …</i>'};
+ const vars=it.a.flatMap(x=>{const n=IRNORM(x);const m=n.match(/^(?!dass )(.+?) (sei|seien|habe|hätten|hätte|bestehe|gebe) (.+)$/);return m?[n,m[2]+' '+m[1]+' '+m[3]]:[n];});const ok=vars.some(x=>a.includes(x));return ok?{ok:true}:{ok:false,msg:'Das stimmt noch nicht ganz. Vergleiche mit der Musterlösung.',cmp:true};}
+function irPrompt(it,ans){return `${BASE}
+Eine Schülerin soll eine Aussage als indirekte Rede wiedergeben.
+Sprecher: ${it.who}
+Direkte Rede: „${it.d}“
+Musterlösung: ${it.m}
+Antwort der Schülerin: """${ans}"""
+Ist die Antwort richtig? Richtig heißt: Einleitung mit einem Verb des Sagens oder „laut …“, Pronomen angepasst (ich → er/sie, wir → sie), Verb im Konjunktiv (sei, habe, hätten …), keine Anführungszeichen, gleicher Inhalt. Andere passende Einleitungsverben und kleine Unterschiede in der Wortstellung sind erlaubt. Rechtschreibfehler nennst du, sie machen die Antwort aber nicht falsch, wenn die indirekte Rede stimmt.
+Antworte NUR mit JSON: {"richtig":true oder false,"erklaerung":"1 kurzer, kindgerechter Satz auf Deutsch, was falsch ist oder was gut ist"}`;}
+function viewIR(){rerender=viewIR;const c=S.cur,I=c.ir;if(I.k>=I.ids.length)return irEnd();const it=IRQ[I.ids[I.k]];const done=I.out[I.k];const sp=it.who.replace(/\s*\(\d+\)$/,'');
+ app.innerHTML=`${header()}<h2>Indirekte Rede üben</h2><p class="sub">Im Bericht gibt es keine wörtliche Rede. Bau die Aussage als indirekte Rede ein – so wie bei der Schularbeit.</p>
+ <div class="steps">${I.ids.map((_,j)=>`<i class="${j<I.k?(I.out[j]&&I.out[j].ok?'ok':'no'):j===I.k?'on':''}"></i>`).join('')}</div>
+ <div class="card"><span class="pill">Satz ${I.k+1} von ${I.ids.length}</span><p style="margin:12px 0 4px"><b>${esc(it.who)}:</b></p><div class="clip" style="margin:0 0 12px">„${esc(it.d)}“</div>
+ <div class="rule">So geht’s: <i>${esc(sp)} sagte, …</i> – ich/wir → er/sie, Verb in den Konjunktiv (<i>sei, habe, seien, hätten</i>), keine Anführungszeichen.</div>
+ <textarea id="ta" style="min-height:70px" placeholder="${esc(sp)} sagte, …"${done?' disabled':''}></textarea>${done?'':keys()}
+ ${done?'':'<div class="row" style="margin-top:8px"><button class="btn" id="chk">Prüfen</button></div>'}<div id="irfb" class="fb"></div></div>`;
+ const ta=$('#ta');ta.value=done?done.ans:(I.draft||'');
+ const showRes=r=>{$('#irfb').innerHTML=`<div class="f ${r.ok?'ok':'bad'}">${r.ok?'✓ Richtig!':'✗ '+r.msg}</div><div class="f warn"><b>Musterlösung:</b> <span class="ex">${esc(it.m)}</span><br><span class="ex">${esc(it.tip)}</span></div><div class="row"><button class="btn" id="nx">${I.k+1<I.ids.length?'Nächster Satz':'Weiter'}</button></div>`;$('#nx').onclick=()=>{I.k++;save();window.scrollTo({top:0});viewIR();};};
+ if(done)return showRes(done);
+ bindKeys();ta.oninput=()=>{I.draft=ta.value;save();};
+ $('#chk').onclick=async()=>{const ans=ta.value.trim();if(!ans){ta.focus();return;}const b=$('#chk');let r=irCheck(it,ans);
+  if(!r.ok&&r.cmp){const sm=await getSample();if(sm&&!aiOff){b.disabled=true;$('#irfb').innerHTML='<div class="aist">Claude prüft deinen Satz …</div>';
+   try{const d=await sm.json(irPrompt(it,ans),{modelTier:'quick'});if(d&&d.richtig===true)r={ok:true};else if(d&&d.erklaerung)r={ok:false,msg:esc(d.erklaerung)};}catch(e){if(e&&e.code==='not_granted')aiOff=true;}}}
+  if(!document.body.contains(b))return;r.ans=ans;I.out[I.k]=r;I.draft='';save();viewIR();};}
+function irEnd(){rerender=irEnd;const c=S.cur,I=c.ir;const ok=I.out.filter(x=>x&&x.ok).length;
+ app.innerHTML=`${header()}<h2>Indirekte Rede: ${ok} von ${I.ids.length} richtig</h2><div class="card"><p>Merke: In deinen Berichten baust du Aussagen genauso ein.</p><div class="clip" style="font-size:17px"><i>Laut Polizist Josef H. sei die Autobahn sofort gesperrt worden.<br>Die Lenkerin gab an, sie habe stark bremsen müssen.<br>Der Bauer erklärte, die Pferde hätten die Koppel durchbrochen.</i></div></div>
+ <div class="row"><button class="btn" id="go">Weiter zu Bericht 1</button></div>`;
+ $('#go').onclick=()=>{c.phase='intro';save();window.scrollTo({top:0});viewIntro();};}
+
+function viewIntro(){rerender=viewIntro;const c=S.cur,r=c.reps[c.i],t=T(r.t);
+ app.innerHTML=`${header()}<h2>Bericht ${c.i+1} von 2: ${esc(t.title)}</h2><p class="sub"><b>${typeName(t)}.</b> ${t.type==='notizen'?(t.wit?'Mach aus der umgangssprachlichen Zeugenaussage einen sachlichen Bericht.':'Mach aus den Stichwörtern des Reporters einen vollständigen Bericht.'):'Beantworte die W-Fragen mit den Angaben und baue die Aussagen indirekt ein.'} Ziel: ${W[0]}–${W[1]} Wörter.</p>
+ ${materialHTML(t,true)}${phraseCard()}
+ <div class="card"><h3>Denk an die Regeln</h3><ul class="rules">${RULES.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+ <div class="row"><button class="btn" id="go">Bericht ${c.i+1} schreiben</button><button class="btn s sm" id="quit" style="margin-left:auto">Runde abbrechen</button></div>`;
+ bindPhrase();$('#go').onclick=()=>{c.phase='write';if(!r.start)r.start=Date.now();save();window.scrollTo({top:0});c.level===3?viewFree():viewStep();};
+ $('#quit').onclick=quitRound;}
+async function quitRound(){if(await ask('Runde abbrechen? Sie wird nicht gewertet.','Ja, abbrechen','Weiterschreiben')){S.cur=null;save();viewHome();}}
+
+/* ===================== GEFÜHRTES SCHREIBEN ===================== */
+const splitP=t=>String(t||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+function storyOf(r){return [...splitP(r.a.hauptteil),...splitP(r.a.schluss)];}
+function viewStep(){rerender=viewStep;const c=S.cur,r=c.reps[c.i],t=T(r.t);const i=r.step;const s=STEPS[i];const lvl=c.level;const st=s.st(t);
+ const ai=r.ai[s.k]||(r.ai[s.k]={text:'',errs:[]});
+ app.innerHTML=`${header()}<h2>Bericht ${c.i+1} von 2: ${esc(t.title)}</h2>
+ ${materialHTML(t,i<2)}
+ <div class="steps">${STEPS.map((x,j)=>`<i class="${j<i?'ok':j===i?'on':''}"></i>`).join('')}</div>
+ <div class="card"><div class="row" style="justify-content:space-between"><span class="pill">Schritt ${i+1} von ${STEPS.length}</span><button class="btn s sm" id="hlp">${c.help?'Formulierungen ausblenden':'Formulierungen einblenden'}</button></div><h3 style="margin-top:10px">${esc(s.label)}</h3><p class="de">${esc(s.de)}</p><div class="rule">${esc(s.rule)}</div>
+ ${c.help&&lvl<=2?`<div class="note">Formulierungen (antippen zum Einfügen):</div><div class="chips">${st.map((x,j)=>`<button class="chip st" data-j="${j}">${esc(x.trim())}</button>`).join('')}</div>`:''}
+ ${c.help&&lvl===1?`<button class="btn s sm" id="ex">Musterbeispiel zeigen</button><div class="example" id="exb">${esc(t.model[s.k])}</div>`:''}
+ ${s.kind==='headline'?`<input type="text" id="ta" placeholder="${esc(s.ph)}" autocomplete="off">`:`<textarea id="ta" placeholder="${esc(s.ph)}" style="${s.kind==='haupt'?'min-height:200px':''}"></textarea>`}${keys()}
+ <div class="wc" id="wcs"></div><div class="fb" id="fb"></div>
+ <div class="aist" id="aist"></div><div class="fb" id="aiL"></div><div id="aiP" class="hidden" style="margin-top:8px"><div class="note">Dein Text – rot unterstrichen = Fehler:</div><div class="clip" style="font-size:17px;margin-top:4px" id="aiPv"></div></div>
+ <div class="row" style="margin-top:12px">${i>0?'<button class="btn s" id="back">Zurück</button>':''}<button class="btn s" id="chk">Genau prüfen</button><button class="btn" id="next">${i===STEPS.length-1?'Fertig – Auswertung':'Weiter'}</button><button class="btn s sm" id="quit" style="margin-left:auto">Abbrechen</button></div></div>
+ <div class="card"><h3>Dein Bericht bis jetzt</h3><div id="pv"></div><div class="wc" id="wct" style="margin-top:6px"></div><div class="fb" id="wh"></div></div>${merkbox()}`;
+ const ta=$('#ta');ta.value=r.a[s.k]||'';bindKeys();
+ const renderAI=()=>{const cur=curErrs(ai,ta.value);$('#aiL').innerHTML=aiListHTML(cur);$('#aiP').classList.toggle('hidden',!cur.length);if(cur.length)$('#aiPv').innerHTML=markHTML(ta.value,cur,[],true);
+  if(ai.text&&ai.text===ta.value.trim())$('#aist').innerHTML=cur.length?`Claude hat <b>${cur.length} Fehler</b> markiert. Bessere sie aus – die Markierung verschwindet, sobald der Fehler weg ist.`:'<span style="color:var(--ok)">✓ Claude hat hier keine Fehler gefunden.</span>';
+  else if(ai.text&&cur.length)$('#aist').textContent='Text geändert – tippe auf „Genau prüfen“, um ihn nochmal kontrollieren zu lassen.';else $('#aist').textContent='';};
+ const upd=()=>{r.a[s.k]=ta.value;save();$('#fb').innerHTML=fbHTML(checkText(ta.value,s.kind));$('#wcs').textContent=`${wc(ta.value)} Wörter in diesem Teil`;
+  const story=storyOf(r);const body=story.join('\n');const reps=findRepeats(body);const allErrs=STEPS.flatMap(x=>curErrs(r.ai[x.k],r.a[x.k]||''));
+  $('#pv').innerHTML=clipHTML(r.a.headline||'',r.a.summary||'',story,reps,allErrs);const n=wc(body)+wc(r.a.summary||'');$('#wct').textContent=`${n} Wörter gesamt ohne Headline (Ziel ${W[0]}–${W[1]})`;$('#wct').classList.toggle('in',n>=W[0]&&n<=W[1]);$('#wh').innerHTML=fbHTML(checkWhole(body));renderAI();};
+ let tm;ta.oninput=()=>{r.a[s.k]=ta.value;clearTimeout(tm);tm=setTimeout(upd,300);};upd();
+ app.querySelectorAll('.chip.st').forEach(b=>b.onclick=()=>insertAt(ta,st[+b.dataset.j]));
+ if($('#ex'))$('#ex').onclick=()=>$('#exb').classList.toggle('show');
+ $('#hlp').onclick=()=>{r.a[s.k]=ta.value;c.help=!c.help;S.help=c.help;save();viewStep();};
+ if($('#back'))$('#back').onclick=()=>{r.a[s.k]=ta.value;r.step--;save();window.scrollTo({top:0});viewStep();};
+ $('#quit').onclick=quitRound;
+ const runAI=async()=>{const txt=ta.value.trim();if(!txt)return false;const b=$('#chk'),nx=$('#next');b.disabled=true;nx.disabled=true;$('#aist').textContent='Claude prüft deinen Text …';let ok=true;
+  try{const errs=await aiCheck(t,s.label,txt);ai.text=txt;ai.errs=errs;save();}catch(e){ok=false;if(document.body.contains(b))$('#aist').textContent=aiErrMsg(e);}
+  if(!document.body.contains(b))return ok;b.disabled=false;nx.disabled=false;if(ok)upd();return ok;};
+ getSample().then(sm=>{if((!sm||aiOff)&&$('#chk'))$('#chk').classList.add('hidden');});
+ $('#chk').onclick=()=>runAI();
+ $('#next').onclick=async()=>{r.a[s.k]=ta.value;upd();const txt=ta.value.trim();
+  if(!txt){if(!await ask('Dieser Teil ist noch leer. Fehlende Teile kosten bei der Schularbeit Punkte!','Trotzdem weiter','Zurück zum Schreiben'))return;}
+  else{const sm=await getSample();if(sm&&!aiOff&&ai.text!==txt){const ok=await runAI();if(ok&&curErrs(ai,ta.value).length){$('#aist').scrollIntoView({behavior:'smooth',block:'center'});return;}}
+   const bad=checkText(ta.value,s.kind).filter(x=>x.lvl==='bad').length+curErrs(ai,ta.value).length;
+   if(s.kind==='haupt'&&wc(txt)<50){if(!await ask('Der Hauptteil ist noch sehr kurz. Beantworte alle W-Fragen: Was? Wo? Wann? Wer? Wie?','Trotzdem weiter','Weiterschreiben'))return;}
+   else if(bad){if(await ask(`Es sind noch <b>${bad} Fehler</b> markiert. Möchtest du zuerst ausbessern?`,'Ja, ausbessern','Trotzdem weiter'))return;}}
+  if(i===STEPS.length-1)finishReport();else{r.step++;save();window.scrollTo({top:0});viewStep();}};}
+
+/* ===================== FREIES SCHREIBEN (STUFE 3) ===================== */
+function viewFree(){rerender=viewFree;const c=S.cur,r=c.reps[c.i],t=T(r.t);const ai=r.ai.free||(r.ai.free={text:'',errs:[]});
+ const allSt=STEPS.flatMap(s=>s.st(t));
+ app.innerHTML=`${header()}<h2>Bericht ${c.i+1} von 2: ${esc(t.title)}</h2>${materialHTML(t,true)}
+ <div class="card"><div class="row" style="justify-content:space-between"><span class="note">Zeit: <span class="timer" id="tmr">0:00</span> (Ziel: höchstens 25 Minuten)</span><button class="btn s sm" id="hlp">${c.help?'Formulierungen ausblenden':'Formulierungen einblenden'}</button></div>
+ ${c.help?`<div class="chips">${allSt.map((x,j)=>`<button class="chip fst" data-j="${j}">${esc(x.trim())}</button>`).join('')}</div>`:''}
+ <label class="note" for="ta" style="display:block;margin-top:10px"><b>1. Hauptteil und Schluss</b> – Ortsmarke, W-Fragen, Folgen; Absätze mit ↵</label><textarea id="ta" style="min-height:280px" placeholder="${esc(t.ort)}. Am …"></textarea>
+ <label class="note" for="sm" style="display:block;margin-top:10px"><b>2. Summary</b> – erst jetzt: 1–2 Sätze</label><textarea id="sm" style="min-height:70px" placeholder="Bei einem … wurde am …"></textarea>
+ <label class="note" for="hd" style="display:block;margin-top:10px"><b>3. Headline</b> – zum Schluss, im Telegrammstil</label><input type="text" id="hd" autocomplete="off" placeholder="z. B. Motorradfahrer tödlich verunglückt">
+ ${keys()}<div class="wc" id="wcs"></div>
+ <div class="row" style="margin-top:8px"><button class="btn s" id="chk">Text prüfen</button><button class="btn" id="done">Fertig – Auswertung</button><button class="btn s sm" id="quit" style="margin-left:auto">Abbrechen</button></div>
+ <div class="aist" id="aist"></div><div class="fb" id="aiL"></div><div class="fb" id="fb"></div><div id="pv" style="margin-top:12px"></div></div>${merkbox()}`;
+ const ta=$('#ta'),sm=$('#sm'),hd=$('#hd');ta.value=r.free||'';sm.value=r.fsum||'';hd.value=r.fhead||'';bindKeys();
+ app.querySelectorAll('.chip.fst').forEach(b=>b.onclick=()=>insertAt(lastField&&document.body.contains(lastField)?lastField:ta,allSt[+b.dataset.j]));
+ $('#hlp').onclick=()=>{r.free=ta.value;r.fsum=sm.value;r.fhead=hd.value;c.help=!c.help;S.help=c.help;save();viewFree();};
+ const upd=()=>{r.free=ta.value;r.fsum=sm.value;r.fhead=hd.value;save();const n=wc(ta.value)+wc(sm.value);$('#wcs').textContent=`${n} Wörter ohne Headline (Ziel ${W[0]}–${W[1]})`;$('#wcs').classList.toggle('in',n>=W[0]&&n<=W[1]);};
+ ta.oninput=upd;sm.oninput=upd;hd.oninput=upd;upd();
+ const iv=setInterval(()=>{const el=$('#tmr');if(!el){clearInterval(iv);return;}const sec=Math.floor((Date.now()-(r.start||Date.now()))/1000);el.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');},1000);
+ const fullTxt=()=>[hd.value.trim(),sm.value.trim(),ta.value.trim()].join('\n');
+ const show=()=>{const cur=curErrs(ai,fullTxt());$('#aiL').innerHTML=aiListHTML(cur);const iss=[];partsOf(r,3).forEach(p=>iss.push(...checkText(p.text,p.kind)));iss.push(...checkWhole(ta.value));$('#fb').innerHTML=fbHTML(iss.filter(x=>x.lvl!=='ok').concat(iss.filter(x=>x.lvl==='ok').slice(0,3)));
+  $('#pv').innerHTML=clipHTML(hd.value,sm.value,splitP(ta.value),findRepeats(ta.value),cur);};
+ if(ta.value.trim())show();
+ $('#chk').onclick=async()=>{upd();show();if(!ta.value.trim())return;const smp=await getSample();if(!smp||aiOff)return;const b=$('#chk');b.disabled=true;$('#aist').textContent='Claude prüft deinen Bericht …';const full=fullTxt();
+  try{ai.errs=await aiCheck(t,'ganzer Bericht (1. Zeile Headline, 2. Zeile Summary, dann Hauptteil und Schluss)',full);ai.text=full;save();if(document.body.contains(b)){$('#aist').textContent=ai.errs.length?`Claude hat ${ai.errs.length} Fehler markiert (rot unterstrichen).`:'✓ Claude hat keine Fehler gefunden.';show();}}catch(e){if(document.body.contains(b))$('#aist').textContent=aiErrMsg(e);}if(document.body.contains(b))b.disabled=false;};
+ $('#quit').onclick=quitRound;
+ $('#done').onclick=async()=>{upd();if(wc(ta.value)<60&&!await ask('Dein Bericht ist noch sehr kurz. Wirklich fertig?','Ja, auswerten','Weiterschreiben'))return;if((!hd.value.trim()||!sm.value.trim())&&!await ask('Summary oder Headline fehlen noch!','Trotzdem auswerten','Noch ergänzen'))return;finishReport();};}
+
+/* ===================== AUSWERTUNG ===================== */
+function headOf(r,lvl){return lvl===3?(r.fhead||''):(r.a.headline||'');}
+function sumOf(r,lvl){return lvl===3?(r.fsum||''):(r.a.summary||'');}
+function storyParas(r,lvl){return lvl===3?splitP(r.free):storyOf(r);}
+function partsOf(r,lvl){if(lvl===3){const ps=storyParas(r,3);return [{kind:'headline',text:r.fhead||''},{kind:'summary',text:r.fsum||''},...ps.map((p,i)=>({kind:i===0?'haupt':'body',text:p}))];}
+ return STEPS.map(s=>({kind:s.kind,text:r.a[s.k]||''}));}
+function allAiErrs(r,lvl){if(lvl===3)return curErrs(r.ai.free,[r.fhead||'',r.fsum||'',r.free||''].join('\n'));return STEPS.flatMap(s=>curErrs(r.ai[s.k],r.a[s.k]||''));}
+const SPR=['Rechtschreibung','Grammatik','Zeichensetzung','Satzbau','Großschreibung','Zeitform'];const STY=['Berichtsstil','Sachlichkeit','Wörtliche Rede','Ausdruck'];
+const isTele=h=>!/^(ein|eine|der|die|das|den|dem)\s/i.test(h)&&!/(?<![a-zäöüß])(ist|sind|wurde|wurden|hat|haben|war|waren)(?![a-zäöüß])/i.test(h);
+function evaluate(t,r,lvl){const head=headOf(r,lvl),sum=sumOf(r,lvl);const paras=storyParas(r,lvl);const body=paras.join('\n');const parts=partsOf(r,lvl);
+ const issues=[];parts.forEach(p=>issues.push(...checkText(p.text,p.kind)));issues.push(...checkWhole(body));
+ const wq=wCheck(t,[head,sum,body].join('\n'));const n=wc(body)+wc(sum);const aiE=allAiErrs(r,lvl);
+ const inhalt=Math.round(25*wq.filter(x=>x.ok).length/wq.length);
+ let auf=0;const ht=head.trim();if(ht)auf+=(wc(ht)<=10&&!/[.!]\s*$/.test(ht)&&isTele(ht))?5:3;
+ const st=sum.trim();if(st){const ss=splitSentences(st);auf+=(ss.length<=2&&wc(st)<=45)?5:3;}
+ const hp=parts.find(p=>p.kind==='haupt');if(hp&&hp.text.trim()){const f=splitSentences(hp.text)[0]||'';if(wc(f)<=4&&/\.$/.test(f))auf+=2;}
+ const schl=lvl===3?(paras.length>=2&&wc(paras[paras.length-1])>=8):wc(r.a.schluss||'')>=8;if(schl)auf+=3;
+ const len=n>=W[0]&&n<=W[1]?10:(n>=105&&n<=170?5:0);
+ const bad=issues.filter(x=>x.lvl==='bad'),warn=issues.filter(x=>x.lvl==='warn');
+ const cnt=(arr,cats)=>arr.filter(x=>cats.includes(x.cat)).length;
+ const sprache=Math.max(0,Math.round(25-3*cnt(bad,SPR)-1.5*cnt(warn,SPR)-2*aiE.filter(e=>!/Berichtsstil|Ausdruck/.test(e.art)).length));
+ const stil=Math.max(0,Math.round(15-5*cnt(bad,STY)-2*cnt(warn,STY)-2*aiE.filter(e=>/Berichtsstil|Ausdruck/.test(e.art)).length));
+ const reps=findRepeats(body);const conn=CONN.filter(p=>wre(p).test(body)).length;const ber=BERICHT.filter(p=>wre(p).test(body)).length;
+ const abw=Math.max(0,Math.min(10,Math.min(5,conn*2)+Math.min(5,ber))-2*reps.length-2*startRepeats(body).length);
+ const fl=Math.min(1,n/W[0]);const sprF=Math.round(sprache*fl),stilF=Math.round(stil*fl),abwF=Math.round(abw*fl);
+ const cats={};[...bad,...warn].forEach(x=>cats[x.cat]=(cats[x.cat]||0)+1);aiE.forEach(e=>{const k=e.art||'Grammatik';cats[k]=(cats[k]||0)+1;});
+ return {total:inhalt+auf+len+sprF+stilF+abwF,parts:[['W-Fragen',inhalt,25],['Aufbau',auf,15],['Länge',len,10],['Sprache',sprF,25],['Berichtsstil',stilF,15],['Abwechslung',abwF,10]],n,issues,wq,reps,aiE,cats,head,sum,paras,body};}
+function finishReport(){const c=S.cur,r=c.reps[c.i],t=T(r.t);const ev=evaluate(t,r,c.level);r.saved={s:ev.total,c:ev.cats,x:[ev.head.trim(),ev.sum.trim().replace(/\n+/g,' '),...ev.paras].join('\n'),parts:ev.parts};c.phase='result';save();window.scrollTo({top:0});viewReport();}
+function finalPrompt(t,head,sum,body){return `${BASE}
+Bewerte diesen Zeitungsbericht einer Schülerin / eines Schülers (Ziel: 120 bis 150 Wörter, Headline im Telegrammstil ohne Artikel und ohne „ist/wurde“, Summary 1–2 Sätze, Hauptteil mit W-Fragen, Schluss mit Folgen).
+Art der Aufgabe: ${typeName(t)}${t.type==='notizen'&&t.wit?' (Grundlage war eine umgangssprachliche Zeugenaussage, die sachlich umformuliert werden soll)':''}. Thema: ${t.title}.
+Wichtige Fakten: ${t.keys.map(k=>k.f+' '+k.h).join(' | ')}
+Headline: """${head}"""
+Summary: """${sum}"""
+Hauptteil und Schluss:
+"""${body}"""
+Antworte NUR mit JSON, ohne Markdown:
+{"lob":"1–2 Sätze auf Deutsch, was gut gelungen ist","aufbau":"1 Satz zu Headline, Summary, Hauptteil und Schluss","fehler":[{"original":"wörtlich kopierter, kurzer Ausschnitt (1–6 Wörter)","korrektur":"richtige Form","art":"${ART}","erklaerung":"kurz und kindgerecht"}],"wiederholungen":[{"wort":"wiederholtes Wort","alternativen":["2–4 passende Ersatzwörter oder Umformulierungen"]}],"tipps":["höchstens 3 konkrete Tipps mit Beispiel"],"verbessert":"der verbesserte Bericht: 1. Zeile Headline, 2. Zeile Summary, dann Absätze; Inhalt und Ideen der Schülerin behalten, nur Fehler und Stil verbessern"}
+Höchstens 10 Fehler, die wichtigsten zuerst. Erfinde keine Fehler.`;}
+function viewReport(){rerender=viewReport;const c=S.cur,r=c.reps[c.i],t=T(r.t);const ev=evaluate(t,r,c.level);const sv=r.saved||{s:ev.total,c:ev.cats,parts:ev.parts};
+ const stars='★'.repeat(Math.round(sv.s/20))+'☆'.repeat(5-Math.round(sv.s/20));const mins=r.start?Math.round((Date.now()-r.start)/60000):null;const m=t.model;
+ const top=Object.entries(sv.c||{}).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ app.innerHTML=`${header()}<h2>Auswertung Bericht ${c.i+1}: ${esc(t.title)}</h2>
+ <div class="card"><div class="row" style="justify-content:space-between"><div><div class="score">${sv.s}</div><div class="note">von 100 Punkten · ${stars}</div></div><div class="note" style="text-align:right">${ev.n} Wörter (Ziel ${W[0]}–${W[1]})</div></div>
+ <div class="bars" style="margin-top:14px">${(sv.parts||ev.parts).map(([n,v,mx])=>`<span>${n}</span><span class="b"><i style="width:${v/mx*100}%"></i></span><span>${v}/${mx}</span>`).join('')}</div></div>
+ <div class="card"><h3>Dein Bericht</h3>${clipHTML(ev.head,ev.sum,ev.paras,ev.reps,ev.aiE)}<p class="note" style="margin:8px 0 0">Farbig: Wiederholungen · rot unterstrichen: Fehler</p></div>
+ <div class="card"><h3>W-Fragen und Folgen</h3>${ev.wq.map(w=>`<div class="f ${w.ok?'ok':'warn'}" style="margin:4px 0">${w.ok?'✓':'!'} <b>${esc(w.f)}</b>${w.ok?'':` fehlt – z. B.: <i>${esc(w.h)}</i>`}</div>`).join('')}</div>
+ <div class="card"><h3>Was du verbessern kannst</h3><div class="fb">${aiListHTML(ev.aiE)}${fbHTML(ev.issues.filter(x=>x.lvl!=='ok'))||(!ev.aiE.length?'<div class="f ok">✓ Keine Fehler gefunden – sehr gut!</div>':'')}</div><p class="note">Die Sofort-Kontrolle findet typische Fehler, aber nicht alle. Lies deinen Text immer noch einmal selbst durch.</p></div>
+ <div class="card hidden" id="ai"><h3>Feedback von Claude</h3><div id="aiout"><p class="note">Claude liest deinen ganzen Bericht …</p></div></div>
+ <details class="card"><summary><b>Musterbericht ansehen</b> <span class="note">– vergleiche: Was hat der Musterbericht, was dir noch fehlt?</span></summary><div style="margin-top:10px">${clipHTML(m.headline,m.summary,[m.hauptteil,m.schluss],[],[],false)}</div></details>
+ <div class="card"><h3>Zusammenfassung</h3>${top.length?`<p>Achte beim nächsten Bericht besonders auf: ${top.map(([k,v])=>`<b>${esc(k)}</b> (${v}×)`).join(', ')}.</p>`:'<p>Dieser Bericht war sprachlich sehr sauber!</p>'}
+ ${mins!==null&&c.level===3?`<p class="note">Schreibzeit: etwa ${mins} Minuten${mins>25?' – bei der Schularbeit musst du zwei Berichte schaffen. Übe, schneller zu werden!':'.'}</p>`:''}
+ <p>Schreib den <b>verbesserten Bericht ins Heft</b> – mit allen Korrekturen.</p>
+ <div class="row"><button class="btn" id="nx">${c.i===0?'Weiter zu Bericht 2':'Zur Rundenauswertung'}</button></div></div>`;
+ $('#nx').onclick=()=>{if(c.i===0){c.i=1;c.phase='intro';save();window.scrollTo({top:0});viewIntro();}else endRound();};
+ runFinal(t,r,ev);}
+async function runFinal(t,r,ev){const sm=await getSample();if(!sm||aiOff)return;const box=$('#ai');if(!box)return;box.classList.remove('hidden');const out=$('#aiout');
+ const key=[ev.head,ev.sum,ev.body].join('\n');if(r.fin&&r.fin.key===key)return showFinal(r.fin.data);
+ try{const d=await sm.json(finalPrompt(t,ev.head,ev.sum,ev.paras.join('\n\n')));r.fin={key,data:d};save();if(document.body.contains(out))showFinal(d);}
+ catch(e){if(e&&e.code==='not_granted'){aiOff=true;box.classList.add('hidden');return;}if(document.body.contains(out)){out.innerHTML=`<div class="f warn">${aiErrMsg(e)}</div><div class="row" style="margin-top:8px"><button class="btn s sm" id="aiR">Nochmal versuchen</button></div>`;$('#aiR').onclick=()=>{out.innerHTML='<p class="note">Claude liest deinen ganzen Bericht …</p>';runFinal(t,r,ev);};}}}
+function showFinal(d){const out=$('#aiout');if(!out||!d)return;const errs=normErrs(d.fehler);const reps=Array.isArray(d.wiederholungen)?d.wiederholungen:[];const tips=Array.isArray(d.tipps)?d.tipps:[];
+ out.innerHTML=`${d.lob?`<div class="f ok">✓ ${esc(d.lob)}</div>`:''}${d.aufbau?`<p style="margin:10px 0 0"><b>Aufbau:</b> ${esc(d.aufbau)}</p>`:''}
+ ${errs.length?`<h3 style="margin-top:12px">Fehler</h3><div class="fb">${aiListHTML(errs)}</div>`:''}
+ ${reps.length?`<h3 style="margin-top:12px">Wortwiederholungen – so geht es abwechslungsreicher</h3><div class="fb">${reps.map(w=>`<div class="f warn">! <b>${esc(w.wort)}</b> → ${(Array.isArray(w.alternativen)?w.alternativen:[]).map(esc).join(', ')}</div>`).join('')}</div>`:''}
+ ${tips.length?`<h3 style="margin-top:12px">Tipps</h3><ul>${tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+ ${d.verbessert?`<h3 style="margin-top:12px">Verbesserte Version</h3>${(()=>{const ls=splitP(d.verbessert);return clipHTML(ls[0]||'',ls[1]||'',ls.slice(2),[],[],false);})()}`:''}`;}
+function endRound(){const c=S.cur;const scores=c.reps.map(r=>r.saved?r.saved.s:0);const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);const Q=c.quiz,I=c.ir;const lvlBefore=c.level;
+ S.hist.push({d:Math.floor(Date.now()/864e5),l:lvlBefore,hp:c.help?1:0,q:[Q.ans.filter(Boolean).length,Q.ids.length],ir:[I.out.filter(x=>x&&x.ok).length,I.ids.length],s:avg,r:c.reps.map(r=>({t:r.t,s:r.saved?r.saved.s:0,c:r.saved?r.saved.c:{},x:r.saved?r.saved.x:''}))});
+ c.lvlMsg='';if(avg>=75&&S.level<3&&S.level===lvlBefore){S.level++;c.lvlMsg=`<div class="f ok">🎉 Super! Du steigst auf <b>Stufe ${S.level}</b> auf: ${LEVELS[S.level].split('– ')[1]}.</div>`;}
+ else if(avg<50&&lvlBefore>1)c.lvlMsg=`<div class="f warn">Tipp: Probier die nächste Runde noch einmal auf <b>Stufe ${lvlBefore-1}</b> (auf der Startseite einstellbar).</div>`;
+ c.phase='round';save();window.scrollTo({top:0});viewRound();}
+function viewRound(){rerender=viewRound;const c=S.cur;const h=S.hist[S.hist.length-1];const prev=S.hist.length>1?S.hist[S.hist.length-2]:null;
+ const agg={};h.r.forEach(r=>Object.entries(r.c||{}).forEach(([k,v])=>agg[k]=(agg[k]||0)+v));const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ app.innerHTML=`${header()}<h2>Rundenauswertung</h2>
+ <div class="card"><div class="row" style="justify-content:space-between"><div><div class="score">${h.s}</div><div class="note">Durchschnitt der beiden Berichte</div></div><div class="note" style="text-align:right">${prev?`${h.s-prev.s>=0?'▲ +':'▼ '}${h.s-prev.s} zur letzten Runde`:'Erste Runde'}</div></div>
+ <div class="tablewrap" style="margin-top:12px"><table><tr><th>Teil</th><th>Ergebnis</th></tr><tr><td>Regel-Check</td><td><b>${h.q[0]} / ${h.q[1]}</b> richtig</td></tr><tr><td>Indirekte Rede</td><td><b>${h.ir[0]} / ${h.ir[1]}</b> richtig</td></tr>${h.r.map((r,j)=>`<tr><td>Bericht ${j+1}: ${esc(T(r.t).title)}</td><td><b>${r.s}</b> Punkte</td></tr>`).join('')}</table></div>${c.lvlMsg?`<div style="margin-top:12px">${c.lvlMsg}</div>`:''}</div>
+ <div class="card"><h3>Zusammenfassung</h3>${top.length?`<p>In dieser Runde kamen diese Fehlerarten am häufigsten vor: ${top.map(([k,v])=>`<b>${esc(k)}</b> (${v}×)`).join(', ')}. Darauf achtest du in der nächsten Runde besonders.</p>`:'<p>Beide Berichte waren sprachlich sehr sauber!</p>'}
+ <p>Schreib <b>beide verbesserten Berichte ins Heft</b>.</p><div class="row"><button class="btn" id="again">Nächste Runde</button></div></div>${merkbox()}`;
+ $('#again').onclick=()=>{S.cur=null;save();window.scrollTo({top:0});viewHome();};}
+
+/* Start */
+if(!S.name)viewStart();else if(S.cur)route();else viewHome();
+
+</script>
+</body>
+</html>
